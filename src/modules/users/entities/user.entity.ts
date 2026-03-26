@@ -1,0 +1,90 @@
+import { Entity, Column, OneToOne, OneToMany, Index, BeforeInsert } from 'typeorm';
+import { ApiProperty } from '@nestjs/swagger';
+import * as bcrypt from 'bcrypt';
+import { BaseEntity } from '@/common/entities/base.entity';
+
+@Entity('users')
+export class User extends BaseEntity {
+  @ApiProperty({
+    description: 'User phone number (unique identifier)',
+    example: '+1234567890',
+  })
+  @Column({ unique: true })
+  @Index()
+  phoneNumber: string;
+
+  @ApiProperty({
+    description: 'Social username for the user',
+    example: 'john_doe',
+  })
+  @Column({ unique: true })
+  @Index()
+  socialUsername: string;
+
+  @ApiProperty({
+    description: 'Wire ID for the user',
+    example: '@johndoe',
+  })
+  @Column({ unique: true })
+  @Index()
+  wireId: string;
+
+  @Column({ select: false })
+  passwordHash: string;
+
+  @ApiProperty({
+    description: 'Whether biometric verification is enabled',
+    example: false,
+  })
+  @Column({ default: false })
+  biometricVerified: boolean;
+
+  @ApiProperty({
+    description: 'Whether OTP verification is completed',
+    example: false,
+  })
+  @Column({ default: false })
+  otpVerified: boolean;
+
+  @ApiProperty({
+    description: 'Device fingerprint for security',
+    example: 'device-fingerprint-hash',
+    required: false,
+  })
+  @Column({ type: 'varchar', nullable: true })
+  deviceFingerprint: string | null;
+
+  @ApiProperty({
+    description: 'IP address used during registration',
+    example: '192.168.1.1',
+    required: false,
+  })
+  @Column({ type: 'varchar', nullable: true })
+  ipAddress: string | null;
+
+  @ApiProperty({
+    description: 'Geolocation data during registration',
+    type: 'object',
+    required: false,
+  })
+  @Column({ type: 'jsonb', nullable: true })
+  geolocation: Record<string, any> | null;
+
+  @ApiProperty({
+    description: 'User registration timestamp',
+    example: '2024-01-01T00:00:00.000Z',
+  })
+  @Column({ type: 'timestamp with time zone', default: () => 'CURRENT_TIMESTAMP' })
+  registrationTimestamp: Date;
+
+  @BeforeInsert()
+  async hashPassword() {
+    if (this.passwordHash) {
+      this.passwordHash = await bcrypt.hash(this.passwordHash, 12);
+    }
+  }
+
+  async validatePassword(password: string): Promise<boolean> {
+    return bcrypt.compare(password, this.passwordHash);
+  }
+}

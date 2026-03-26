@@ -1,0 +1,64 @@
+# ============================================
+# Docker Ignore — NestJS Backend
+# Prevents unnecessary files from entering Docker build context
+# ============================================
+
+# Dependencies (installed inside container)
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output (rebuilt inside container)
+dist
+build
+
+# Tests & coverage
+coverage
+.nyc_output
+test
+**/*.spec.ts
+**/*.test.ts
+jest.config.*
+
+# Environment files (injected via env_file/environment)
+.env
+.env.*
+!.env.example
+
+# Version control
+.git
+.gitignore
+
+# IDE / Editor
+.idea
+.vscode
+*.swp
+*.swo
+*~
+.editorconfig
+
+# Documentation
+*.md
+!README.md
+LICENSE
+CHANGELOG.md
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker files (prevent recursive context)
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Uploads & logs (mounted as volumes)
+uploads/*
+logs/*
+ml-models/*
+
+# Temp
+.tmp
+temp
+tmp
