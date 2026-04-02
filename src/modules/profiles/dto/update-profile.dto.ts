@@ -8,7 +8,7 @@ export class UpdateProfileDto {
   @MaxLength(255)
   publicName?: string;
 
-  @ApiProperty({ description: 'Profile picture URL', required: false, example: 'https://cdn.example.com/profile.jpg' })
+  @ApiProperty({ description: 'Profile picture URL', required: false, example: 'https://cdn.promptgenie.app/profile.jpg' })
   @IsOptional()
   @IsString()
   @MaxLength(500)

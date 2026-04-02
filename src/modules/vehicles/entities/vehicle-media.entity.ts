@@ -29,7 +29,7 @@ export class VehicleMedia extends BaseEntity {
 
   @ApiProperty({
     description: 'Media URL',
-    example: 'https://storage.example.com/vehicle-123.jpg',
+    example: 'https://storage.promptgenie.app/vehicle-123.jpg',
   })
   @Column({ type: 'text' })
   url: string;

@@ -24,7 +24,7 @@ export class RegisterFacilitatorAccountDto {
   provider?: 'flutterwave' | 'paystack' | 'mock';
 
   /** User's email address (used for recipient creation metadata). */
-  @ApiProperty({ example: 'user@example.com' })
+  @ApiProperty({ example: 'user@promptgenie.app' })
   @IsEmail()
   email: string;
 
