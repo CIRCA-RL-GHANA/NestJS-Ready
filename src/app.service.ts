@@ -53,7 +53,7 @@ export class AppService {
    */
   getApiRoutes() {
     return {
-      baseUrl: process.env.APP_URL || 'http://localhost:3000',
+      baseUrl: process.env.APP_URL || 'https://api.promptgenie.app',
       apiVersion: 'v1',
       endpoints: {
         auth: {

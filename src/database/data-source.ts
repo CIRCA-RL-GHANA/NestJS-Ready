@@ -19,7 +19,7 @@ export default new DataSource({
   port: parseInt(process.env.DB_PORT || '5432', 10),
   username: process.env.DB_USERNAME || 'postgres',
   password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME || 'orionstack_dev',
+  database: process.env.DB_NAME || 'promptgenie_dev',
   entities: [join(__dirname, '..', '**', '*.entity{.ts,.js}')],
   migrations: [join(__dirname, 'migrations', '**', '*{.ts,.js}')],
   synchronize: false,

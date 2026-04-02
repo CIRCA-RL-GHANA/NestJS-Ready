@@ -11,7 +11,7 @@ export const configuration = () => ({
     port: parseInt(process.env.DB_PORT || '5432', 10),
     username: process.env.DB_USERNAME || 'postgres',
     password: process.env.DB_PASSWORD,
-    name: process.env.DB_NAME || 'orionstack_dev',
+    name: process.env.DB_NAME || 'promptgenie_dev',
     synchronize: process.env.DB_SYNCHRONIZE === 'true',
     logging: process.env.DB_LOGGING === 'true',
     ssl: process.env.DB_SSL === 'true',

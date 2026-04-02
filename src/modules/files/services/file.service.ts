@@ -16,7 +16,7 @@ export interface FileUploadResponse {
 @Injectable()
 export class FileService {
   private s3: S3Client;
-  private bucket = process.env.AWS_S3_BUCKET || 'orionstack-files';
+  private bucket = process.env.AWS_S3_BUCKET || 'promptgenie-files';
   private readonly logger = new Logger(FileService.name);
 
   constructor(private readonly aiNlp: AINlpService) {

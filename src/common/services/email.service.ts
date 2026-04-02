@@ -139,19 +139,19 @@ export class EmailService {
    * Send welcome email
    */
   async sendWelcome(email: string, name: string): Promise<void> {
-    const subject = 'Welcome to OrionStack!';
+    const subject = 'Welcome to PROMPT Genie!';
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2>Welcome to OrionStack, ${name}!</h2>
+        <h2>Welcome to PROMPT Genie, ${name}!</h2>
         <p>Thank you for joining our platform. We're excited to have you on board!</p>
         <p>Get started by exploring our features and setting up your profile.</p>
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${this.configService.get('app.url', 'https://orionstack.com')}" style="background-color: #28a745; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
+          <a href="${this.configService.get('app.url', 'https://promptgenie.app')}" style="background-color: #28a745; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
             Get Started
           </a>
         </div>
         <p>If you have any questions, feel free to reach out to our support team.</p>
-        <p>Best regards,<br>The OrionStack Team</p>
+        <p>Best regards,<br>The PROMPT Genie Team</p>
       </div>
     `;
 
@@ -197,7 +197,7 @@ export class EmailService {
           <p><strong>Status:</strong> ${orderDetails.status}</p>
         </div>
         <p>We'll send you another email when your order ships.</p>
-        <p>Thank you for choosing OrionStack!</p>
+        <p>Thank you for choosing PROMPT Genie!</p>
       </div>
     `;
 
@@ -213,7 +213,7 @@ export class EmailService {
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2>${title}</h2>
         <p>${message}</p>
-        <p>Best regards,<br>The OrionStack Team</p>
+        <p>Best regards,<br>The PROMPT Genie Team</p>
       </div>
     `;
 
