@@ -71,8 +71,8 @@ async function bootstrap() {
   // Swagger documentation (disabled in production)
   if (!isProduction) {
     const config = new DocumentBuilder()
-      .setTitle('OrionStack Platform API')
-      .setDescription('Production-ready NestJS backend for multi-tenant enterprise platform')
+      .setTitle('PROMPT Genie Platform API')
+      .setDescription('PROMPT Genie — All-in-One Financial & Social Hub API')
       .setVersion('1.0')
       .addBearerAuth()
       .addTag('auth', 'Authentication and authorization')

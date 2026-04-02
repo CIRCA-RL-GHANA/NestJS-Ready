@@ -67,10 +67,10 @@ import { QPointsMarketModule } from './modules/qpoints/market/qpoints-market.mod
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         redis: {
-          host: configService.get('REDIS_HOST'),
-          port: configService.get('REDIS_PORT'),
-          password: configService.get('REDIS_PASSWORD'),
-          db: configService.get('REDIS_DB'),
+          host: configService.get<string>('redis.host'),
+          port: configService.get<number>('redis.port'),
+          password: configService.get<string>('redis.password') || undefined,
+          db: configService.get<number>('redis.db'),
         },
       }),
     }),
