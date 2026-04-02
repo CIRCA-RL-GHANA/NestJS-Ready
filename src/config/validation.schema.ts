@@ -37,7 +37,7 @@ export const validationSchema = Joi.object({
   // Email - SendGrid
   SENDGRID_API_KEY: Joi.string().required(),
   EMAIL_FROM: Joi.string().email().required(),
-  EMAIL_FROM_NAME: Joi.string().default('OrionStack'),
+  EMAIL_FROM_NAME: Joi.string().default('PROMPT Genie'),
 
   // SMS
   TWILIO_ACCOUNT_SID: Joi.string().required(),

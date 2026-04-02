@@ -43,8 +43,8 @@ export const configuration = () => ({
   // Email - SendGrid
   email: {
     sendgridApiKey: process.env.SENDGRID_API_KEY,
-    from: process.env.EMAIL_FROM || 'noreply@orionstack.com',
-    fromName: process.env.EMAIL_FROM_NAME || 'OrionStack',
+    from: process.env.EMAIL_FROM || 'noreply@promptgenie.com',
+    fromName: process.env.EMAIL_FROM_NAME || 'PROMPT Genie',
   },
 
   // SMS
