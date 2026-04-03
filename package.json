@@ -1,8 +1,8 @@
 {
-  "name": "orionstack-platform-backend",
+  "name": "promptgenie-backend",
   "version": "1.0.0",
   "description": "Production-ready NestJS backend for multi-tenant enterprise platform",
-  "author": "OrionStack Team",
+  "author": "PROMPT Genie Team",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {

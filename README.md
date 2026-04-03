@@ -119,7 +119,7 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_USERNAME=postgres
 DB_PASSWORD=postgres
-DB_NAME=orionstack_dev
+DB_NAME=promptgenie_dev
 DB_SYNCHRONIZE=false
 JWT_SECRET=dev_jwt_secret_change_in_prod
 JWT_REFRESH_SECRET=dev_refresh_secret_change_in_prod
@@ -249,8 +249,8 @@ Multi-stage build:
 2. **production** stage: copies only `dist/` and production `node_modules`, runs as non-root user `nestjs:nodejs`, healthcheck at `/api/v1/health/live`, `EXPOSE 3000`
 
 ```bash
-docker build -t orionstack-app .
-docker run -p 3000:3000 --env-file ../.env orionstack-app
+docker build -t promptgenie-app .
+docker run -p 3000:3000 --env-file ../.env promptgenie-app
 ```
 
 ## Database Migrations

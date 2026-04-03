@@ -4,10 +4,10 @@ services:
   # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
-    container_name: orionstack-postgres
+    container_name: promptgenie-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${DB_NAME:-orionstack_dev}
+      POSTGRES_DB: ${DB_NAME:-promptgenie_dev}
       POSTGRES_USER: ${DB_USERNAME:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
     ports:
@@ -23,7 +23,7 @@ services:
   # Redis Cache
   redis:
     image: redis:7-alpine
-    container_name: orionstack-redis
+    container_name: promptgenie-redis
     restart: unless-stopped
     command: redis-server --appendonly yes
     ports:
@@ -42,7 +42,7 @@ services:
       context: .
       dockerfile: Dockerfile
       target: production
-    container_name: orionstack-app
+    container_name: promptgenie-app
     restart: unless-stopped
     ports:
       - '${PORT:-3000}:3000'
