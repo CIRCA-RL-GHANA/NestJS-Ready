@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bull';
 import { ScheduleModule } from '@nestjs/schedule';
 import { WinstonModule } from 'nest-winston';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import * as winston from 'winston';
 
@@ -60,6 +61,17 @@ import { QPointsMarketModule } from './modules/qpoints/market/qpoints-market.mod
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => typeOrmConfig(configService),
+    }),
+
+    // Rate Limiting (defense-in-depth alongside nginx)
+    ThrottlerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ([
+        {
+          ttl: configService.get<number>('throttle.ttl') ?? 60,
+          limit: configService.get<number>('throttle.limit') ?? 100,
+        },
+      ]),
     }),
 
     // Queue
@@ -139,6 +151,10 @@ import { QPointsMarketModule } from './modules/qpoints/market/qpoints-market.mod
     QPointsMarketModule,
   ],
   providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
