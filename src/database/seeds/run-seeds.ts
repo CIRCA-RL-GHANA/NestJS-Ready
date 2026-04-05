@@ -52,7 +52,7 @@ async function seed() {
        VALUES ($1,$2,$3,$4,$5,'ADMIN','ACTIVE',true,true,true,true)
        ON CONFLICT (email) DO NOTHING
        RETURNING id`,
-      ['admin@thedep.app', '+10000000000', adminHash, 'Admin', 'User'],
+      ['admin@genieinprompt.app', '+10000000000', adminHash, 'Admin', 'User'],
     );
     if (admin) console.log('✅ Admin created:', admin.id);
     else console.log('ℹ️  Admin already exists, skipping');
@@ -68,7 +68,7 @@ async function seed() {
          VALUES ($1,$2,$3,'Customer',$4,'CUSTOMER','ACTIVE',true,true,false)
          ON CONFLICT (email) DO NOTHING
          RETURNING id`,
-        [`customer${i}@thedep.app`, `+1234567${String(i).padStart(3, '0')}`, hash, `${i}`],
+        [`customer${i}@genieinprompt.app`, `+1234567${String(i).padStart(3, '0')}`, hash, `${i}`],
       );
       if (row) {
         customerIds.push(row.id);
@@ -88,7 +88,7 @@ async function seed() {
          VALUES ($1,$2,$3,'Driver',$4,'DRIVER','ACTIVE',true,true,true,true)
          ON CONFLICT (email) DO NOTHING
          RETURNING id`,
-        [`driver${i}@thedep.app`, `+1987654${String(i).padStart(3, '0')}`, hash, `${i}`],
+        [`driver${i}@genieinprompt.app`, `+1987654${String(i).padStart(3, '0')}`, hash, `${i}`],
       );
       if (row) console.log(`✅ Driver ${i} created:`, row.id);
       else console.log(`ℹ️  Driver ${i} already exists`);
@@ -104,7 +104,7 @@ async function seed() {
          VALUES ($1,$2,$3,'Vendor',$4,'VENDOR','ACTIVE',true,true,true,false)
          ON CONFLICT (email) DO NOTHING
          RETURNING id`,
-        [`vendor${i}@thedep.app`, `+1555123${String(i).padStart(3, '0')}`, hash, `${i}`],
+        [`vendor${i}@genieinprompt.app`, `+1555123${String(i).padStart(3, '0')}`, hash, `${i}`],
       );
       if (row) console.log(`✅ Vendor ${i} created:`, row.id);
       else console.log(`ℹ️  Vendor ${i} already exists`);
@@ -132,10 +132,10 @@ async function seed() {
     await queryRunner.commitTransaction();
     console.log('\n✨ Seed completed successfully!');
     console.log('\n📊 Summary:');
-    console.log('  - 1 Admin   → admin@thedep.app       / AdminPassword123!');
-    console.log('  - 5 Customers → customer[1-5]@thedep.app / Customer123!');
-    console.log('  - 3 Drivers → driver[1-3]@thedep.app    / Driver123!');
-    console.log('  - 2 Vendors → vendor[1-2]@thedep.app    / Vendor123!');
+    console.log('  - 1 Admin   → admin@genieinprompt.app       / AdminPassword123!');
+    console.log('  - 5 Customers → customer[1-5]@genieinprompt.app / Customer123!');
+    console.log('  - 3 Drivers → driver[1-3]@genieinprompt.app    / Driver123!');
+    console.log('  - 2 Vendors → vendor[1-2]@genieinprompt.app    / Vendor123!');
   } catch (err) {
     await queryRunner.rollbackTransaction();
     console.error('❌ Seed failed, rolled back:', err);

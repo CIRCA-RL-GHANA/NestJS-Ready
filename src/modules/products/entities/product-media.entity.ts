@@ -28,7 +28,7 @@ export class ProductMedia extends BaseEntity {
 
   @ApiProperty({
     description: 'Media URL',
-    example: 'https://storage.promptgenie.app/products/image1.jpg',
+    example: 'https://storage.genieinprompt.app/products/image1.jpg',
   })
   @Column({ type: 'text' })
   url: string;

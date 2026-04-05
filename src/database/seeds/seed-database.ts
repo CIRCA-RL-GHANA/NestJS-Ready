@@ -25,7 +25,7 @@ async function seed() {
     console.log('📝 Creating admin user...');
     const adminPassword = await bcrypt.hash('AdminPassword123!', 10);
     const admin = await userRepo.save({
-      email: 'admin@thedep.app',
+      email: 'admin@genieinprompt.app',
       phone_number: '+1234567890',
       password_hash: adminPassword,
       first_name: 'Admin',
@@ -45,7 +45,7 @@ async function seed() {
     for (let i = 1; i <= 5; i++) {
       const customerPassword = await bcrypt.hash('Customer123!', 10);
       const customer = await userRepo.save({
-        email: `customer${i}@thedep.app`,
+        email: `customer${i}@genieinprompt.app`,
         phone_number: `+123456789${i}`,
         password_hash: customerPassword,
         first_name: `Customer`,
@@ -66,7 +66,7 @@ async function seed() {
     for (let i = 1; i <= 3; i++) {
       const driverPassword = await bcrypt.hash('Driver123!', 10);
       const driver = await userRepo.save({
-        email: `driver${i}@thedep.app`,
+        email: `driver${i}@genieinprompt.app`,
         phone_number: `+1234567890${i}`,
         password_hash: driverPassword,
         first_name: `Driver`,
@@ -88,7 +88,7 @@ async function seed() {
     for (let i = 1; i <= 2; i++) {
       const vendorPassword = await bcrypt.hash('Vendor123!', 10);
       const vendor = await userRepo.save({
-        email: `vendor${i}@thedep.app`,
+        email: `vendor${i}@genieinprompt.app`,
         phone_number: `+1234567891${i}`,
         password_hash: vendorPassword,
         first_name: `Vendor`,

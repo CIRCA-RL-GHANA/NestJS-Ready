@@ -2,7 +2,7 @@
 # ============================================================
 # VPS Initial Setup — Hostinger Ubuntu 22.04
 # Run once as root immediately after provisioning.
-# Usage: bash scripts/vps-init.sh [--domain api.promptgenie.app] [--email admin@promptgenie.app]
+# Usage: bash scripts/vps-init.sh [--domain api.genieinprompt.app] [--email admin@genieinprompt.app]
 # ============================================================
 set -euo pipefail
 
@@ -21,7 +21,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z "$DOMAIN" || -z "$EMAIL" ]]; then
-  read -rp "API domain (e.g. api.promptgenie.app): " DOMAIN
+  read -rp "API domain (e.g. api.genieinprompt.app): " DOMAIN
   read -rp "SSL/Let's Encrypt contact email:        " EMAIL
 fi
 

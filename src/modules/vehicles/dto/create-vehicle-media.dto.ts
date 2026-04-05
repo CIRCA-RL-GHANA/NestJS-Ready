@@ -20,7 +20,7 @@ export class CreateVehicleMediaDto {
 
   @ApiProperty({
     description: 'Media URL',
-    example: 'https://storage.promptgenie.app/vehicle-123.jpg',
+    example: 'https://storage.genieinprompt.app/vehicle-123.jpg',
   })
   @IsUrl()
   url: string;

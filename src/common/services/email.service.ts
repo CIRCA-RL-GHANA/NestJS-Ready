@@ -146,7 +146,7 @@ export class EmailService {
         <p>Thank you for joining our platform. We're excited to have you on board!</p>
         <p>Get started by exploring our features and setting up your profile.</p>
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${this.configService.get('app.url', 'https://promptgenie.app')}" style="background-color: #28a745; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
+          <a href="${this.configService.get('app.url', 'https://genieinprompt.app')}" style="background-color: #28a745; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
             Get Started
           </a>
         </div>
