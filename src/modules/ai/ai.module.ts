@@ -15,6 +15,7 @@ import { AIFraudService } from './services/ai-fraud.service';
 import { AIInsightsService } from './services/ai-insights.service';
 import { AISearchService } from './services/ai-search.service';
 import { AIRecommendationsService } from './services/ai-recommendations.service';
+import { AITensorflowService } from './services/ai-tensorflow.service';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import { AIRecommendationsService } from './services/ai-recommendations.service'
     HttpModule,
   ],
   controllers: [AIController],
-  providers: [AIService, AINlpService, AIPricingService, AIFraudService, AIInsightsService, AISearchService, AIRecommendationsService],
-  exports:   [AIService, AINlpService, AIPricingService, AIFraudService, AIInsightsService, AISearchService, AIRecommendationsService],
+  providers: [AIService, AINlpService, AIPricingService, AIFraudService, AIInsightsService, AISearchService, AIRecommendationsService, AITensorflowService],
+  exports:   [AIService, AINlpService, AIPricingService, AIFraudService, AIInsightsService, AISearchService, AIRecommendationsService, AITensorflowService],
 })
 export class AIModule {}
