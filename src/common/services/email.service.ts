@@ -35,7 +35,7 @@ export class EmailService {
       this.logger.log('SendGrid email service initialized');
     }
 
-    this.fromEmail = this.configService.get<string>('email.from', 'noreply@promptgenie.com');
+    this.fromEmail = this.configService.get<string>('email.from', 'noreply@genieinprompt.app');
     this.fromName = this.configService.get<string>('email.fromName', 'PROMPT Genie');
   }
 

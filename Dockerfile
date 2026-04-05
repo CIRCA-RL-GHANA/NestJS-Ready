@@ -1,6 +1,10 @@
 # Multi-stage build for production
 FROM node:18-alpine AS builder
 
+# libc6-compat: required for @tensorflow/tfjs-node native binary (glibc shim on Alpine/musl)
+# python3 + make + g++ + git: required for node-gyp compilation of native modules (bcrypt, etc.)
+RUN apk add --no-cache libc6-compat python3 make g++ git
+
 WORKDIR /app
 
 # Copy package files
@@ -19,6 +23,9 @@ RUN npm run build
 
 # Production stage
 FROM node:18-alpine AS production
+
+# libc6-compat: required for @tensorflow/tfjs-node native binary on Alpine/musl
+RUN apk add --no-cache libc6-compat
 
 WORKDIR /app
 
