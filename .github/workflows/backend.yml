@@ -155,7 +155,7 @@ jobs:
             echo "=== [3/4] Running migrations ==="
             docker compose -f docker-compose.prod.yml run --rm \
               -e NODE_ENV=production --entrypoint "" \
-              app sh -c "npm run migration:run 2>/dev/null || true"
+              app sh -c "npm run migration:run:prod"
 
             echo "=== [4/4] Rolling restart ==="
             docker compose -f docker-compose.prod.yml up -d --remove-orphans
@@ -163,7 +163,7 @@ jobs:
 
             echo "=== Health check (max 120s) ==="
             for i in $(seq 1 24); do
-              if docker exec promptgenie-app wget -qO- http://localhost:3000/api/v1/health 2>/dev/null | grep -q '"status":"ok"'; then
+              if docker exec promptgenie-app wget -qO- http://localhost:3000/api/v1/health/live 2>/dev/null | grep -q '"status":"ok"'; then
                 echo "✓ Healthy after $((i*5))s"; break
               fi
               [ $i -lt 24 ] && sleep 5 || { docker compose -f docker-compose.prod.yml logs --tail=60 app; exit 1; }
