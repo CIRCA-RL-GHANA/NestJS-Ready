@@ -174,7 +174,7 @@ jobs:
         run: |
           sleep 5
           STATUS=$(curl -sk -o /dev/null -w '%{http_code}' \
-            "https://${{ secrets.DEPLOY_HOST }}/api/v1/health")
+            "https://api.genieinprompt.app/api/v1/health/live")
           echo "Health: HTTP $STATUS"
           [ "$STATUS" -eq 200 ] || { echo "::error::Health check failed (HTTP $STATUS)"; exit 1; }
 
