@@ -94,6 +94,7 @@ services:
   # ---- NestJS Backend Application ----
   # context: '.' because this repo IS the NestJS application
   app:
+    image: nestjs-ready-app:latest
     build:
       context: .
       dockerfile: Dockerfile

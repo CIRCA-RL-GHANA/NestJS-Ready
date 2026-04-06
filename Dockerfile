@@ -21,6 +21,10 @@ COPY src ./src
 # Build application
 RUN npm run build
 
+# Prune dev dependencies so the production stage can copy node_modules directly,
+# preserving pre-compiled native binaries (bcrypt, @tensorflow/tfjs-node).
+RUN npm prune --production
+
 # Production stage
 FROM node:18-alpine AS production
 
@@ -32,8 +36,10 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install production dependencies only
-RUN npm ci --only=production && npm cache clean --force
+# Copy pre-compiled production node_modules from the builder stage.
+# Native modules (bcrypt, @tensorflow/tfjs-node) are already compiled there;
+# re-running npm ci here would fail because this stage lacks python3/make/g++.
+COPY --from=builder /app/node_modules ./node_modules
 
 # Copy built application from builder
 COPY --from=builder /app/dist ./dist
