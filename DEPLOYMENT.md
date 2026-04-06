@@ -3,6 +3,39 @@
 This guide walks through a one-time VPS initialisation and the automated CI/CD
 pipeline that deploys every push to `main`.
 
+## Raw GitHub file URLs
+
+Use these URLs to pull individual files directly from GitHub without cloning
+the repository — useful when bootstrapping a fresh VPS or referencing files
+in scripts.
+
+| File | Raw GitHub URL |
+|---|---|
+| VPS init script | `https://raw.githubusercontent.com/CIRCA-RL-GHANA/NestJS-Ready/main/scripts/vps-init.sh` |
+| Production Compose file | `https://raw.githubusercontent.com/CIRCA-RL-GHANA/NestJS-Ready/main/docker-compose.prod.yml` |
+| Deploy script | `https://raw.githubusercontent.com/CIRCA-RL-GHANA/NestJS-Ready/main/scripts/deploy.sh` |
+| SSL setup script | `https://raw.githubusercontent.com/CIRCA-RL-GHANA/NestJS-Ready/main/scripts/setup-ssl.sh` |
+| `.env` example | `https://raw.githubusercontent.com/CIRCA-RL-GHANA/NestJS-Ready/main/.env.example` |
+
+> **Note:** `docker-compose.prod.yml` builds the app image from the local
+> `Dockerfile` and references `./nginx/nginx.conf`, so it requires the full
+> repository to be present on the VPS (handled automatically by the rsync
+> step in CI/CD). Download it standalone only as a reference.
+
+Quick one-liner to download all deployment files onto the VPS after provisioning:
+
+```bash
+BASE="https://raw.githubusercontent.com/CIRCA-RL-GHANA/NestJS-Ready/main"
+mkdir -p /opt/promptgenie/scripts /opt/promptgenie/nginx
+curl -fsSL "$BASE/docker-compose.prod.yml" -o /opt/promptgenie/docker-compose.prod.yml
+curl -fsSL "$BASE/scripts/deploy.sh"       -o /opt/promptgenie/scripts/deploy.sh
+curl -fsSL "$BASE/scripts/setup-ssl.sh"    -o /opt/promptgenie/scripts/setup-ssl.sh
+curl -fsSL "$BASE/.env.example"            -o /opt/promptgenie/.env.example
+chmod +x /opt/promptgenie/scripts/*.sh
+```
+
+---
+
 **Infrastructure overview**
 
 | File | Purpose |
