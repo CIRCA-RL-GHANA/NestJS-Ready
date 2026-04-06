@@ -218,17 +218,20 @@ export class AINlpService {
   // ─────────────────────────────────────────────────────────────────────────
 
   summariseText(text: string): TextSummary {
-    const sentences = text.match(/[^.!?]+[.!?]+/g) ?? [text];
-    const keywords = this.extractKeywords(text, 8);
-    const wordCount = (text.match(/\b\w+\b/g) ?? []).length;
+    // Guard against excessively long inputs to prevent ReDoS
+    const safeText = typeof text === 'string' ? text.slice(0, 10_000) : String(text ?? '');
+    const sentences = safeText.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 0);
+    const sentenceList = sentences.length > 0 ? sentences : [safeText];
+    const keywords = this.extractKeywords(safeText, 8);
+    const wordCount = (safeText.match(/\b\w+\b/g) ?? []).length;
     // Rank sentences by keyword overlap
-    const ranked = sentences
+    const ranked = sentenceList
       .map((s) => ({
         s,
         score: keywords.filter((k) => s.toLowerCase().includes(k.toLowerCase())).length,
       }))
       .sort((a, b) => b.score - a.score);
-    const summaryLines = ranked.slice(0, Math.min(3, Math.ceil(sentences.length / 4)));
+    const summaryLines = ranked.slice(0, Math.min(3, Math.ceil(sentenceList.length / 4)));
     const summary = summaryLines.map((r) => r.s.trim()).join(' ');
 
     return {

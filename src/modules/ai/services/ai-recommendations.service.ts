@@ -68,19 +68,21 @@ export class AIRecommendationsService {
     catalogueItems: Array<{ id: string; text: string }>,
     topN = 10,
   ): RecommendedItem[] {
-    if (!purchasedTexts) {
+    const safeText = Array.isArray(purchasedTexts) ? (purchasedTexts as string[]).join(' ') : String(purchasedTexts ?? '');
+    const safeCatalogue = Array.isArray(catalogueItems) ? catalogueItems : [];
+    if (!safeText) {
       // Cold start — return top-N by neutral score
-      return catalogueItems.slice(0, topN).map((i) => ({
+      return safeCatalogue.slice(0, topN).map((i) => ({
         id: i.id,
         score: 0.5,
         reason: 'popular item',
       }));
     }
 
-    return catalogueItems
+    return safeCatalogue
       .map((item) => ({
         id: item.id,
-        score: this.nlpService.similarity(purchasedTexts, item.text),
+        score: this.nlpService.similarity(safeText, item.text),
         reason: 'purchase history match',
       }))
       .sort((a, b) => b.score - a.score)
@@ -115,8 +117,10 @@ export class AIRecommendationsService {
     contentItems: Array<{ id: string; type: string; text: string }>,
     topN = 20,
   ): FeedItem[] {
-    if (!userInterestText) {
-      return contentItems.slice(0, topN).map((i) => ({
+    const safeText = Array.isArray(userInterestText) ? (userInterestText as string[]).join(' ') : String(userInterestText ?? '');
+    const safeItems = Array.isArray(contentItems) ? contentItems : [];
+    if (!safeText) {
+      return safeItems.slice(0, topN).map((i) => ({
         id: i.id,
         type: i.type,
         score: 0.4,
@@ -124,11 +128,11 @@ export class AIRecommendationsService {
       }));
     }
 
-    return contentItems
+    return safeItems
       .map((item) => ({
         id: item.id,
         type: item.type,
-        score: this.nlpService.similarity(userInterestText, item.text),
+        score: this.nlpService.similarity(safeText, item.text),
         reason: 'interest match',
       }))
       .sort((a, b) => b.score - a.score)
