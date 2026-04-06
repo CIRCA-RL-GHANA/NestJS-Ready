@@ -1,4 +1,4 @@
-import { IsUUID, IsEnum, IsOptional, IsString, IsNumber } from 'class-validator';
+import { IsEnum, IsOptional, IsString, IsNumber } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { DeliveryStatus } from '../entities/delivery.entity';
 

@@ -8,7 +8,6 @@ import {
   UseGuards,
   Request,
   ParseUUIDPipe,
-  ParseFloatPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { IsNumber, IsOptional, IsString, Min } from 'class-validator';

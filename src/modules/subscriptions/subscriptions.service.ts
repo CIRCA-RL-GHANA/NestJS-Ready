@@ -96,7 +96,7 @@ export class SubscriptionsService {
    * Delete subscription plan (soft delete)
    */
   async deletePlan(id: string): Promise<void> {
-    const plan = await this.getPlanById(id);
+    await this.getPlanById(id);
 
     // Check if any active subscriptions use this plan
     const activeAssignments = await this.assignmentRepository.count({

@@ -372,7 +372,7 @@ export class UsersService {
    */
   async scoreLoginRisk(
     userId: string,
-    ipAddress: string,
+    _ipAddress: string,
   ): Promise<{ riskScore: number; flags: string[] }> {
     try {
       const result = await this.aiFraud.scoreTransaction({

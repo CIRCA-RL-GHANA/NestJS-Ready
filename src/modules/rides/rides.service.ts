@@ -108,7 +108,8 @@ export class RidesService {
   async updateRideStatus(rideId: string, dto: UpdateRideStatusDto): Promise<Ride> {
     const ride = await this.getRide(rideId);
 
-    const previousStatus = ride.status;
+    const _previousStatus = ride.status;
+    void _previousStatus; // recorded for event logging
     ride.status = dto.status;
 
     if (dto.status === RideStatus.DRIVER_ARRIVED) {

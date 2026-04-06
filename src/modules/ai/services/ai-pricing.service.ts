@@ -1,6 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThan } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 
 export interface PricingContext {
@@ -162,7 +160,6 @@ export class AIPricingService {
     discount = parseFloat(Math.min(0.4, discount).toFixed(2));
 
     // Expected revenue lift: demand elasticity -1.5 → each 10% ↓ price = ~15% ↑ volume
-    const priceDrop = discount * currentPrice;
     const elasticity = 1.5;
     const volGain = discount * elasticity;
     const revenueLift = parseFloat(((volGain - discount) * currentPrice).toFixed(2));

@@ -6,9 +6,6 @@ import {
   IsOptional,
   IsObject,
   IsArray,
-  IsNumber,
-  Min,
-  Max,
   Length,
 } from 'class-validator';
 import { PlaceVisibility } from '../entities/place.entity';

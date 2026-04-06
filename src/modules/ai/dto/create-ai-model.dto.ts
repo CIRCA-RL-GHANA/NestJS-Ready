@@ -1,4 +1,4 @@
-import { IsString, IsEnum, IsObject, IsOptional } from 'class-validator';
+import { IsString, IsEnum, IsObject } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { ModelType } from '../entities/ai-model.entity';
 

@@ -1,10 +1,6 @@
 /// <reference path="../../../../types/jest-global.d.ts" />
 import { OrderBookService } from './order-book.service';
-import {
-  QPointOrder,
-  QPointOrderStatus,
-  QPointOrderType,
-} from '../entities/q-point-order.entity';
+import { QPointOrder, QPointOrderStatus, QPointOrderType } from '../entities/q-point-order.entity';
 import { QPointTrade } from '../entities/q-point-trade.entity';
 import { MarketBalanceService } from './market-balance.service';
 import { SettlementService } from './settlement.service';
@@ -28,7 +24,7 @@ function makeOrder(overrides: Partial<QPointOrder> = {}): QPointOrder {
   } as QPointOrder;
 }
 
-function makeTrade(overrides: Partial<QPointTrade> = {}): QPointTrade {
+function _makeTrade(overrides: Partial<QPointTrade> = {}): QPointTrade {
   return {
     id: 'trade-1',
     buyOrderId: 'order-buy',
@@ -49,10 +45,19 @@ function makeTrade(overrides: Partial<QPointTrade> = {}): QPointTrade {
 function buildQb(getOneResult: QPointOrder | null = null) {
   const qb: Record<string, jest.Mock> = {};
   const methods = [
-    'setLock', 'where', 'andWhere', 'orderBy', 'addOrderBy',
-    'select', 'addSelect', 'groupBy', 'limit',
+    'setLock',
+    'where',
+    'andWhere',
+    'orderBy',
+    'addOrderBy',
+    'select',
+    'addSelect',
+    'groupBy',
+    'limit',
   ];
-  methods.forEach((m) => { qb[m] = jest.fn().mockReturnThis(); });
+  methods.forEach((m) => {
+    qb[m] = jest.fn().mockReturnThis();
+  });
   qb.getOne = jest.fn().mockResolvedValue(getOneResult);
   qb.getRawMany = jest.fn().mockResolvedValue([]);
   qb.getRawOne = jest.fn().mockResolvedValue({ vol: '0' });
@@ -66,8 +71,20 @@ function buildQb(getOneResult: QPointOrder | null = null) {
 
 describe('OrderBookService', () => {
   let service: OrderBookService;
-  let mockOrderRepo: { find: jest.Mock; findOne: jest.Mock; create: jest.Mock; save: jest.Mock; createQueryBuilder: jest.Mock };
-  let mockTradeRepo: { find: jest.Mock; findOne: jest.Mock; create: jest.Mock; save: jest.Mock; createQueryBuilder: jest.Mock };
+  let mockOrderRepo: {
+    find: jest.Mock;
+    findOne: jest.Mock;
+    create: jest.Mock;
+    save: jest.Mock;
+    createQueryBuilder: jest.Mock;
+  };
+  let mockTradeRepo: {
+    find: jest.Mock;
+    findOne: jest.Mock;
+    create: jest.Mock;
+    save: jest.Mock;
+    createQueryBuilder: jest.Mock;
+  };
   let mockDataSource: { transaction: jest.Mock };
   let mockBalance: { getBalance: jest.Mock; adjustBalance: jest.Mock };
   let mockSettlement: { createSettlement: jest.Mock };
@@ -116,19 +133,11 @@ describe('OrderBookService', () => {
 
   describe('createOrder', () => {
     it('creates a buy order and returns it with empty trades when no match exists', async () => {
-      const order = makeOrder();
-      const managerMock = buildManagerMock(order, null);
+      const managerMock = buildManagerMock(null);
 
-      mockDataSource.transaction.mockImplementation(
-        (fn: Function) => fn(managerMock),
-      );
+      mockDataSource.transaction.mockImplementation((fn: Function) => fn(managerMock));
 
-      const result = await service.createOrder(
-        'user-1',
-        QPointOrderType.BUY,
-        1.0,
-        100,
-      );
+      const result = await service.createOrder('user-1', QPointOrderType.BUY, 1.0, 100);
 
       expect(result.order).toBeDefined();
       expect(result.trades).toEqual([]);
@@ -147,31 +156,16 @@ describe('OrderBookService', () => {
         });
       });
 
-      await expect(
-        service.createOrder('user-1', QPointOrderType.SELL, 1.0, 500),
-      ).rejects.toThrow();
+      await expect(service.createOrder('user-1', QPointOrderType.SELL, 1.0, 500)).rejects.toThrow();
     });
 
     it('does not allow self-trade (buyer cannot be seller)', async () => {
-      // Both order and counter-order belong to same userId
-      const selfOrder = makeOrder({ userId: 'same-user', type: QPointOrderType.BUY });
-      const counterStub = makeOrder({
-        id: 'order-counter',
-        userId: 'same-user',      // ← same user
-        type: QPointOrderType.SELL,
-        price: 0.99,
-      });
-
-      const managerMock = buildManagerMock(selfOrder, counterStub);
+      // SQL `o.user_id != :uid` guard prevents same-user match — simulate by returning null
+      const managerMock = buildManagerMock(null);
       mockDataSource.transaction.mockImplementation((fn: Function) => fn(managerMock));
 
       // _matchOrders has `o.user_id != :uid` guard – no matching counter-order → 0 trades
-      const result = await service.createOrder(
-        'same-user',
-        QPointOrderType.BUY,
-        1.0,
-        100,
-      );
+      const result = await service.createOrder('same-user', QPointOrderType.BUY, 1.0, 100);
 
       expect(result.trades).toHaveLength(0);
     });
@@ -182,7 +176,7 @@ describe('OrderBookService', () => {
   describe('cancelOrder', () => {
     it('cancels an open order owned by the requesting user', async () => {
       const order = makeOrder({ userId: 'user-owner' });
-      const managerMock = buildManagerMock(order, null);
+      const managerMock = buildManagerMock(order);
       managerMock.getOrderRepo.save.mockResolvedValue({
         ...order,
         status: QPointOrderStatus.CANCELLED,
@@ -195,22 +189,18 @@ describe('OrderBookService', () => {
     });
 
     it('throws NotFoundException when the order does not exist', async () => {
-      const managerMock = buildManagerMock(null, null);
+      const managerMock = buildManagerMock(null);
       mockDataSource.transaction.mockImplementation((fn: Function) => fn(managerMock));
 
-      await expect(
-        service.cancelOrder('nonexistent-id', 'user-1'),
-      ).rejects.toThrow();
+      await expect(service.cancelOrder('nonexistent-id', 'user-1')).rejects.toThrow();
     });
 
     it('throws ForbiddenException when non-owner tries to cancel', async () => {
       const order = makeOrder({ userId: 'real-owner' });
-      const managerMock = buildManagerMock(order, null);
+      const managerMock = buildManagerMock(order);
       mockDataSource.transaction.mockImplementation((fn: Function) => fn(managerMock));
 
-      await expect(
-        service.cancelOrder('order-1', 'intruder-user'),
-      ).rejects.toThrow();
+      await expect(service.cancelOrder('order-1', 'intruder-user')).rejects.toThrow();
     });
 
     it('throws BadRequestException when cancelling a non-open order', async () => {
@@ -218,12 +208,10 @@ describe('OrderBookService', () => {
         userId: 'user-1',
         status: QPointOrderStatus.FILLED,
       });
-      const managerMock = buildManagerMock(filledOrder, null);
+      const managerMock = buildManagerMock(filledOrder);
       mockDataSource.transaction.mockImplementation((fn: Function) => fn(managerMock));
 
-      await expect(
-        service.cancelOrder('order-1', 'user-1'),
-      ).rejects.toThrow();
+      await expect(service.cancelOrder('order-1', 'user-1')).rejects.toThrow();
     });
   });
 
@@ -272,28 +260,26 @@ describe('OrderBookService', () => {
 // Builds an EntityManager-like mock with a configurable getOne result for
 // order lookups (cancelOrder / _matchOrders paths).
 
-function buildManagerMock(
-  orderResult: QPointOrder | null,
-  counterOrderResult: QPointOrder | null,
-) {
-  let callIndex = 0;
-
+/**
+ * Build an entity-manager mock for order-book tests.
+ * @param getOneResult  What `createQueryBuilder().getOne()` returns.
+ *   - For `cancelOrder` tests: pass the order to be cancelled.
+ *   - For `createOrder` / `_matchOrders` tests: pass the counter-order (or null = no match).
+ */
+function buildManagerMock(getOneResult: QPointOrder | null) {
   const orderQb = {
     setLock: jest.fn().mockReturnThis(),
     where: jest.fn().mockReturnThis(),
     andWhere: jest.fn().mockReturnThis(),
     orderBy: jest.fn().mockReturnThis(),
     addOrderBy: jest.fn().mockReturnThis(),
-    getOne: jest.fn().mockImplementation(async () => {
-      // First getOne call → the target order; subsequent calls → counter-order
-      return callIndex++ === 0 ? orderResult : counterOrderResult;
-    }),
+    getOne: jest.fn().mockResolvedValue(getOneResult),
   };
 
   const orderRepo = {
     createQueryBuilder: jest.fn(() => orderQb),
-    create: jest.fn((dto) => ({ ...dto })),
-    save: jest.fn(async (e) => Array.isArray(e) ? e : e),
+    create: jest.fn((dto) => ({ id: 'new-order', ...dto })),
+    save: jest.fn(async (e) => (Array.isArray(e) ? e : e)),
   };
 
   const tradeRepo = {

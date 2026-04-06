@@ -1,7 +1,6 @@
-import { Entity, Column, Index, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, Index } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { BaseEntity } from '@/common/entities/base.entity';
-import { User } from './user.entity';
 
 @Entity('otps')
 export class Otp extends BaseEntity {

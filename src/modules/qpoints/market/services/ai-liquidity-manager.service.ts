@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThan } from 'typeorm';
+import { Repository } from 'typeorm';
 import { QPointOrder, QPointOrderStatus, QPointOrderType } from '../entities/q-point-order.entity';
 import { OrderBookService } from './order-book.service';
 import { MarketBalanceService } from './market-balance.service';

@@ -1,10 +1,6 @@
 import { IsNotEmpty, IsEnum, IsUUID, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  EntityProfileType,
-  AccessLevel,
-  ComplianceStatus,
-} from '../entities/entity-profile-settings.entity';
+import { EntityProfileType, AccessLevel } from '../entities/entity-profile-settings.entity';
 
 export class CreateEntityProfileSettingsDto {
   @ApiProperty({

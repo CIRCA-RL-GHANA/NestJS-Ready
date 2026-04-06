@@ -1,5 +1,5 @@
-import { Controller, Post, Body, Req, UseGuards, Get, Param, Query, Put } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { Controller, Post, Body, Req, Get, Query, Put } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Request } from 'express';
 import { QPointsTransactionService } from './qpoints-transaction.service';
 import { DepositQPointsDto } from './dto/deposit-qpoints.dto';

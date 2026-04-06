@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner, Table, TableIndex, TableForeignKey } from 'typeorm';
+import { MigrationInterface, QueryRunner, Table, TableIndex } from 'typeorm';
 
 export class CreateSocialInteractionsTable1700001000000 implements MigrationInterface {
   name = 'CreateSocialInteractionsTable1700001000000';

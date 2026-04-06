@@ -1,10 +1,6 @@
 /// <reference path="../../../../types/jest-global.d.ts" />
 import { AiLiquidityManagerService } from './ai-liquidity-manager.service';
-import {
-  QPointOrder,
-  QPointOrderStatus,
-  QPointOrderType,
-} from '../entities/q-point-order.entity';
+import { QPointOrder, QPointOrderStatus, QPointOrderType } from '../entities/q-point-order.entity';
 import { OrderBookService, OrderBook } from './order-book.service';
 import { MarketBalanceService } from './market-balance.service';
 
@@ -86,7 +82,9 @@ describe('AiLiquidityManagerService', () => {
       cancelOrder: jest.fn().mockResolvedValue(makeOrder({ status: QPointOrderStatus.CANCELLED })),
     };
     mockBalance = {
-      getBalance: jest.fn().mockResolvedValue({ balance: 250_000_000_000_000, updatedAt: new Date() }),
+      getBalance: jest
+        .fn()
+        .mockResolvedValue({ balance: 250_000_000_000_000, updatedAt: new Date() }),
     };
     service = buildService();
   });
@@ -110,7 +108,10 @@ describe('AiLiquidityManagerService', () => {
   describe('run() – inventory buy signal', () => {
     it('places a BUY order when platform QP balance is below minInventory', async () => {
       // balance = 10T < minInventory (50T)
-      mockBalance.getBalance.mockResolvedValue({ balance: 10_000_000_000_000, updatedAt: new Date() });
+      mockBalance.getBalance.mockResolvedValue({
+        balance: 10_000_000_000_000,
+        updatedAt: new Date(),
+      });
       mockOrderBook.getOrderBook.mockResolvedValue(emptyBook());
 
       await service.run();
@@ -127,7 +128,10 @@ describe('AiLiquidityManagerService', () => {
   describe('run() – inventory sell signal', () => {
     it('places a SELL order when platform QP balance exceeds maxInventory', async () => {
       // balance = 495T > maxInventory (490T)
-      mockBalance.getBalance.mockResolvedValue({ balance: 495_000_000_000_000, updatedAt: new Date() });
+      mockBalance.getBalance.mockResolvedValue({
+        balance: 495_000_000_000_000,
+        updatedAt: new Date(),
+      });
       mockOrderBook.getOrderBook.mockResolvedValue(emptyBook());
 
       await service.run();
@@ -148,14 +152,15 @@ describe('AiLiquidityManagerService', () => {
       // Spread is 10% (bid=0.95, ask=1.05), target is 2% → should tighten
       mockOrderBook.getOrderBook.mockResolvedValue(bookWithSpread(0.95, 1.05));
       // Balance is healthy → skip inventory phase
-      mockBalance.getBalance.mockResolvedValue({ balance: 250_000_000_000_000, updatedAt: new Date() });
+      mockBalance.getBalance.mockResolvedValue({
+        balance: 250_000_000_000_000,
+        updatedAt: new Date(),
+      });
 
       await service.run();
 
-      // At least 2 createOrder calls (one tightening bid, one tightening ask)
-      expect(mockOrderBook.createOrder).toHaveBeenCalledTimes(
-        expect.any(Number), // flexible – could be 1 or 2 depending on order count
-      );
+      // At least 1 createOrder call (one tightening bid and/or ask)
+      expect(mockOrderBook.createOrder.mock.calls.length).toBeGreaterThanOrEqual(1);
     });
   });
 
@@ -167,21 +172,24 @@ describe('AiLiquidityManagerService', () => {
       const staleOrder = makeOrder({ createdAt: staleTime });
       mockOrderRepo.find.mockResolvedValue([staleOrder]);
       mockOrderBook.getOrderBook.mockResolvedValue(bookWithSpread(0.99, 1.01));
-      mockBalance.getBalance.mockResolvedValue({ balance: 250_000_000_000_000, updatedAt: new Date() });
+      mockBalance.getBalance.mockResolvedValue({
+        balance: 250_000_000_000_000,
+        updatedAt: new Date(),
+      });
 
       await service.run();
 
-      expect(mockOrderBook.cancelOrder).toHaveBeenCalledWith(
-        staleOrder.id,
-        AI_USER,
-      );
+      expect(mockOrderBook.cancelOrder).toHaveBeenCalledWith(staleOrder.id, AI_USER);
     });
 
     it('does not cancel orders that are still within TTL', async () => {
       const freshOrder = makeOrder({ createdAt: new Date() }); // just created
       mockOrderRepo.find.mockResolvedValue([freshOrder]);
       mockOrderBook.getOrderBook.mockResolvedValue(emptyBook());
-      mockBalance.getBalance.mockResolvedValue({ balance: 250_000_000_000_000, updatedAt: new Date() });
+      mockBalance.getBalance.mockResolvedValue({
+        balance: 250_000_000_000_000,
+        updatedAt: new Date(),
+      });
 
       await service.run();
 
@@ -197,7 +205,10 @@ describe('AiLiquidityManagerService', () => {
       const openOrders = Array.from({ length: 10 }, () => makeOrder());
       mockOrderRepo.find.mockResolvedValue(openOrders);
       mockOrderBook.getOrderBook.mockResolvedValue(bookWithSpread(0.95, 1.05));
-      mockBalance.getBalance.mockResolvedValue({ balance: 250_000_000_000_000, updatedAt: new Date() });
+      mockBalance.getBalance.mockResolvedValue({
+        balance: 250_000_000_000_000,
+        updatedAt: new Date(),
+      });
 
       await service.run();
 
@@ -227,7 +238,10 @@ describe('AiLiquidityManagerService', () => {
       service.setEnabled(true);
 
       mockOrderBook.getOrderBook.mockResolvedValue(emptyBook());
-      mockBalance.getBalance.mockResolvedValue({ balance: 250_000_000_000_000, updatedAt: new Date() });
+      mockBalance.getBalance.mockResolvedValue({
+        balance: 250_000_000_000_000,
+        updatedAt: new Date(),
+      });
 
       await service.run();
 
@@ -240,7 +254,10 @@ describe('AiLiquidityManagerService', () => {
   describe('circuit breaker', () => {
     it('trips open after MAX_ORDERS_PER_MINUTE orders in the same minute', async () => {
       // Drive many run cycles where the balance is always below min to force orders
-      mockBalance.getBalance.mockResolvedValue({ balance: 10_000_000_000_000, updatedAt: new Date() });
+      mockBalance.getBalance.mockResolvedValue({
+        balance: 10_000_000_000_000,
+        updatedAt: new Date(),
+      });
       mockOrderBook.getOrderBook.mockResolvedValue(emptyBook());
 
       // Exhaust the circuit breaker manually (20 orders per minute)
@@ -251,10 +268,9 @@ describe('AiLiquidityManagerService', () => {
       // After hitting the limit the circuit breaker should open
       const status = service.getStatus();
       // Either the CB tripped or no more orders were placed (acceptable either way)
-      expect(
-        status.circuitBreakerOpen ||
-          mockOrderBook.createOrder.mock.calls.length <= 20,
-      ).toBe(true);
+      expect(status.circuitBreakerOpen || mockOrderBook.createOrder.mock.calls.length <= 20).toBe(
+        true,
+      );
     });
   });
 });

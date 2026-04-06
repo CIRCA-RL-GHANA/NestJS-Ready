@@ -1,6 +1,5 @@
 /// <reference path="../../../../types/jest-global.d.ts" />
 import { MarketBalanceService } from './market-balance.service';
-import { QPointMarketBalance } from '../entities/q-point-market-balance.entity';
 
 const USER_ID = 'user-abc-123';
 const AI_USER_ID = '00000000-0000-0000-0000-000000000001';
@@ -15,6 +14,8 @@ function buildManagerMock(overrides: Record<string, unknown> = {}) {
     execute: jest.fn().mockResolvedValue({}),
     createQueryBuilder: jest.fn().mockReturnThis(),
     where: jest.fn().mockReturnThis(),
+    select: jest.fn().mockReturnThis(),
+    getRawOne: jest.fn().mockResolvedValue({ total: '0' }),
     getOne: jest.fn(),
   };
   const repo = {
@@ -49,10 +50,7 @@ describe('MarketBalanceService', () => {
       transaction: jest.fn(),
     };
 
-    service = new MarketBalanceService(
-      mockRepo as never,
-      mockDataSource as never,
-    );
+    service = new MarketBalanceService(mockRepo as never, mockDataSource as never);
   });
 
   afterEach(() => {
@@ -98,18 +96,18 @@ describe('MarketBalanceService', () => {
   // =========================================================================
   describe('adjustBalance', () => {
     it('credits balance on positive delta', async () => {
-      const { manager, repoInManager, qb } = buildManagerMock();
+      const { manager, qb } = buildManagerMock();
       const row = { userId: USER_ID, balance: '1000', updatedAt: new Date() };
       qb.getOne.mockResolvedValue(row);
-      repoInManager.save.mockResolvedValue({ ...row, balance: 1100 });
-      mockDataSource.transaction.mockImplementation(async (fn: (m: typeof manager) => Promise<number>) => fn(manager));
+      manager.save = jest.fn().mockResolvedValue({ ...row, balance: 1100 });
+      mockDataSource.transaction.mockImplementation(
+        async (fn: (m: typeof manager) => Promise<number>) => fn(manager),
+      );
 
       const newBalance = await service.adjustBalance(USER_ID, 100, 'test_credit');
 
       expect(newBalance).toBe(1100);
-      expect(repoInManager.save).toHaveBeenCalledWith(
-        expect.objectContaining({ balance: 1100 }),
-      );
+      expect(manager.save).toHaveBeenCalledWith(expect.objectContaining({ balance: 1100 }));
     });
 
     it('debits balance on negative delta', async () => {
@@ -117,7 +115,9 @@ describe('MarketBalanceService', () => {
       const row = { userId: USER_ID, balance: '1000', updatedAt: new Date() };
       qb.getOne.mockResolvedValue(row);
       repoInManager.save.mockResolvedValue({ ...row, balance: 750 });
-      mockDataSource.transaction.mockImplementation(async (fn: (m: typeof manager) => Promise<number>) => fn(manager));
+      mockDataSource.transaction.mockImplementation(
+        async (fn: (m: typeof manager) => Promise<number>) => fn(manager),
+      );
 
       const newBalance = await service.adjustBalance(USER_ID, -250, 'trade_sell_xyz');
 
@@ -131,21 +131,21 @@ describe('MarketBalanceService', () => {
         balance: '50',
         updatedAt: new Date(),
       });
-      mockDataSource.transaction.mockImplementation(async (fn: (m: typeof manager) => Promise<number>) => fn(manager));
+      mockDataSource.transaction.mockImplementation(
+        async (fn: (m: typeof manager) => Promise<number>) => fn(manager),
+      );
 
-      await expect(
-        service.adjustBalance(USER_ID, -200, 'trade_sell_overspend'),
-      ).rejects.toThrow();
+      await expect(service.adjustBalance(USER_ID, -200, 'trade_sell_overspend')).rejects.toThrow();
     });
 
     it('throws NotFoundException when balance row disappears mid-transaction', async () => {
       const { manager, qb } = buildManagerMock();
       qb.getOne.mockResolvedValue(null); // Row not found after upsert
-      mockDataSource.transaction.mockImplementation(async (fn: (m: typeof manager) => Promise<number>) => fn(manager));
+      mockDataSource.transaction.mockImplementation(
+        async (fn: (m: typeof manager) => Promise<number>) => fn(manager),
+      );
 
-      await expect(
-        service.adjustBalance(USER_ID, 10, 'mystery_credit'),
-      ).rejects.toThrow();
+      await expect(service.adjustBalance(USER_ID, 10, 'mystery_credit')).rejects.toThrow();
     });
   });
 });

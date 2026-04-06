@@ -348,7 +348,7 @@ export class MarketProfilesService {
   private async detectFraud(
     profile: MarketProfile,
     userId: string,
-    changes: UpdateMarketProfileDto,
+    _changes: UpdateMarketProfileDto,
   ): Promise<void> {
     this.logger.warn(`Fraud detected on profile ${profile.id} by user ${userId}`);
 

@@ -262,7 +262,7 @@ export class EntityProfilesService {
 
   async deleteBusinessCategory(id: string, userId: string): Promise<void> {
     try {
-      const category = await this.getBusinessCategoryById(id);
+      await this.getBusinessCategoryById(id);
       await this.categoryRepository.softDelete(id);
 
       await this.logAudit('Delete Business Category', 'SUCCESS', userId, { categoryId: id });

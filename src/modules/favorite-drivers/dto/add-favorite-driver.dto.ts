@@ -1,13 +1,4 @@
-import {
-  IsUUID,
-  IsEnum,
-  IsOptional,
-  IsBoolean,
-  IsString,
-  IsNumber,
-  Min,
-  Max,
-} from 'class-validator';
+import { IsUUID, IsEnum, IsOptional, IsString, IsNumber, Min, Max } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { FavoriteDriverVisibility } from '../entities/favorite-driver.entity';
 

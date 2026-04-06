@@ -1,8 +1,6 @@
-import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
+import { Entity, Column, Index } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { BaseEntity } from '@common/entities/base.entity';
-import { EntityProfile } from '@modules/entities/entities/entity.entity';
-import { Branch } from '@modules/entities/entities/branch.entity';
 
 export enum ProfileType {
   ENTITY = 'Entity',
