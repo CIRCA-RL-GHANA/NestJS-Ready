@@ -26,12 +26,12 @@ Quick one-liner to download all deployment files onto the VPS after provisioning
 
 ```bash
 BASE="https://raw.githubusercontent.com/CIRCA-RL-GHANA/NestJS-Ready/main"
-mkdir -p /opt/promptgenie/scripts /opt/promptgenie/nginx
-curl -fsSL "$BASE/docker-compose.prod.yml" -o /opt/promptgenie/docker-compose.prod.yml
-curl -fsSL "$BASE/scripts/deploy.sh"       -o /opt/promptgenie/scripts/deploy.sh
-curl -fsSL "$BASE/scripts/setup-ssl.sh"    -o /opt/promptgenie/scripts/setup-ssl.sh
-curl -fsSL "$BASE/.env.example"            -o /opt/promptgenie/.env.example
-chmod +x /opt/promptgenie/scripts/*.sh
+mkdir -p /home/promptgenie/scripts /home/promptgenie/nginx
+curl -fsSL "$BASE/docker-compose.prod.yml" -o /home/promptgenie/docker-compose.prod.yml
+curl -fsSL "$BASE/scripts/deploy.sh"       -o /home/promptgenie/scripts/deploy.sh
+curl -fsSL "$BASE/scripts/setup-ssl.sh"    -o /home/promptgenie/scripts/setup-ssl.sh
+curl -fsSL "$BASE/.env.example"            -o /home/promptgenie/.env.example
+chmod +x /home/promptgenie/scripts/*.sh
 ```
 
 ---
@@ -81,7 +81,7 @@ The script:
 - Creates a 2 GB swap file (safety net for small VPS)
 - Installs **Docker** and **Docker Compose v2**
 - Creates a `promptgenie` deploy user and adds it to the `docker` group
-- Creates `/opt/promptgenie/{logs,uploads,certbot/conf,certbot/www}`
+- Creates `/home/promptgenie/{logs,uploads,certbot/conf,certbot/www}`
 - Configures **UFW** firewall (22, 80, 443 open; all else denied)
 - Hardens SSH (key-only, no root login, max 3 auth tries)
 - Applies performance kernel parameters
@@ -118,8 +118,8 @@ ssh -i ~/.ssh/promptgenie_deploy promptgenie@<VPS_IP> "echo OK"
 
 ```bash
 ssh promptgenie@<VPS_IP>
-cp /opt/promptgenie/.env.example /opt/promptgenie/.env   # if rsync hasn't run yet
-nano /opt/promptgenie/.env
+cp /home/promptgenie/.env.example /home/promptgenie/.env   # if rsync hasn't run yet
+nano /home/promptgenie/.env
 ```
 
 At minimum set:
@@ -218,7 +218,7 @@ The workflow in `.github/workflows/backend.yml` will:
 
 1. **Lint** (`npm run lint`) and **type-check** (`tsc --noEmit`)
 2. **Unit test** (`npm test`) against ephemeral Postgres + Redis containers
-3. **Rsync** the repository to `/opt/promptgenie/` on the VPS
+3. **Rsync** the repository to `/home/promptgenie/` on the VPS
 4. **Build** the Docker image on the VPS (`docker compose build --no-cache app`)
 5. Start **Postgres + Redis** and wait for health checks
 6. Run **DB migrations** (`npm run migration:run:prod`)
@@ -238,7 +238,7 @@ and leave the previous containers running.
 
 ```bash
 ssh promptgenie@<VPS_IP>
-cd /opt/promptgenie
+cd /home/promptgenie
 bash scripts/deploy.sh deploy
 ```
 
@@ -257,7 +257,7 @@ bash scripts/deploy.sh preflight    # check Docker, .env, nginx config
 
 ```bash
 ssh promptgenie@<VPS_IP>
-cd /opt/promptgenie
+cd /home/promptgenie
 bash scripts/setup-ssl.sh api.genieinprompt.app admin@genieinprompt.app
 ```
 
@@ -279,23 +279,23 @@ All three are public and return `200 OK` or `503 Service Unavailable`.
 
 ```bash
 # NestJS application
-docker compose -f /opt/promptgenie/docker-compose.prod.yml logs -f --tail=100 app
+docker compose -f /home/promptgenie/docker-compose.prod.yml logs -f --tail=100 app
 
 # Nginx access/error
-docker compose -f /opt/promptgenie/docker-compose.prod.yml logs -f --tail=100 nginx
+docker compose -f /home/promptgenie/docker-compose.prod.yml logs -f --tail=100 nginx
 ```
 
 ### Disk usage
 
 ```bash
 docker system df
-df -h /opt/promptgenie
+df -h /home/promptgenie
 ```
 
 ### Container status
 
 ```bash
-docker compose -f /opt/promptgenie/docker-compose.prod.yml ps
+docker compose -f /home/promptgenie/docker-compose.prod.yml ps
 ```
 
 ---
@@ -354,8 +354,8 @@ Or use the standalone Certbot container directly:
 
 ```bash
 docker run --rm -p 80:80 \
-  -v /opt/promptgenie/certbot/conf:/etc/letsencrypt \
-  -v /opt/promptgenie/certbot/www:/var/www/certbot \
+  -v /home/promptgenie/certbot/conf:/etc/letsencrypt \
+  -v /home/promptgenie/certbot/www:/var/www/certbot \
   certbot/certbot certonly --standalone \
     --agree-tos --no-eff-email \
     -m admin@genieinprompt.app \

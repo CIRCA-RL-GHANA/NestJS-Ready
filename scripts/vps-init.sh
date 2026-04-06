@@ -9,7 +9,7 @@ set -euo pipefail
 # ── Parse args ──────────────────────────────────────────────────────────────
 DOMAIN=""
 EMAIL=""
-APP_DIR="/opt/promptgenie"
+APP_DIR="/home/promptgenie"
 DEPLOY_USER="promptgenie"
 
 while [[ $# -gt 0 ]]; do
@@ -163,8 +163,8 @@ ok "Kernel tuning applied"
 log "Issuing SSL certificate for $DOMAIN..."
 if [[ ! -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ]]; then
   docker run --rm -p 80:80 \
-    -v /opt/promptgenie/certbot/conf:/etc/letsencrypt \
-    -v /opt/promptgenie/certbot/www:/var/www/certbot \
+    -v "$APP_DIR/certbot/conf":/etc/letsencrypt \
+    -v "$APP_DIR/certbot/www":/var/www/certbot \
     certbot/certbot certonly \
       --standalone \
       --agree-tos \
@@ -190,8 +190,8 @@ fi
 
 # ── Auto-renew SSL via cron ───────────────────────────────────────────────────
 CRON_RENEW="0 3 * * * docker run --rm \
-  -v /opt/promptgenie/certbot/conf:/etc/letsencrypt \
-  -v /opt/promptgenie/certbot/www:/var/www/certbot \
+  -v $APP_DIR/certbot/conf:/etc/letsencrypt \
+  -v $APP_DIR/certbot/www:/var/www/certbot \
   certbot/certbot renew --quiet && \
   docker exec promptgenie-nginx nginx -s reload 2>/dev/null || true"
 

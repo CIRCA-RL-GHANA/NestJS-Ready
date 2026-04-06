@@ -130,7 +130,7 @@ jobs:
             --exclude='*.log' \
             --exclude='coverage' \
             -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.DEPLOY_PORT || 22 }} -o StrictHostKeyChecking=no" \
-            ./ ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/opt/promptgenie/
+            ./ ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/home/promptgenie/
 
       # ── Build & restart on VPS ─────────────────────────────────────────────
       - name: Deploy on VPS
@@ -143,7 +143,7 @@ jobs:
           command_timeout: 15m
           script: |
             set -euo pipefail
-            cd /opt/promptgenie
+            cd /home/promptgenie
 
             echo "=== [1/4] Building new app image ==="
             docker compose -f docker-compose.prod.yml build --no-cache app
