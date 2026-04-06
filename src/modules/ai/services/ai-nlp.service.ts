@@ -220,7 +220,7 @@ export class AINlpService {
   summariseText(text: string): TextSummary {
     // Guard against excessively long inputs to prevent ReDoS
     const safeText = typeof text === 'string' ? text.slice(0, 10_000) : String(text ?? '');
-    const sentences = safeText.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 0);
+    const sentences = safeText.split(/(?<=[.!?])\s+/).filter((s) => s.trim().length > 0);
     const sentenceList = sentences.length > 0 ? sentences : [safeText];
     const keywords = this.extractKeywords(safeText, 8);
     const wordCount = (safeText.match(/\b\w+\b/g) ?? []).length;

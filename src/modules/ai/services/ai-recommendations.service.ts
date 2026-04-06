@@ -68,7 +68,9 @@ export class AIRecommendationsService {
     catalogueItems: Array<{ id: string; text: string }>,
     topN = 10,
   ): RecommendedItem[] {
-    const safeText = Array.isArray(purchasedTexts) ? (purchasedTexts as string[]).join(' ') : String(purchasedTexts ?? '');
+    const safeText = Array.isArray(purchasedTexts)
+      ? (purchasedTexts as string[]).join(' ')
+      : String(purchasedTexts ?? '');
     const safeCatalogue = Array.isArray(catalogueItems) ? catalogueItems : [];
     if (!safeText) {
       // Cold start — return top-N by neutral score
@@ -117,7 +119,9 @@ export class AIRecommendationsService {
     contentItems: Array<{ id: string; type: string; text: string }>,
     topN = 20,
   ): FeedItem[] {
-    const safeText = Array.isArray(userInterestText) ? (userInterestText as string[]).join(' ') : String(userInterestText ?? '');
+    const safeText = Array.isArray(userInterestText)
+      ? (userInterestText as string[]).join(' ')
+      : String(userInterestText ?? '');
     const safeItems = Array.isArray(contentItems) ? contentItems : [];
     if (!safeText) {
       return safeItems.slice(0, topN).map((i) => ({
