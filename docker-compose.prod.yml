@@ -92,13 +92,8 @@ services:
           memory: 512M
 
   # ---- NestJS Backend Application ----
-  # context: '.' because this repo IS the NestJS application
   app:
-    pull_policy: never
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: production
+    image: ghcr.io/circa-rl-ghana/nestjs-ready:latest
     container_name: promptgenie-app
     restart: unless-stopped
     expose:
