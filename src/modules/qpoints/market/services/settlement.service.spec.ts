@@ -40,9 +40,7 @@ describe('SettlementService', () => {
     mockRepo = {
       create: jest.fn((dto) => ({ ...dto, id: `settlement-${Math.random()}` })),
       save: jest.fn(async (items: unknown) =>
-        Array.isArray(items)
-          ? items.map((item, i) => ({ ...item, id: `settlement-${i}` }))
-          : items,
+        Array.isArray(items) ? items.map((item, i) => ({ ...item, id: `settlement-${i}` })) : items,
       ),
       update: jest.fn().mockResolvedValue({ affected: 1 }),
       findOne: jest.fn(),
@@ -77,7 +75,10 @@ describe('SettlementService', () => {
       expect(mockRepo.save).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({ type: SettlementType.DEBIT, status: SettlementStatus.PENDING }),
-          expect.objectContaining({ type: SettlementType.CREDIT, status: SettlementStatus.PENDING }),
+          expect.objectContaining({
+            type: SettlementType.CREDIT,
+            status: SettlementStatus.PENDING,
+          }),
         ]),
       );
 
@@ -114,9 +115,7 @@ describe('SettlementService', () => {
       });
 
       const trade = makeTrade();
-      await expect(
-        service.createSettlement(trade, 'buyer-1', 'seller-1', 105.0),
-      ).rejects.toThrow();
+      await expect(service.createSettlement(trade, 'buyer-1', 'seller-1', 105.0)).rejects.toThrow();
 
       // Both records marked failed
       expect(mockRepo.update).toHaveBeenCalledWith(
@@ -129,9 +128,7 @@ describe('SettlementService', () => {
       mockFacilitator.transfer.mockRejectedValue(new Error('Network timeout'));
 
       const trade = makeTrade();
-      await expect(
-        service.createSettlement(trade, 'buyer-1', 'seller-1', 105.0),
-      ).rejects.toThrow();
+      await expect(service.createSettlement(trade, 'buyer-1', 'seller-1', 105.0)).rejects.toThrow();
 
       expect(mockNotifications.notifyUser).toHaveBeenCalledWith(
         'buyer-1',
@@ -183,9 +180,7 @@ describe('SettlementService', () => {
     it('throws InternalServerErrorException when the settlement is not found', async () => {
       mockRepo.findOne.mockResolvedValue(null);
 
-      await expect(
-        service.getSettlementStatus('nonexistent'),
-      ).rejects.toThrow();
+      await expect(service.getSettlementStatus('nonexistent')).rejects.toThrow();
     });
   });
 });

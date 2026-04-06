@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from '../app.module';
+import { AppModule } from '../../app.module';
 import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
@@ -109,9 +109,9 @@ async function seed() {
     for (const customer of customers) {
       await walletRepo.save({
         user_id: customer.id,
-        balance: 500.00,
+        balance: 500.0,
         currency: 'USD',
-        total_credited: 500.00,
+        total_credited: 500.0,
         status: 'ACTIVE',
       });
     }
@@ -156,7 +156,6 @@ async function seed() {
     console.log(`- ${customers.length} Customers with wallets, Q-Points, and subscriptions`);
     console.log(`- ${drivers.length} Drivers`);
     console.log(`- ${vendors.length} Vendors`);
-
   } catch (error) {
     console.error('❌ Seed failed:', error);
     throw error;

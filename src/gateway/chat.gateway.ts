@@ -75,9 +75,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       client.join(`user:${user.id}`);
 
-      this.logger.log(
-        `User ${user.id} connected. Active: ${this.getActiveConnections()}`,
-      );
+      this.logger.log(`User ${user.id} connected. Active: ${this.getActiveConnections()}`);
 
       client.emit('connection:confirmed', {
         userId: user.id,
@@ -105,9 +103,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
       }
 
-      this.logger.log(
-        `User ${user.id} disconnected. Active: ${this.getActiveConnections()}`,
-      );
+      this.logger.log(`User ${user.id} disconnected. Active: ${this.getActiveConnections()}`);
     }
   }
 
@@ -140,19 +136,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         attachmentUrls: payload.attachments || [],
       });
 
-      const conversation = await this.chatService.getConversation(
-        payload.conversationId,
-      );
+      const conversation = await this.chatService.getConversation(payload.conversationId);
       const participantIds = conversation.participants.map((p) => p.id);
 
       for (const participantId of participantIds) {
-        this.server
-          .to(`user:${participantId}`)
-          .emit('message:new', {
-            ...message,
-            senderName: user.username,
-            sendPhoneNumber: user.phoneNumber,
-          });
+        this.server.to(`user:${participantId}`).emit('message:new', {
+          ...message,
+          senderName: user.username,
+          sendPhoneNumber: user.phoneNumber,
+        });
       }
 
       client.emit('message:ack', {
@@ -196,12 +188,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     const user = client.data.user as SocketUser;
 
-    client
-      .to(`conversation:${payload.conversationId}`)
-      .emit('user:stopped-typing', {
-        userId: user.id,
-        conversationId: payload.conversationId,
-      });
+    client.to(`conversation:${payload.conversationId}`).emit('user:stopped-typing', {
+      userId: user.id,
+      conversationId: payload.conversationId,
+    });
   }
 
   /**
@@ -217,13 +207,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     await this.chatService.markMessageAsRead(payload.messageId, user.id);
 
     const message = await this.chatService.getMessage(payload.messageId);
-    this.server
-      .to(`user:${message.senderId}`)
-      .emit('message:read-receipt', {
-        messageId: payload.messageId,
-        readBy: user.id,
-        readAt: new Date(),
-      });
+    this.server.to(`user:${message.senderId}`).emit('message:read-receipt', {
+      messageId: payload.messageId,
+      readBy: user.id,
+      readAt: new Date(),
+    });
   }
 
   /**
@@ -237,18 +225,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       const user = client.data.user as SocketUser;
 
-      const message = await this.chatService.deleteMessage(
-        payload.messageId,
-        user.id,
-      );
+      const message = await this.chatService.deleteMessage(payload.messageId, user.id);
 
-      this.server
-        .to(`conversation:${message.conversationId}`)
-        .emit('message:deleted', {
-          messageId: message.id,
-          conversationId: message.conversationId,
-          deletedAt: new Date(),
-        });
+      this.server.to(`conversation:${message.conversationId}`).emit('message:deleted', {
+        messageId: message.id,
+        conversationId: message.conversationId,
+        deletedAt: new Date(),
+      });
     } catch (error) {
       client.emit('error', { message: error.message });
     }
@@ -264,9 +247,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     const user = client.data.user as SocketUser;
     client.join(`conversation:${payload.conversationId}`);
-    this.logger.debug(
-      `User ${user.id} joined conversation ${payload.conversationId}`,
-    );
+    this.logger.debug(`User ${user.id} joined conversation ${payload.conversationId}`);
   }
 
   /**
@@ -283,10 +264,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   /**
    * Broadcast user status
    */
-  private broadcastUserStatus(
-    userId: string,
-    status: 'online' | 'offline',
-  ): void {
+  private broadcastUserStatus(userId: string, status: 'online' | 'offline'): void {
     this.server.emit('user:status-changed', {
       userId,
       status,
@@ -295,9 +273,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   private getActiveConnections(): number {
-    return Array.from(this.userConnections.values()).reduce(
-      (sum, set) => sum + set.size,
-      0,
-    );
+    return Array.from(this.userConnections.values()).reduce((sum, set) => sum + set.size, 0);
   }
 }

@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Product, ProductStatus } from './entities/product.entity';
 import { ProductMedia } from './entities/product-media.entity';
 import { DiscountTier } from './entities/discount-tier.entity';
@@ -101,11 +101,11 @@ export class ProductsService {
     // Re-rank via NLP TF-IDF for semantic relevance
     if (candidates.length > 1) {
       this.aiNlp.resetIndex();
-      candidates.forEach(p =>
+      candidates.forEach((p) =>
         this.aiNlp.indexDocument(p.id, `${p.name} ${p.description ?? ''} ${p.category ?? ''}`),
       );
       const scores = this.aiNlp.searchDocuments(query, candidates.length);
-      const scoreMap = new Map(scores.map(s => [s.id, s.score]));
+      const scoreMap = new Map(scores.map((s) => [s.id, s.score]));
       candidates.sort((a, b) => (scoreMap.get(b.id) ?? 0) - (scoreMap.get(a.id) ?? 0));
     }
 
@@ -117,9 +117,9 @@ export class ProductsService {
     const product = await this.getProductById(productId);
     return this.aiPricing.recommendDiscount(
       Number(product.price),
-      0,              // daysSinceLastSale — caller should pass real value
+      0, // daysSinceLastSale — caller should pass real value
       product.viewCount ?? 0,
-      0.02,           // default neutral conversion rate
+      0.02, // default neutral conversion rate
       product.stockQuantity ?? 0,
     );
   }

@@ -20,7 +20,11 @@ export class DeliveryPackage extends BaseEntity {
 
   @ApiProperty({ description: 'Delivery route sequence', type: [Object], required: false })
   @Column({ type: 'jsonb', nullable: true })
-  route: Array<{ orderId: string; sequence: number; location: { lat: number; lng: number } }> | null;
+  route: Array<{
+    orderId: string;
+    sequence: number;
+    location: { lat: number; lng: number };
+  }> | null;
 
   @ApiProperty({ description: 'Whether package is completed' })
   @Column({ type: 'boolean', default: false })

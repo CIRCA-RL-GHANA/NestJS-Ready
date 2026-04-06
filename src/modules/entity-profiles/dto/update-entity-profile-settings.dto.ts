@@ -3,7 +3,11 @@ import { ApiProperty } from '@nestjs/swagger';
 import { AccessLevel, ComplianceStatus } from '../entities/entity-profile-settings.entity';
 
 export class UpdateEntityProfileSettingsDto {
-  @ApiProperty({ description: 'Business location/address', required: false, example: '123 Main St, City' })
+  @ApiProperty({
+    description: 'Business location/address',
+    required: false,
+    example: '123 Main St, City',
+  })
   @IsOptional()
   @IsString()
   location?: string;
@@ -13,27 +17,31 @@ export class UpdateEntityProfileSettingsDto {
   @IsUUID()
   businessCategoryId?: string;
 
-  @ApiProperty({ 
-    description: 'Compliance status', 
+  @ApiProperty({
+    description: 'Compliance status',
     enum: ComplianceStatus,
     required: false,
-    example: ComplianceStatus.APPROVED 
+    example: ComplianceStatus.APPROVED,
   })
   @IsOptional()
   @IsEnum(ComplianceStatus)
   complianceStatus?: ComplianceStatus;
 
-  @ApiProperty({ 
-    description: 'Visibility/Access level', 
+  @ApiProperty({
+    description: 'Visibility/Access level',
     enum: AccessLevel,
     required: false,
-    example: AccessLevel.PUBLIC 
+    example: AccessLevel.PUBLIC,
   })
   @IsOptional()
   @IsEnum(AccessLevel)
   visibility?: AccessLevel;
 
-  @ApiProperty({ description: 'Service scope description', required: false, example: 'Food delivery and catering' })
+  @ApiProperty({
+    description: 'Service scope description',
+    required: false,
+    example: 'Food delivery and catering',
+  })
   @IsOptional()
   @IsString()
   serviceScope?: string;

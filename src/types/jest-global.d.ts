@@ -17,14 +17,26 @@ declare function fdescribe(name: string, fn: () => void): void;
 declare function xdescribe(name: string, fn: () => void): void;
 
 declare function it(name: string, fn: (() => void) | (() => Promise<void>), timeout?: number): void;
-declare function fit(name: string, fn: (() => void) | (() => Promise<void>), timeout?: number): void;
-declare function xit(name: string, fn: (() => void) | (() => Promise<void>), timeout?: number): void;
-declare function test(name: string, fn: (() => void) | (() => Promise<void>), timeout?: number): void;
+declare function fit(
+  name: string,
+  fn: (() => void) | (() => Promise<void>),
+  timeout?: number,
+): void;
+declare function xit(
+  name: string,
+  fn: (() => void) | (() => Promise<void>),
+  timeout?: number,
+): void;
+declare function test(
+  name: string,
+  fn: (() => void) | (() => Promise<void>),
+  timeout?: number,
+): void;
 
 declare function beforeAll(fn: (() => void) | (() => Promise<void>), timeout?: number): void;
-declare function afterAll(fn:  (() => void) | (() => Promise<void>), timeout?: number): void;
+declare function afterAll(fn: (() => void) | (() => Promise<void>), timeout?: number): void;
 declare function beforeEach(fn: (() => void) | (() => Promise<void>), timeout?: number): void;
-declare function afterEach(fn:  (() => void) | (() => Promise<void>), timeout?: number): void;
+declare function afterEach(fn: (() => void) | (() => Promise<void>), timeout?: number): void;
 
 /** Core jest matchers (subset sufficient for the project's test suite). */
 interface JestMatchers<R = void> {
@@ -68,7 +80,7 @@ interface JestMatchers<R = void> {
   // negation / async
   not: JestMatchers<R>;
   resolves: JestMatchersAsync;
-  rejects:  JestMatchersAsync;
+  rejects: JestMatchersAsync;
 }
 
 interface JestMatchersAsync {
@@ -145,5 +157,9 @@ declare namespace jest {
 
   /** Matched against `ReturnType<typeof jest.fn>` in specs. */
   type MockedFunction<T extends (...args: any) => any> = Mock<ReturnType<T>, Parameters<T>>;
-  type Mocked<T> = { [P in keyof T]: T[P] extends (...args: any) => any ? Mock<ReturnType<T[P]>, Parameters<T[P]>> : T[P] };
+  type Mocked<T> = {
+    [P in keyof T]: T[P] extends (...args: any) => any
+      ? Mock<ReturnType<T[P]>, Parameters<T[P]>>
+      : T[P];
+  };
 }

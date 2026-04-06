@@ -7,11 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource, EntityManager } from 'typeorm';
-import {
-  QPointOrder,
-  QPointOrderStatus,
-  QPointOrderType,
-} from '../entities/q-point-order.entity';
+import { QPointOrder, QPointOrderStatus, QPointOrderType } from '../entities/q-point-order.entity';
 import { QPointTrade } from '../entities/q-point-trade.entity';
 import { MarketBalanceService } from './market-balance.service';
 import { SettlementService } from './settlement.service';
@@ -116,8 +112,7 @@ export class OrderBookService {
         .getOne();
 
       if (!order) throw new NotFoundException(`Order ${orderId} not found`);
-      if (order.userId !== userId)
-        throw new ForbiddenException('You do not own this order');
+      if (order.userId !== userId) throw new ForbiddenException('You do not own this order');
       if (order.status !== QPointOrderStatus.OPEN)
         throw new BadRequestException(`Order is already ${order.status}`);
 
@@ -130,32 +125,30 @@ export class OrderBookService {
   /** Return aggregated order book depth. */
   async getOrderBook(): Promise<OrderBook> {
     // Buy levels: highest price first
-    const buysRaw: { price: string; quantity: string; cnt: string }[] =
-      await this.orderRepo
-        .createQueryBuilder('o')
-        .select('o.price', 'price')
-        .addSelect('SUM(o.quantity - o.filled_quantity)', 'quantity')
-        .addSelect('COUNT(o.id)', 'cnt')
-        .where('o.type = :t', { t: QPointOrderType.BUY })
-        .andWhere('o.status = :s', { s: QPointOrderStatus.OPEN })
-        .groupBy('o.price')
-        .orderBy('o.price', 'DESC')
-        .limit(20)
-        .getRawMany();
+    const buysRaw: { price: string; quantity: string; cnt: string }[] = await this.orderRepo
+      .createQueryBuilder('o')
+      .select('o.price', 'price')
+      .addSelect('SUM(o.quantity - o.filled_quantity)', 'quantity')
+      .addSelect('COUNT(o.id)', 'cnt')
+      .where('o.type = :t', { t: QPointOrderType.BUY })
+      .andWhere('o.status = :s', { s: QPointOrderStatus.OPEN })
+      .groupBy('o.price')
+      .orderBy('o.price', 'DESC')
+      .limit(20)
+      .getRawMany();
 
     // Sell levels: lowest price first
-    const sellsRaw: { price: string; quantity: string; cnt: string }[] =
-      await this.orderRepo
-        .createQueryBuilder('o')
-        .select('o.price', 'price')
-        .addSelect('SUM(o.quantity - o.filled_quantity)', 'quantity')
-        .addSelect('COUNT(o.id)', 'cnt')
-        .where('o.type = :t', { t: QPointOrderType.SELL })
-        .andWhere('o.status = :s', { s: QPointOrderStatus.OPEN })
-        .groupBy('o.price')
-        .orderBy('o.price', 'ASC')
-        .limit(20)
-        .getRawMany();
+    const sellsRaw: { price: string; quantity: string; cnt: string }[] = await this.orderRepo
+      .createQueryBuilder('o')
+      .select('o.price', 'price')
+      .addSelect('SUM(o.quantity - o.filled_quantity)', 'quantity')
+      .addSelect('COUNT(o.id)', 'cnt')
+      .where('o.type = :t', { t: QPointOrderType.SELL })
+      .andWhere('o.status = :s', { s: QPointOrderStatus.OPEN })
+      .groupBy('o.price')
+      .orderBy('o.price', 'ASC')
+      .limit(20)
+      .getRawMany();
 
     return {
       buys: buysRaw.map((r) => ({
@@ -206,17 +199,15 @@ export class OrderBookService {
 
     // 24h volume
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const volResult: { vol: string } = await this.tradeRepo
+    const volResult: { vol: string } = (await this.tradeRepo
       .createQueryBuilder('t')
       .select('COALESCE(SUM(t.quantity), 0)', 'vol')
       .where('t.created_at >= :since', { since })
-      .getRawOne() as { vol: string };
+      .getRawOne()) as { vol: string };
 
     const spreadPercent =
       bestBid && bestAsk
-        ? Number(
-            ((bestAsk - bestBid) / ((bestAsk + bestBid) / 2)) * 100,
-          ).toFixed(4)
+        ? Number(((bestAsk - bestBid) / ((bestAsk + bestBid) / 2)) * 100).toFixed(4)
         : null;
 
     return {
@@ -229,10 +220,7 @@ export class OrderBookService {
   }
 
   /** Market buy: match against best available sell orders immediately. */
-  async marketBuy(
-    userId: string,
-    quantity: number,
-  ): Promise<CreateOrderResult> {
+  async marketBuy(userId: string, quantity: number): Promise<CreateOrderResult> {
     const book = await this.getOrderBook();
     if (!book.sells.length) {
       throw new BadRequestException('No sell orders available. Market buy cannot execute.');
@@ -242,10 +230,7 @@ export class OrderBookService {
   }
 
   /** Market sell: match against best available buy orders immediately. */
-  async marketSell(
-    userId: string,
-    quantity: number,
-  ): Promise<CreateOrderResult> {
+  async marketSell(userId: string, quantity: number): Promise<CreateOrderResult> {
     const book = await this.getOrderBook();
     if (!book.buys.length) {
       throw new BadRequestException('No buy orders available. Market sell cannot execute.');
@@ -273,17 +258,14 @@ export class OrderBookService {
     const trades: QPointTrade[] = [];
 
     const oppositeSide =
-      order.type === QPointOrderType.BUY
-        ? QPointOrderType.SELL
-        : QPointOrderType.BUY;
+      order.type === QPointOrderType.BUY ? QPointOrderType.SELL : QPointOrderType.BUY;
 
     const priceCondition =
       order.type === QPointOrderType.BUY
         ? 'o.price <= :price' // we pay up to our price
         : 'o.price >= :price'; // we accept down to our price
 
-    const priceOrder =
-      order.type === QPointOrderType.BUY ? 'ASC' : 'DESC'; // best counter-price first
+    const priceOrder = order.type === QPointOrderType.BUY ? 'ASC' : 'DESC'; // best counter-price first
 
     while (Number(order.quantity) - Number(order.filledQuantity) > MIN_STEP) {
       const remaining = Number(order.quantity) - Number(order.filledQuantity);
@@ -302,8 +284,7 @@ export class OrderBookService {
 
       if (!counterOrder) break;
 
-      const counterRemaining =
-        Number(counterOrder.quantity) - Number(counterOrder.filledQuantity);
+      const counterRemaining = Number(counterOrder.quantity) - Number(counterOrder.filledQuantity);
 
       const fillQty = Math.min(remaining, counterRemaining);
       // Execution price is the resting order's price (maker price)
@@ -324,8 +305,7 @@ export class OrderBookService {
 
       // Update filled quantities
       order.filledQuantity = Number(order.filledQuantity) + fillQty;
-      counterOrder.filledQuantity =
-        Number(counterOrder.filledQuantity) + fillQty;
+      counterOrder.filledQuantity = Number(counterOrder.filledQuantity) + fillQty;
 
       if (Number(counterOrder.filledQuantity) >= Number(counterOrder.quantity)) {
         counterOrder.status = QPointOrderStatus.FILLED;
@@ -338,8 +318,7 @@ export class OrderBookService {
 
       // Post-match: adjust QP balances and trigger cash settlement
       // These can throw – their exceptions will roll back the transaction
-      const cashAmount =
-        Math.round(execPrice * fillQty * 100) / 100; // round to cents
+      const cashAmount = Math.round(execPrice * fillQty * 100) / 100; // round to cents
 
       const buyerId = isBuyerOrder ? order.userId : counterOrder.userId;
       const sellerId = isBuyerOrder ? counterOrder.userId : order.userId;
@@ -357,9 +336,7 @@ export class OrderBookService {
         });
 
       // Notify both parties
-      this._notifyTrade(trade, buyerId, sellerId, execPrice, fillQty).catch(
-        () => void 0,
-      );
+      this._notifyTrade(trade, buyerId, sellerId, execPrice, fillQty).catch(() => void 0);
 
       if (order.status === QPointOrderStatus.FILLED) break;
     }

@@ -64,7 +64,10 @@ export class EntityProfilesService {
     }
   }
 
-  async getProfileSettings(profileType: ProfileType, profileId: string): Promise<EntityProfileSettings> {
+  async getProfileSettings(
+    profileType: ProfileType,
+    profileId: string,
+  ): Promise<EntityProfileSettings> {
     const settings = await this.settingsRepository.findOne({
       where: { profileType: profileType as any, profileId },
     });
@@ -124,7 +127,10 @@ export class EntityProfilesService {
 
   // ==================== Operating Hours ====================
 
-  async createOperatingHours(dto: CreateOperatingHoursDto, userId: string): Promise<OperatingHours> {
+  async createOperatingHours(
+    dto: CreateOperatingHoursDto,
+    userId: string,
+  ): Promise<OperatingHours> {
     try {
       const hours = this.operatingHoursRepository.create(dto);
       const saved = await this.operatingHoursRepository.save(hours);
@@ -195,7 +201,10 @@ export class EntityProfilesService {
 
   // ==================== Business Categories ====================
 
-  async createBusinessCategory(dto: CreateBusinessCategoryDto, userId: string): Promise<BusinessCategory> {
+  async createBusinessCategory(
+    dto: CreateBusinessCategoryDto,
+    userId: string,
+  ): Promise<BusinessCategory> {
     try {
       // Check uniqueness
       const existing = await this.categoryRepository.findOne({ where: { name: dto.name } });
@@ -206,7 +215,10 @@ export class EntityProfilesService {
       const category = this.categoryRepository.create(dto);
       const saved = await this.categoryRepository.save(category);
 
-      await this.logAudit('Create Business Category', 'SUCCESS', userId, { categoryId: saved.id, name: dto.name });
+      await this.logAudit('Create Business Category', 'SUCCESS', userId, {
+        categoryId: saved.id,
+        name: dto.name,
+      });
       this.logger.log(`Business category created: ${saved.id} (${dto.name})`);
       return saved;
     } catch (error) {
@@ -250,7 +262,7 @@ export class EntityProfilesService {
 
   async deleteBusinessCategory(id: string, userId: string): Promise<void> {
     try {
-      const category = await this.getBusinessCategoryById(id);
+      await this.getBusinessCategoryById(id);
       await this.categoryRepository.softDelete(id);
 
       await this.logAudit('Delete Business Category', 'SUCCESS', userId, { categoryId: id });
@@ -287,7 +299,9 @@ export class EntityProfilesService {
   ): Promise<{ keywords: string[]; sentiment: string; summary: string }> {
     const category = await this.categoryRepository.findOne({ where: { id: categoryId } });
     if (!category) throw new NotFoundException('Category not found');
-    const text = [(category as any).name ?? '', (category as any).description ?? ''].filter(Boolean).join(' ');
+    const text = [(category as any).name ?? '', (category as any).description ?? '']
+      .filter(Boolean)
+      .join(' ');
     if (!text.trim()) return { keywords: [], sentiment: 'neutral', summary: '' };
     try {
       const [kw, sent, sum] = await Promise.all([
@@ -295,7 +309,7 @@ export class EntityProfilesService {
         this.aiNlp.analyzeSentiment(text),
         this.aiNlp.summariseText(text),
       ]);
-      return { keywords: kw.keywords, sentiment: sent.label, summary: sum.summary };
+      return { keywords: kw, sentiment: sent.label, summary: sum.summary };
     } catch {
       return { keywords: [], sentiment: 'neutral', summary: '' };
     }

@@ -1,8 +1,6 @@
-import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
+import { Entity, Column, Index } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { BaseEntity } from '@common/entities/base.entity';
-import { EntityProfile } from '@modules/entities/entities/entity.entity';
-import { Branch } from '@modules/entities/entities/branch.entity';
 
 export enum ProfileType {
   ENTITY = 'Entity',
@@ -22,10 +20,10 @@ export enum DayOfWeek {
 @Entity('operating_hours')
 @Index(['profileType', 'profileId'])
 export class OperatingHours extends BaseEntity {
-  @ApiProperty({ 
-    description: 'Profile type (Entity or Branch)', 
+  @ApiProperty({
+    description: 'Profile type (Entity or Branch)',
     enum: ProfileType,
-    example: ProfileType.ENTITY 
+    example: ProfileType.ENTITY,
   })
   @Column({ type: 'enum', enum: ProfileType })
   profileType: ProfileType;
@@ -34,10 +32,10 @@ export class OperatingHours extends BaseEntity {
   @Column({ type: 'uuid' })
   profileId: string;
 
-  @ApiProperty({ 
-    description: 'Day of week', 
+  @ApiProperty({
+    description: 'Day of week',
     enum: DayOfWeek,
-    example: DayOfWeek.MONDAY 
+    example: DayOfWeek.MONDAY,
   })
   @Column({ type: 'enum', enum: DayOfWeek })
   dayOfWeek: DayOfWeek;

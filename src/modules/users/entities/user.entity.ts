@@ -1,4 +1,4 @@
-import { Entity, Column, OneToOne, OneToMany, Index, BeforeInsert } from 'typeorm';
+import { Entity, Column, Index, BeforeInsert } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import * as bcrypt from 'bcrypt';
 import { BaseEntity } from '@/common/entities/base.entity';

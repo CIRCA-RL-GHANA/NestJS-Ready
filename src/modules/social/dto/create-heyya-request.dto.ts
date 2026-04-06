@@ -1,4 +1,4 @@
-import { IsUUID, IsString, IsOptional, IsDateString, IsEnum } from 'class-validator';
+import { IsUUID, IsString, IsOptional, IsDateString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateHeyYaRequestDto {

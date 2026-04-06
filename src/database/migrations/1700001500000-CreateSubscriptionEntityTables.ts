@@ -12,9 +12,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
  *
  * Ordering matters: subscription_plans → entities → branches → qpoint_accounts
  */
-export class CreateSubscriptionEntityTables1700001500000
-  implements MigrationInterface
-{
+export class CreateSubscriptionEntityTables1700001500000 implements MigrationInterface {
   name = 'CreateSubscriptionEntityTables1700001500000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -75,9 +73,15 @@ export class CreateSubscriptionEntityTables1700001500000
           REFERENCES "subscription_plans"("id") ON DELETE SET NULL
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_entities_owner_id"            ON "entities" ("owner_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_entities_type"                ON "entities" ("type")`);
-    await queryRunner.query(`CREATE INDEX "idx_entities_subscription_plan_id" ON "entities" ("subscription_plan_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_entities_owner_id"            ON "entities" ("owner_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_entities_type"                ON "entities" ("type")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_entities_subscription_plan_id" ON "entities" ("subscription_plan_id")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_entities_updated_at
         BEFORE UPDATE ON "entities"
@@ -112,9 +116,15 @@ export class CreateSubscriptionEntityTables1700001500000
           REFERENCES "subscription_plans"("id") ON DELETE SET NULL
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_branches_entity_id"           ON "branches" ("entity_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_branches_subscription_plan_id" ON "branches" ("subscription_plan_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_branches_manager_id"          ON "branches" ("manager_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_branches_entity_id"           ON "branches" ("entity_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_branches_subscription_plan_id" ON "branches" ("subscription_plan_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_branches_manager_id"          ON "branches" ("manager_id")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_branches_updated_at
         BEFORE UPDATE ON "branches"
@@ -147,7 +157,9 @@ export class CreateSubscriptionEntityTables1700001500000
           REFERENCES "entities"("id") ON DELETE CASCADE
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_qpoint_accounts_entity_id" ON "qpoint_accounts" ("entity_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_qpoint_accounts_entity_id" ON "qpoint_accounts" ("entity_id")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_qpoint_accounts_updated_at
         BEFORE UPDATE ON "qpoint_accounts"
@@ -175,7 +187,9 @@ export class CreateSubscriptionEntityTables1700001500000
           REFERENCES "subscription_plans"("id") ON DELETE RESTRICT
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_sub_assignments_target" ON "subscription_assignments" ("target_type","target_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_sub_assignments_target" ON "subscription_assignments" ("target_type","target_id")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_subscription_assignments_updated_at
         BEFORE UPDATE ON "subscription_assignments"

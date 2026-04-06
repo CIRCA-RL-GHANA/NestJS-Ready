@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  Logger,
-  BadRequestException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource, EntityManager } from 'typeorm';
 import { QPointMarketBalance } from '../entities/q-point-market-balance.entity';
@@ -47,11 +42,7 @@ export class MarketBalanceService {
    * @param delta   Positive to credit, negative to debit
    * @param reason  Audit label, e.g. "trade_<id>"
    */
-  async adjustBalance(
-    userId: string,
-    delta: number,
-    reason: string,
-  ): Promise<number> {
+  async adjustBalance(userId: string, delta: number, reason: string): Promise<number> {
     return this.dataSource.transaction(async (manager: EntityManager) => {
       // Upsert with row-level lock to prevent race conditions
       await manager

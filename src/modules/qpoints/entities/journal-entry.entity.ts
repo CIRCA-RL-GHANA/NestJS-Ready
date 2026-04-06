@@ -37,7 +37,7 @@ export class JournalEntry extends BaseEntity {
 
   @ApiProperty({
     description: 'Amount',
-    example: 100.00,
+    example: 100.0,
   })
   @Column({ type: 'decimal', precision: 18, scale: 2 })
   amount: number;

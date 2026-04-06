@@ -17,10 +17,7 @@ export class StatementService {
     private readonly aiNlp: AINlpService,
   ) {}
 
-  async createOrUpdateStatement(
-    userId: string,
-    createDto: CreateStatementDto,
-  ): Promise<Statement> {
+  async createOrUpdateStatement(userId: string, createDto: CreateStatementDto): Promise<Statement> {
     try {
       let statement = await this.statementRepository.findOne({
         where: { userId },
@@ -48,7 +45,7 @@ export class StatementService {
             ai: {
               keywords,
               sentimentLabel: sentiment.label,
-              sentimentScore: sentiment.normalised,
+              sentimentScore: sentiment.score,
               analysedAt: new Date().toISOString(),
             },
           };

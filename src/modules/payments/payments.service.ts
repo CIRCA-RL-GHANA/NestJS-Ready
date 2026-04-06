@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Payment, PaymentStatus } from '../entities/payment.entity';
@@ -25,13 +20,15 @@ export class PaymentsService {
   async processPayment(dto: CreatePaymentDto): Promise<Payment> {
     // AI fraud pre-check before processing
     const fraudResult = this.aiFraud.scoreTransaction({
-      userId:        dto.userId,
-      amount:        dto.amount,
-      currency:      dto.currency ?? 'NGN',
+      userId: dto.userId,
+      amount: dto.amount,
+      currency: dto.currency ?? 'NGN',
       paymentMethod: dto.paymentMethod,
     });
     if (fraudResult.blocked) {
-      this.logger.warn(`Payment blocked by AI fraud check for user ${dto.userId}: ${fraudResult.reason}`);
+      this.logger.warn(
+        `Payment blocked by AI fraud check for user ${dto.userId}: ${fraudResult.reason}`,
+      );
       throw new BadRequestException(`Transaction blocked: ${fraudResult.reason}`);
     }
     if (fraudResult.reviewFlag) {
@@ -80,7 +77,9 @@ export class PaymentsService {
     await this.walletsService.addBalance(payment.userId, Number(payment.amount));
     await this.paymentRepository.update(paymentId, { status: PaymentStatus.REFUNDED });
 
-    this.logger.log(`Payment ${paymentId} refunded — ${payment.amount} returned to user ${payment.userId}`);
+    this.logger.log(
+      `Payment ${paymentId} refunded — ${payment.amount} returned to user ${payment.userId}`,
+    );
 
     return { ...payment, status: PaymentStatus.REFUNDED };
   }

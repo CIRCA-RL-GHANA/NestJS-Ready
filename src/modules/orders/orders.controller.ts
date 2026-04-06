@@ -23,7 +23,10 @@ export class OrdersController {
   @Post()
   @ApiOperation({ summary: 'Create new order' })
   @ApiResponse({ status: 201, description: 'Order created successfully', type: Order })
-  async createOrder(@CurrentUser('id') buyerId: string, @Body() dto: CreateOrderDto): Promise<Order> {
+  async createOrder(
+    @CurrentUser('id') buyerId: string,
+    @Body() dto: CreateOrderDto,
+  ): Promise<Order> {
     return this.ordersService.createOrder(buyerId, dto);
   }
 
@@ -85,9 +88,7 @@ export class OrdersController {
   @Put('fulfillment/:sessionId/complete')
   @ApiOperation({ summary: 'Complete order fulfillment' })
   @ApiResponse({ status: 200, description: 'Fulfillment completed', type: FulfillmentSession })
-  async completeFulfillment(
-    @Param('sessionId') sessionId: string,
-  ): Promise<FulfillmentSession> {
+  async completeFulfillment(@Param('sessionId') sessionId: string): Promise<FulfillmentSession> {
     return this.ordersService.completeFulfillment(sessionId);
   }
 

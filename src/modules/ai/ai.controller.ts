@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Put, Body, Param, Query, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Body,
+  Param,
+  Query,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBody } from '@nestjs/swagger';
 import { AIService } from './ai.service';
 import { AINlpService } from './services/ai-nlp.service';
@@ -23,13 +33,13 @@ import { AIEvent } from './entities/ai-event.entity';
 @Controller('ai')
 export class AIController {
   constructor(
-    private readonly aiService:              AIService,
-    private readonly nlpService:             AINlpService,
-    private readonly pricingService:         AIPricingService,
-    private readonly fraudService:           AIFraudService,
-    private readonly insightsService:        AIInsightsService,
-    private readonly searchService:          AISearchService,
-    private readonly recommendationService:  AIRecommendationsService,
+    private readonly aiService: AIService,
+    private readonly nlpService: AINlpService,
+    private readonly pricingService: AIPricingService,
+    private readonly fraudService: AIFraudService,
+    private readonly insightsService: AIInsightsService,
+    private readonly searchService: AISearchService,
+    private readonly recommendationService: AIRecommendationsService,
   ) {}
 
   // ============ Models ============
@@ -86,10 +96,7 @@ export class AIController {
   @Put('models/:id')
   @ApiOperation({ summary: 'Update AI model' })
   @ApiResponse({ status: 200, description: 'Model updated', type: AIModel })
-  async updateModel(
-    @Param('id') id: string,
-    @Body() data: Record<string, any>,
-  ): Promise<AIModel> {
+  async updateModel(@Param('id') id: string, @Body() data: Record<string, any>): Promise<AIModel> {
     return this.aiService.updateModel(id, data);
   }
 
@@ -353,7 +360,10 @@ export class AIController {
     schema: {
       properties: {
         query: { type: 'string' },
-        documents: { type: 'array', items: { properties: { id: { type: 'string' }, text: { type: 'string' } } } },
+        documents: {
+          type: 'array',
+          items: { properties: { id: { type: 'string' }, text: { type: 'string' } } },
+        },
         topN: { type: 'number' },
       },
     },
@@ -364,7 +374,7 @@ export class AIController {
     @Body('topN') topN?: number,
   ) {
     this.nlpService.resetIndex();
-    (documents ?? []).forEach(d => this.nlpService.indexDocument(d.id, d.text));
+    (documents ?? []).forEach((d) => this.nlpService.indexDocument(d.id, d.text));
     return this.nlpService.searchDocuments(query ?? '', topN ?? 20);
   }
 
@@ -376,13 +386,14 @@ export class AIController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Compute AI dynamic ride pricing with surge' })
   computeRidePrice(
-    @Body() body: {
-      baseDistance:  number;
-      pickupLat:     number;
-      pickupLng:     number;
-      dropoffLat:    number;
-      dropoffLng:    number;
-      rideType?:     string;
+    @Body()
+    body: {
+      baseDistance: number;
+      pickupLat: number;
+      pickupLng: number;
+      dropoffLat: number;
+      dropoffLng: number;
+      rideType?: string;
       demandFactor?: number;
       supplyFactor?: number;
     },
@@ -390,12 +401,12 @@ export class AIController {
     return this.pricingService.computeRidePrice(
       {
         baseDistance: body.baseDistance,
-        pickupLat:    body.pickupLat,
-        pickupLng:    body.pickupLng,
-        dropoffLat:   body.dropoffLat,
-        dropoffLng:   body.dropoffLng,
-        rideType:     body.rideType,
-        requestedAt:  new Date(),
+        pickupLat: body.pickupLat,
+        pickupLng: body.pickupLng,
+        dropoffLat: body.dropoffLat,
+        dropoffLng: body.dropoffLng,
+        rideType: body.rideType,
+        requestedAt: new Date(),
       },
       body.demandFactor ?? 1.0,
       body.supplyFactor ?? 1.0,
@@ -406,12 +417,13 @@ export class AIController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get AI discount recommendation for a product' })
   recommendDiscount(
-    @Body() body: {
-      currentPrice:       number;
-      daysSinceLastSale:  number;
-      viewCount:          number;
-      conversionRate:     number;
-      stockLevel:         number;
+    @Body()
+    body: {
+      currentPrice: number;
+      daysSinceLastSale: number;
+      viewCount: number;
+      conversionRate: number;
+      stockLevel: number;
     },
   ) {
     return this.pricingService.recommendDiscount(
@@ -427,11 +439,12 @@ export class AIController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get AI subscription retention discount offer' })
   suggestRetentionDiscount(
-    @Body() body: {
-      monthsSubscribed:     number;
-      lastLoginDaysAgo:     number;
-      featureUsageScore:    number;
-      currentMonthlyPrice:  number;
+    @Body()
+    body: {
+      monthsSubscribed: number;
+      lastLoginDaysAgo: number;
+      featureUsageScore: number;
+      currentMonthlyPrice: number;
     },
   ) {
     return this.pricingService.suggestRetentionDiscount(
@@ -450,18 +463,19 @@ export class AIController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Score a transaction for fraud risk (0–1)' })
   scoreTransaction(
-    @Body() body: {
-      userId:              string;
-      amount:              number;
-      currency:            string;
-      paymentMethod:       string;
-      ipAddress?:          string;
-      deviceId?:           string;
-      latitude?:           number;
-      longitude?:          number;
-      recentAmounts?:      number[];
-      recentCountInHour?:  number;
-      avgHistoricAmount?:  number;
+    @Body()
+    body: {
+      userId: string;
+      amount: number;
+      currency: string;
+      paymentMethod: string;
+      ipAddress?: string;
+      deviceId?: string;
+      latitude?: number;
+      longitude?: number;
+      recentAmounts?: number[];
+      recentCountInHour?: number;
+      avgHistoricAmount?: number;
     },
   ) {
     return this.fraudService.scoreTransaction(body);
@@ -471,14 +485,13 @@ export class AIController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Score geographical anomaly for a transaction' })
   scoreLocationAnomaly(
-    @Body() body: {
-      knownLat: number; knownLng: number;
-      txnLat:   number; txnLng:   number;
-    },
+    @Body() body: { knownLat: number; knownLng: number; txnLat: number; txnLng: number },
   ) {
     const signal = this.fraudService.scoreLocationAnomaly(
-      body.knownLat, body.knownLng,
-      body.txnLat,   body.txnLng,
+      body.knownLat,
+      body.knownLng,
+      body.txnLat,
+      body.txnLng,
     );
     return signal ?? { name: 'no_anomaly', risk: 0, detail: 'Location within expected range' };
   }
@@ -491,13 +504,15 @@ export class AIController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'AI financial insights from income/expense transactions' })
   analyseFinancials(
-    @Body() body: {
-      incomeTransactions:  Array<{ amount: number; category: string; date: string }>;
+    @Body()
+    body: {
+      incomeTransactions: Array<{ amount: number; category: string; date: string }>;
       expenseTransactions: Array<{ amount: number; category: string; date: string }>;
     },
   ) {
     const mapDate = (t: { amount: number; category: string; date: string }) => ({
-      ...t, date: new Date(t.date),
+      ...t,
+      date: new Date(t.date),
     });
     return this.insightsService.analyseFinancials(
       (body.incomeTransactions ?? []).map(mapDate),
@@ -512,18 +527,16 @@ export class AIController {
     @Body() body: { transactions: Array<{ amount: number; category: string; date: string }> },
   ) {
     return this.insightsService.getSpendingPattern(
-      (body.transactions ?? []).map(t => ({ ...t, date: new Date(t.date) })),
+      (body.transactions ?? []).map((t) => ({ ...t, date: new Date(t.date) })),
     );
   }
 
   @Post('insights/forecast')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Revenue forecast for next 7 and 30 days' })
-  forecastRevenue(
-    @Body() body: { dailySales: Array<{ date: string; revenue: number }> },
-  ) {
+  forecastRevenue(@Body() body: { dailySales: Array<{ date: string; revenue: number }> }) {
     return this.insightsService.forecastRevenue(
-      (body.dailySales ?? []).map(d => ({ date: new Date(d.date), revenue: d.revenue })),
+      (body.dailySales ?? []).map((d) => ({ date: new Date(d.date), revenue: d.revenue })),
     );
   }
 
@@ -531,16 +544,17 @@ export class AIController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Collaborative filtering — personalised item recommendations' })
   collaborativeFilter(
-    @Body() body: {
+    @Body()
+    body: {
       targetVector: Record<string, number>;
-      allVectors:   Record<string, Record<string, number>>;
-      topN?:        number;
+      allVectors: Record<string, Record<string, number>>;
+      topN?: number;
     },
   ) {
     return this.insightsService.collaborativeFilter(
       body.targetVector ?? {},
-      body.allVectors   ?? {},
-      body.topN         ?? 10,
+      body.allVectors ?? {},
+      body.topN ?? 10,
     );
   }
 
@@ -559,8 +573,8 @@ export class AIController {
           type: 'array',
           items: {
             properties: {
-              id:         { type: 'string' },
-              text:       { type: 'string' },
+              id: { type: 'string' },
+              text: { type: 'string' },
               entityType: { type: 'string' },
             },
           },
@@ -609,7 +623,7 @@ export class AIController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Find items similar to a target using content-based filtering' })
   getSimilarItems(
-    @Body('targetTags')  targetTags:  string,
+    @Body('targetTags') targetTags: string,
     @Body('catalogueItems') catalogueItems: Array<{ id: string; tags: string }>,
     @Body('topN') topN?: number,
   ) {
@@ -655,12 +669,12 @@ export class AIController {
   @ApiOperation({ summary: 'Blend collaborative and content-based recommendation lists' })
   blendRecommendations(
     @Body('collaborative') collaborative: Array<{ id: string; score: number }>,
-    @Body('contentBased')  contentBased:  Array<{ id: string; score: number }>,
+    @Body('contentBased') contentBased: Array<{ id: string; score: number }>,
     @Body('topN') topN?: number,
   ) {
     return this.recommendationService.blendRecommendations(
       collaborative ?? [],
-      contentBased  ?? [],
+      contentBased ?? [],
       topN ?? 10,
     );
   }
@@ -669,14 +683,15 @@ export class AIController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Recommend optimal subscription plan for a user' })
   recommendSubscriptionPlan(
-    @Body('usageScore')  usageScore:  number,
+    @Body('usageScore') usageScore: number,
     @Body('currentTier') currentTier: string,
-    @Body('plans') plans: Array<{ id: string; name: string; tier: string; featureScore: number; price: number }>,
+    @Body('plans')
+    plans: Array<{ id: string; name: string; tier: string; featureScore: number; price: number }>,
   ) {
     return this.recommendationService.recommendSubscriptionPlan(
-      usageScore   ?? 0.5,
-      currentTier  ?? '',
-      plans        ?? [],
+      usageScore ?? 0.5,
+      currentTier ?? '',
+      plans ?? [],
     );
   }
 
@@ -684,12 +699,16 @@ export class AIController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Score wishlist items by purchase conversion likelihood' })
   scoreWishlistConversion(
-    @Body('items') items: Array<{
-      id: string; name: string; priority: number;
-      addedDaysAgo: number; estimatedPrice: number; budget?: number;
+    @Body('items')
+    items: Array<{
+      id: string;
+      name: string;
+      priority: number;
+      addedDaysAgo: number;
+      estimatedPrice: number;
+      budget?: number;
     }>,
   ) {
     return this.recommendationService.scoreWishlistConversion(items ?? []);
   }
 }
-

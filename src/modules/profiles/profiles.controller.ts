@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Req, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Req,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ProfilesService } from './profiles.service';
 import { CreateProfileDto } from './dto/create-profile.dto';
@@ -86,7 +97,11 @@ export class ProfilesController {
 
   @Get(':profileId/visibility')
   @ApiOperation({ summary: 'Get visibility settings for a profile' })
-  @ApiResponse({ status: 200, description: 'Visibility settings retrieved successfully', type: VisibilitySettings })
+  @ApiResponse({
+    status: 200,
+    description: 'Visibility settings retrieved successfully',
+    type: VisibilitySettings,
+  })
   @ApiResponse({ status: 404, description: 'Visibility settings not found' })
   async getVisibilitySettings(@Param('profileId') profileId: string): Promise<VisibilitySettings> {
     return this.profilesService.getVisibilitySettings(profileId);
@@ -94,7 +109,11 @@ export class ProfilesController {
 
   @Put(':profileId/visibility')
   @ApiOperation({ summary: 'Update visibility settings for a profile' })
-  @ApiResponse({ status: 200, description: 'Visibility settings updated successfully', type: VisibilitySettings })
+  @ApiResponse({
+    status: 200,
+    description: 'Visibility settings updated successfully',
+    type: VisibilitySettings,
+  })
   @ApiResponse({ status: 404, description: 'Visibility settings not found' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   async updateVisibilitySettings(
@@ -105,22 +124,38 @@ export class ProfilesController {
     const ipAddress = req.ip || req.connection.remoteAddress;
     const userAgent = req.headers['user-agent'] || 'Unknown';
     const userId = req.user?.id || 'system';
-    return this.profilesService.updateVisibilitySettings(profileId, dto, userId, ipAddress, userAgent);
+    return this.profilesService.updateVisibilitySettings(
+      profileId,
+      dto,
+      userId,
+      ipAddress,
+      userAgent,
+    );
   }
 
   // ==================== Interaction Preferences Endpoints ====================
 
   @Get(':profileId/interaction-preferences')
   @ApiOperation({ summary: 'Get interaction preferences for a profile' })
-  @ApiResponse({ status: 200, description: 'Interaction preferences retrieved successfully', type: InteractionPreferences })
+  @ApiResponse({
+    status: 200,
+    description: 'Interaction preferences retrieved successfully',
+    type: InteractionPreferences,
+  })
   @ApiResponse({ status: 404, description: 'Interaction preferences not found' })
-  async getInteractionPreferences(@Param('profileId') profileId: string): Promise<InteractionPreferences> {
+  async getInteractionPreferences(
+    @Param('profileId') profileId: string,
+  ): Promise<InteractionPreferences> {
     return this.profilesService.getInteractionPreferences(profileId);
   }
 
   @Put(':profileId/interaction-preferences')
   @ApiOperation({ summary: 'Update interaction preferences for a profile' })
-  @ApiResponse({ status: 200, description: 'Interaction preferences updated successfully', type: InteractionPreferences })
+  @ApiResponse({
+    status: 200,
+    description: 'Interaction preferences updated successfully',
+    type: InteractionPreferences,
+  })
   @ApiResponse({ status: 404, description: 'Interaction preferences not found' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   async updateInteractionPreferences(
@@ -131,6 +166,12 @@ export class ProfilesController {
     const ipAddress = req.ip || req.connection.remoteAddress;
     const userAgent = req.headers['user-agent'] || 'Unknown';
     const userId = req.user?.id || 'system';
-    return this.profilesService.updateInteractionPreferences(profileId, dto, userId, ipAddress, userAgent);
+    return this.profilesService.updateInteractionPreferences(
+      profileId,
+      dto,
+      userId,
+      ipAddress,
+      userAgent,
+    );
   }
 }

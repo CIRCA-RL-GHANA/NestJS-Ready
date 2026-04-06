@@ -15,7 +15,11 @@ export class SubscriptionPlan extends BaseEntity {
   @Column({ type: 'varchar', length: 50, unique: true })
   name: string;
 
-  @ApiProperty({ description: 'Plan description', required: false, example: 'Free tier with basic features' })
+  @ApiProperty({
+    description: 'Plan description',
+    required: false,
+    example: 'Free tier with basic features',
+  })
   @Column({ type: 'text', nullable: true })
   description: string;
 

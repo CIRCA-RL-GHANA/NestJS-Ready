@@ -42,7 +42,7 @@ export class GoTransaction extends BaseEntity {
   @Column({ type: 'enum', enum: GoTransactionType })
   type: GoTransactionType;
 
-  @ApiProperty({ description: 'Amount', example: 150.00 })
+  @ApiProperty({ description: 'Amount', example: 150.0 })
   @Column({ type: 'decimal', precision: 14, scale: 2 })
   amount: number;
 
@@ -66,7 +66,10 @@ export class GoTransaction extends BaseEntity {
   @Column({ type: 'enum', enum: GoTransactionStatus, default: GoTransactionStatus.COMPLETED })
   status: GoTransactionStatus;
 
-  @ApiProperty({ description: 'Reference to linked entity (orderId, rideId, etc.)', required: false })
+  @ApiProperty({
+    description: 'Reference to linked entity (orderId, rideId, etc.)',
+    required: false,
+  })
   @Column({ type: 'uuid', nullable: true })
   referenceId: string | null;
 

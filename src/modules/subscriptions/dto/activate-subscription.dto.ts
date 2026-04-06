@@ -3,10 +3,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { SubscriptionTargetType } from '../entities/subscription-assignment.entity';
 
 export class ActivateSubscriptionDto {
-  @ApiProperty({ 
-    description: 'Target type (Entity or Branch)', 
+  @ApiProperty({
+    description: 'Target type (Entity or Branch)',
     enum: SubscriptionTargetType,
-    example: SubscriptionTargetType.ENTITY 
+    example: SubscriptionTargetType.ENTITY,
   })
   @IsNotEmpty()
   @IsEnum(SubscriptionTargetType)

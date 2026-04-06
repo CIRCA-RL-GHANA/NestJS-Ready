@@ -1,12 +1,12 @@
 import { IsNotEmpty, IsEnum, IsUUID, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { EntityProfileType, AccessLevel, ComplianceStatus } from '../entities/entity-profile-settings.entity';
+import { EntityProfileType, AccessLevel } from '../entities/entity-profile-settings.entity';
 
 export class CreateEntityProfileSettingsDto {
-  @ApiProperty({ 
-    description: 'Profile type (Entity or Branch)', 
+  @ApiProperty({
+    description: 'Profile type (Entity or Branch)',
     enum: EntityProfileType,
-    example: EntityProfileType.ENTITY 
+    example: EntityProfileType.ENTITY,
   })
   @IsNotEmpty()
   @IsEnum(EntityProfileType)
@@ -17,7 +17,11 @@ export class CreateEntityProfileSettingsDto {
   @IsUUID()
   profileId: string;
 
-  @ApiProperty({ description: 'Business location/address', required: false, example: '123 Main St, City' })
+  @ApiProperty({
+    description: 'Business location/address',
+    required: false,
+    example: '123 Main St, City',
+  })
   @IsOptional()
   @IsString()
   location?: string;
@@ -27,17 +31,21 @@ export class CreateEntityProfileSettingsDto {
   @IsUUID()
   businessCategoryId?: string;
 
-  @ApiProperty({ 
-    description: 'Visibility/Access level', 
+  @ApiProperty({
+    description: 'Visibility/Access level',
     enum: AccessLevel,
     required: false,
-    example: AccessLevel.PRIVATE 
+    example: AccessLevel.PRIVATE,
   })
   @IsOptional()
   @IsEnum(AccessLevel)
   visibility?: AccessLevel;
 
-  @ApiProperty({ description: 'Service scope description', required: false, example: 'Food delivery and catering' })
+  @ApiProperty({
+    description: 'Service scope description',
+    required: false,
+    example: 'Food delivery and catering',
+  })
   @IsOptional()
   @IsString()
   serviceScope?: string;

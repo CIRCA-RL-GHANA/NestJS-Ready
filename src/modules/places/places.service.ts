@@ -1,4 +1,10 @@
-import { Injectable, Logger, NotFoundException, ConflictException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  ConflictException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsWhere, ILike } from 'typeorm';
 import { CreatePlaceDto } from './dto/create-place.dto';
@@ -230,16 +236,16 @@ export class PlacesService {
       .getMany();
 
     // Simple distance calculation (Haversine formula could be used for accuracy)
-    return places.filter(place => {
+    return places.filter((place) => {
       if (!place.coordinates) return false;
-      
+
       const distance = this.calculateDistance(
         latitude,
         longitude,
         place.coordinates.latitude,
         place.coordinates.longitude,
       );
-      
+
       return distance <= radiusKm;
     });
   }
@@ -272,12 +278,12 @@ export class PlacesService {
 
     // AI re-rank by cosine similarity to the query
     try {
-      const docs = candidates.map(p => ({
-        id:   p.id,
+      const docs = candidates.map((p) => ({
+        id: p.id,
         text: `${p.name} ${(p as any).description ?? ''} ${p.category ?? ''} ${(p as any).location ?? ''}`,
       }));
       const ranked = this.aiSearch.rankCandidates(query, docs, candidates.length);
-      const order  = new Map(ranked.map((r, i) => [r.id, i]));
+      const order = new Map(ranked.map((r, i) => [r.id, i]));
       return [...candidates].sort((a, b) => (order.get(a.id) ?? 99) - (order.get(b.id) ?? 99));
     } catch (e) {
       this.logger.warn(`AI place re-ranking failed: ${e.message}`);
@@ -292,14 +298,14 @@ export class PlacesService {
     const R = 6371; // Earth's radius in km
     const dLat = this.toRad(lat2 - lat1);
     const dLon = this.toRad(lon2 - lon1);
-    
+
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(this.toRad(lat1)) *
         Math.cos(this.toRad(lat2)) *
         Math.sin(dLon / 2) *
         Math.sin(dLon / 2);
-    
+
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }

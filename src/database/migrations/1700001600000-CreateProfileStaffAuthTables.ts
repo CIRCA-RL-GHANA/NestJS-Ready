@@ -16,9 +16,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
  *   - audit_logs                (security audit trail)
  *   - statements                (personal lifestyle statement per user)
  */
-export class CreateProfileStaffAuthTables1700001600000
-  implements MigrationInterface
-{
+export class CreateProfileStaffAuthTables1700001600000 implements MigrationInterface {
   name = 'CreateProfileStaffAuthTables1700001600000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -144,7 +142,9 @@ export class CreateProfileStaffAuthTables1700001600000
           REFERENCES "business_categories"("id") ON DELETE SET NULL
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_entity_profile_settings_type_id" ON "entity_profile_settings" ("profile_type","profile_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_entity_profile_settings_type_id" ON "entity_profile_settings" ("profile_type","profile_id")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_entity_profile_settings_updated_at
         BEFORE UPDATE ON "entity_profile_settings"
@@ -168,7 +168,9 @@ export class CreateProfileStaffAuthTables1700001600000
         CONSTRAINT "pk_operating_hours" PRIMARY KEY ("id")
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_operating_hours_profile" ON "operating_hours" ("profile_type","profile_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_operating_hours_profile" ON "operating_hours" ("profile_type","profile_id")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_operating_hours_updated_at
         BEFORE UPDATE ON "operating_hours"

@@ -1,4 +1,10 @@
-import { Injectable, Logger, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { FavoriteShop, AddedByRole } from './entities/favorite-shop.entity';
@@ -6,7 +12,10 @@ import { Interest, InterestAddedByRole, TargetType } from './entities/interest.e
 import { ConnectionRequest, ConnectionStatus } from './entities/connection-request.entity';
 import { AddFavoriteShopDto, RemoveFavoriteShopDto } from './dto/favorite-shop.dto';
 import { AddInterestDto, RemoveInterestDto } from './dto/interest.dto';
-import { CreateConnectionRequestDto, RespondConnectionRequestDto } from './dto/connection-request.dto';
+import {
+  CreateConnectionRequestDto,
+  RespondConnectionRequestDto,
+} from './dto/connection-request.dto';
 import { AIRecommendationsService } from '../ai/services/ai-recommendations.service';
 
 @Injectable()
@@ -28,7 +37,11 @@ export class InterestsService {
    * FAVORITE SHOPS
    */
 
-  async addFavoriteShop(dto: AddFavoriteShopDto, userId: string, userRole: string): Promise<FavoriteShop> {
+  async addFavoriteShop(
+    dto: AddFavoriteShopDto,
+    userId: string,
+    userRole: string,
+  ): Promise<FavoriteShop> {
     this.logger.log(`Adding favorite shop: Entity ${dto.entityId}, Shop ${dto.shopId}`);
 
     // Check if already favorited
@@ -106,7 +119,9 @@ export class InterestsService {
    */
 
   async addInterest(dto: AddInterestDto, userId: string, userRole: string): Promise<Interest> {
-    this.logger.log(`Adding interest: Owner ${dto.ownerId}, Target ${dto.targetId} (${dto.targetType})`);
+    this.logger.log(
+      `Adding interest: Owner ${dto.ownerId}, Target ${dto.targetId} (${dto.targetType})`,
+    );
 
     // Check if interest already exists
     const existing = await this.interestRepository.findOne({
@@ -220,7 +235,10 @@ export class InterestsService {
     return saved;
   }
 
-  async respondToConnectionRequest(id: string, dto: RespondConnectionRequestDto): Promise<ConnectionRequest> {
+  async respondToConnectionRequest(
+    id: string,
+    dto: RespondConnectionRequestDto,
+  ): Promise<ConnectionRequest> {
     this.logger.log(`Responding to connection request: ${id}`);
 
     const request = await this.connectionRequestRepository.findOne({
@@ -256,7 +274,10 @@ export class InterestsService {
     });
   }
 
-  async listReceivedConnectionRequests(receiverId: string, status?: ConnectionStatus): Promise<ConnectionRequest[]> {
+  async listReceivedConnectionRequests(
+    receiverId: string,
+    status?: ConnectionStatus,
+  ): Promise<ConnectionRequest[]> {
     const where: any = { receiverId };
     if (status) {
       where.status = status;
@@ -347,10 +368,10 @@ export class InterestsService {
 
   private mapRoleToInterestRole(role: string): InterestAddedByRole {
     const roleMap: Record<string, InterestAddedByRole> = {
-      'Owner': InterestAddedByRole.OWNER,
-      'Administrator': InterestAddedByRole.ADMINISTRATOR,
-      'SocialOfficer': InterestAddedByRole.SOCIAL_OFFICER,
-      'BranchManager': InterestAddedByRole.BRANCH_MANAGER,
+      Owner: InterestAddedByRole.OWNER,
+      Administrator: InterestAddedByRole.ADMINISTRATOR,
+      SocialOfficer: InterestAddedByRole.SOCIAL_OFFICER,
+      BranchManager: InterestAddedByRole.BRANCH_MANAGER,
     };
 
     return roleMap[role] || InterestAddedByRole.OWNER;
@@ -360,16 +381,19 @@ export class InterestsService {
    * AI RECOMMENDATIONS
    */
 
-  async getAISimilarShops(entityId: string, topN = 5): Promise<{ shopId: string; score: number }[]> {
+  async getAISimilarShops(
+    entityId: string,
+    topN = 5,
+  ): Promise<{ shopId: string; score: number }[]> {
     const shops = await this.favoriteShopRepository.find({ where: { entityId } });
     if (shops.length < 2) return [];
 
     try {
-      const docs = shops.map(s => ({
+      const docs = shops.map((s) => ({
         id: s.shopId,
-        text: [s.shopId, s.entityId, s.addedByRole].filter(Boolean).join(' '),
+        tags: [s.shopId, s.entityId, s.addedByRole].filter(Boolean).join(' '),
       }));
-      const targetText = docs[0].text;
+      const targetText = docs[0].tags;
       const similar = await this.aiRecommendations.getSimilarItems(targetText, docs, topN);
       return similar.map((item: any) => ({ shopId: item.id, score: item.score }));
     } catch (err) {
@@ -378,16 +402,20 @@ export class InterestsService {
     }
   }
 
-  async getAIInterestRecommendations(ownerId: string, targetType?: TargetType): Promise<Interest[]> {
+  async getAIInterestRecommendations(
+    ownerId: string,
+    targetType?: TargetType,
+  ): Promise<Interest[]> {
     const interests = await this.listInterests(ownerId, targetType);
     if (interests.length < 2) return interests;
 
     try {
       const profileText = interests
-        .map(i => [i.targetId, i.targetType, String(i.interestLevel)].join(' '))
+        .map((i) => [i.targetId, i.targetType, String(i.interestLevel)].join(' '))
         .join(' ');
-      const corpus = interests.map(i => ({
+      const corpus = interests.map((i) => ({
         id: i.id,
+        type: i.targetType ?? 'interest',
         text: [i.targetId, i.targetType, String(i.interestLevel)].join(' '),
       }));
       const ranked = await this.aiRecommendations.getPersonalizedFeed(profileText, corpus);

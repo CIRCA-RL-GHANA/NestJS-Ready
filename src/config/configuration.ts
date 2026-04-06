@@ -94,8 +94,7 @@ export const configuration = () => ({
     surgeMaxMultiplier: parseFloat(process.env.AI_SURGE_MAX_MULTIPLIER || '3.5'),
     platformFeePct: parseFloat(process.env.AI_PLATFORM_FEE_PCT || '8'),
     modelPath: process.env.ML_MODEL_PATH || './ml-models',
-    featureStoreUpdateInterval:
-      parseInt(process.env.FEATURE_STORE_UPDATE_INTERVAL || '300000', 10),
+    featureStoreUpdateInterval: parseInt(process.env.FEATURE_STORE_UPDATE_INTERVAL || '300000', 10),
     // Q Points market liquidity AI
     market: {
       enabled: process.env.AI_MARKET_ENABLED === 'true',

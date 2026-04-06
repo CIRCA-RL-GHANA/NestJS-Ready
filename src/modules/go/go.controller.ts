@@ -8,7 +8,6 @@ import {
   UseGuards,
   Request,
   ParseUUIDPipe,
-  ParseFloatPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { IsNumber, IsOptional, IsString, Min } from 'class-validator';
@@ -18,7 +17,7 @@ import { GoService } from './go.service';
 import { GoTransactionCategory, GoTransactionType } from './entities/go-transaction.entity';
 
 export class TopUpDto {
-  @ApiProperty({ example: 500.00 })
+  @ApiProperty({ example: 500.0 })
   @IsNumber()
   @Min(1)
   amount: number;
@@ -60,10 +59,7 @@ export class GoController {
 
   @Get('transactions/:id')
   @ApiOperation({ summary: 'Get a specific transaction' })
-  async getTransaction(
-    @Request() req: any,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  async getTransaction(@Request() req: any, @Param('id', ParseUUIDPipe) id: string) {
     return this.goService.getTransaction(id, req.user.id);
   }
 

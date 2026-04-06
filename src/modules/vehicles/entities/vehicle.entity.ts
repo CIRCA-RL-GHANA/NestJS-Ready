@@ -45,21 +45,21 @@ export class Vehicle extends BaseEntity {
 
   @ApiProperty({
     description: 'Base fare',
-    example: 50.00,
+    example: 50.0,
   })
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   baseFare: number;
 
   @ApiProperty({
     description: 'Per kilometer rate',
-    example: 15.00,
+    example: 15.0,
   })
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   perKmRate: number;
 
   @ApiProperty({
     description: 'Wait charge per minute',
-    example: 2.50,
+    example: 2.5,
   })
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   waitChargePerMinute: number;
@@ -78,7 +78,7 @@ export class Vehicle extends BaseEntity {
     required: false,
     example: {
       latitude: 40.7128,
-      longitude: -74.0060,
+      longitude: -74.006,
     },
   })
   @Column({ type: 'jsonb', nullable: true })

@@ -7,7 +7,7 @@ export class DepositQPointsDto {
   @IsUUID()
   accountId: string;
 
-  @ApiProperty({ description: 'Amount to deposit', example: 100.00 })
+  @ApiProperty({ description: 'Amount to deposit', example: 100.0 })
   @IsNotEmpty()
   @IsNumber()
   @Min(0.01)

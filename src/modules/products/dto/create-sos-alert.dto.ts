@@ -1,6 +1,5 @@
-import { IsUUID, IsEnum, IsString, IsOptional, IsObject } from 'class-validator';
+import { IsUUID, IsString, IsOptional, IsObject } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { SOSStatus } from '../entities/sos-alert.entity';
 
 export class CreateSOSAlertDto {
   @ApiProperty({ description: 'User ID (alert sender)' })

@@ -22,27 +22,27 @@ export class InteractionPreferences extends BaseEntity {
   @Column({ type: 'uuid', nullable: false, unique: true })
   profileId: string;
 
-  @ApiProperty({ 
-    description: 'Who can send messages', 
+  @ApiProperty({
+    description: 'Who can send messages',
     enum: MessageRestriction,
-    example: MessageRestriction.EVERYONE 
+    example: MessageRestriction.EVERYONE,
   })
-  @Column({ 
-    type: 'enum', 
-    enum: MessageRestriction, 
-    default: MessageRestriction.EVERYONE 
+  @Column({
+    type: 'enum',
+    enum: MessageRestriction,
+    default: MessageRestriction.EVERYONE,
   })
   messageRestriction: MessageRestriction;
 
-  @ApiProperty({ 
-    description: 'Who can view profile', 
+  @ApiProperty({
+    description: 'Who can view profile',
     enum: ProfileViewRestriction,
-    example: ProfileViewRestriction.PUBLIC 
+    example: ProfileViewRestriction.PUBLIC,
   })
-  @Column({ 
-    type: 'enum', 
-    enum: ProfileViewRestriction, 
-    default: ProfileViewRestriction.PUBLIC 
+  @Column({
+    type: 'enum',
+    enum: ProfileViewRestriction,
+    default: ProfileViewRestriction.PUBLIC,
   })
   profileViewRestriction: ProfileViewRestriction;
 

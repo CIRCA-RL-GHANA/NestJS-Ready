@@ -2,8 +2,6 @@ import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { BaseEntity } from '@common/entities/base.entity';
 import { SubscriptionPlan } from './subscription-plan.entity';
-import { EntityProfile } from '@modules/entities/entities/entity.entity';
-import { Branch } from '@modules/entities/entities/branch.entity';
 
 export enum SubscriptionTargetType {
   ENTITY = 'Entity',
@@ -13,10 +11,10 @@ export enum SubscriptionTargetType {
 @Entity('subscription_assignments')
 @Index(['targetType', 'targetId'])
 export class SubscriptionAssignment extends BaseEntity {
-  @ApiProperty({ 
-    description: 'Target type (Entity or Branch)', 
+  @ApiProperty({
+    description: 'Target type (Entity or Branch)',
     enum: SubscriptionTargetType,
-    example: SubscriptionTargetType.ENTITY 
+    example: SubscriptionTargetType.ENTITY,
   })
   @Column({ type: 'enum', enum: SubscriptionTargetType })
   targetType: SubscriptionTargetType;

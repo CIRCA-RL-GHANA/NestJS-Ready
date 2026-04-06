@@ -1,12 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsEmail,
-  IsIn,
-  IsOptional,
-  IsString,
-  MaxLength,
-  MinLength,
-} from 'class-validator';
+import { IsEmail, IsIn, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 
 /** Payload for registering a user's bank account with a payment facilitator. */
 export class RegisterFacilitatorAccountDto {
@@ -43,7 +36,10 @@ export class RegisterFacilitatorAccountDto {
    * Recipient bank code (CBN / GHlink code).
    * Required for Paystack nuban and Flutterwave transfers.
    */
-  @ApiPropertyOptional({ example: '044', description: 'CBN bank code (Nigeria) or provider-specific bank code' })
+  @ApiPropertyOptional({
+    example: '044',
+    description: 'CBN bank code (Nigeria) or provider-specific bank code',
+  })
   @IsOptional()
   @IsString()
   @MinLength(3)

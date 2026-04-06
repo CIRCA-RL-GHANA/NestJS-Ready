@@ -4,7 +4,12 @@ import { Repository } from 'typeorm';
 import { PlannerTransaction, TransactionType } from './entities/planner-transaction.entity';
 import { CreatePlannerTransactionDto, UpdatePlannerTransactionDto } from './dto';
 import { EmailService } from '@/common/services/email.service';
-import { AIInsightsService, FinancialInsight, SpendingPattern, RevenueForecaste } from '../ai/services/ai-insights.service';
+import {
+  AIInsightsService,
+  FinancialInsight,
+  SpendingPattern,
+  RevenueForecaste,
+} from '../ai/services/ai-insights.service';
 
 export interface FinancialSummary {
   totalIncome: number;
@@ -83,7 +88,11 @@ export class PlannerService {
     return transaction;
   }
 
-  async getTransactionsByMonth(userId: string, month: string, year: number): Promise<PlannerTransaction[]> {
+  async getTransactionsByMonth(
+    userId: string,
+    month: string,
+    year: number,
+  ): Promise<PlannerTransaction[]> {
     try {
       const transactions = await this.transactionRepository.find({
         where: { userId, month, year },
@@ -208,7 +217,10 @@ export class PlannerService {
     }
   }
 
-  async getTransactionsByType(userId: string, type: TransactionType): Promise<PlannerTransaction[]> {
+  async getTransactionsByType(
+    userId: string,
+    type: TransactionType,
+  ): Promise<PlannerTransaction[]> {
     try {
       const transactions = await this.transactionRepository.find({
         where: { userId, type },
@@ -221,5 +233,47 @@ export class PlannerService {
       this.logger.error(`Failed to fetch transactions by type: ${error.message}`, error.stack);
       throw error;
     }
+  }
+
+  async getAIFinancialInsights(userId: string): Promise<FinancialInsight[]> {
+    const txns = await this.transactionRepository.find({ where: { userId }, take: 200 });
+    const income = txns
+      .filter((t) => t.type === TransactionType.INCOME)
+      .map((t) => ({
+        amount: Number(t.amount),
+        category: String(t.category),
+        date: t.transactionDate,
+      }));
+    const expenses = txns
+      .filter((t) => t.type === TransactionType.EXPENSE)
+      .map((t) => ({
+        amount: Number(t.amount),
+        category: String(t.category),
+        date: t.transactionDate,
+      }));
+    return this.aiInsights.analyseFinancials(income, expenses);
+  }
+
+  async getAISpendingPattern(userId: string): Promise<SpendingPattern> {
+    const txns = await this.transactionRepository.find({ where: { userId }, take: 200 });
+    const all = txns.map((t) => ({
+      amount: Number(t.amount),
+      category: String(t.category),
+      date: t.transactionDate,
+    }));
+    return this.aiInsights.getSpendingPattern(all);
+  }
+
+  async getAIRevenueForecast(userId: string): Promise<RevenueForecaste> {
+    const txns = await this.transactionRepository.find({
+      where: { userId, type: TransactionType.INCOME },
+      order: { transactionDate: 'ASC' },
+      take: 90,
+    });
+    const dailySales = txns.map((t) => ({ date: t.transactionDate, revenue: Number(t.amount) }));
+    if (dailySales.length < 3) {
+      return { next7Days: 0, next30Days: 0, trend: 'flat', confidence: 0.3 };
+    }
+    return this.aiInsights.forecastRevenue(dailySales);
   }
 }

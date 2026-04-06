@@ -1,4 +1,14 @@
-import { IsUUID, IsString, IsNumber, IsInt, IsBoolean, IsObject, IsOptional, Min, Length } from 'class-validator';
+import {
+  IsUUID,
+  IsString,
+  IsNumber,
+  IsInt,
+  IsBoolean,
+  IsObject,
+  IsOptional,
+  Min,
+  Length,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateDeliveryZoneDto {

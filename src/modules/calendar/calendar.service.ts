@@ -29,14 +29,14 @@ export class CalendarService {
       if (eventText.length > 4) {
         try {
           const keywords = this.aiNlp.extractKeywords(eventText, 5);
-          const intent   = this.aiNlp.detectIntent(eventText);
+          const intent = this.aiNlp.detectIntent(eventText);
           (event as any).metadata = {
             ...((event as any).metadata ?? {}),
             ai: {
               keywords,
-              intent:     intent.intent,
+              intent: intent.intent,
               confidence: intent.confidence,
-              entities:   intent.entities,
+              entities: intent.entities,
             },
           };
         } catch (e) {
@@ -177,19 +177,18 @@ export class CalendarService {
     const allEvents = await this.getEvents(userId);
     if (!allEvents.length || !query.trim()) return allEvents;
 
-    const intent   = this.aiNlp.detectIntent(query);
+    const intent = this.aiNlp.detectIntent(query);
     const keywords = this.aiNlp.extractKeywords(query, 5);
 
     // Score each event by keyword overlap with the query
-    const scored = allEvents.map(ev => {
-      const text  = `${ev.title} ${(ev as any).description ?? ''} ${(ev as any).location ?? ''}`.toLowerCase();
-      const hits  = keywords.filter(kw => text.includes(kw.toLowerCase())).length;
+    const scored = allEvents.map((ev) => {
+      const text =
+        `${ev.title} ${(ev as any).description ?? ''} ${(ev as any).location ?? ''}`.toLowerCase();
+      const hits = keywords.filter((kw) => text.includes(kw.toLowerCase())).length;
       const intentBoost = intent.intent !== 'unknown' && text.includes(intent.intent) ? 0.2 : 0;
       return { event: ev, score: hits + intentBoost };
     });
 
-    return scored
-      .sort((a, b) => b.score - a.score)
-      .map(s => s.event);
+    return scored.sort((a, b) => b.score - a.score).map((s) => s.event);
   }
 }

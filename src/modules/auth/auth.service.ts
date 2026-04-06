@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  UnauthorizedException,
-  Logger,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException, Logger, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -47,10 +42,7 @@ export class AuthService {
 
     // Find user by phone number OR social username
     const user = await this.userRepository.findOne({
-      where: [
-        { phoneNumber: identifier },
-        { socialUsername: identifier },
-      ],
+      where: [{ phoneNumber: identifier }, { socialUsername: identifier }],
       select: [
         'id',
         'phoneNumber',

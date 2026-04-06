@@ -1,4 +1,16 @@
-import { IsString, IsUUID, IsInt, IsNumber, IsEnum, IsOptional, IsArray, IsObject, ValidateNested, Length, Min } from 'class-validator';
+import {
+  IsString,
+  IsUUID,
+  IsInt,
+  IsNumber,
+  IsEnum,
+  IsOptional,
+  IsArray,
+  IsObject,
+  ValidateNested,
+  Length,
+  Min,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { VehicleStatus } from '../entities/vehicle.entity';
@@ -8,7 +20,7 @@ class CoordinatesDto {
   @IsNumber()
   latitude: number;
 
-  @ApiProperty({ example: -74.0060 })
+  @ApiProperty({ example: -74.006 })
   @IsNumber()
   longitude: number;
 }
@@ -47,7 +59,7 @@ export class CreateVehicleDto {
 
   @ApiProperty({
     description: 'Base fare',
-    example: 50.00,
+    example: 50.0,
   })
   @IsNumber()
   @Min(0)
@@ -55,7 +67,7 @@ export class CreateVehicleDto {
 
   @ApiProperty({
     description: 'Per kilometer rate',
-    example: 15.00,
+    example: 15.0,
   })
   @IsNumber()
   @Min(0)
@@ -63,7 +75,7 @@ export class CreateVehicleDto {
 
   @ApiProperty({
     description: 'Wait charge per minute',
-    example: 2.50,
+    example: 2.5,
   })
   @IsNumber()
   @Min(0)

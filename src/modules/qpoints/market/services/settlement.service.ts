@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  Logger,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -56,19 +52,11 @@ export class SettlementService {
       status: SettlementStatus.PENDING,
     });
 
-    const [savedDebit, savedCredit] = await this.repo.save([
-      debitRecord,
-      creditRecord,
-    ]);
+    const [savedDebit, savedCredit] = await this.repo.save([debitRecord, creditRecord]);
 
     let transferId: string | undefined;
     try {
-      const result = await this.facilitator.transfer(
-        buyerId,
-        sellerId,
-        cashAmount,
-        trade.id,
-      );
+      const result = await this.facilitator.transfer(buyerId, sellerId, cashAmount, trade.id);
 
       if (result.status === 'failed') {
         throw new Error(result.errorMessage ?? 'Facilitator transfer failed');
@@ -100,14 +88,8 @@ export class SettlementService {
       const msg = err instanceof Error ? err.message : String(err);
       this.logger.error(`Settlement FAILED for trade ${trade.id}: ${msg}`);
 
-      await this.repo.update(
-        { id: savedDebit.id },
-        { status: SettlementStatus.FAILED },
-      );
-      await this.repo.update(
-        { id: savedCredit.id },
-        { status: SettlementStatus.FAILED },
-      );
+      await this.repo.update({ id: savedDebit.id }, { status: SettlementStatus.FAILED });
+      await this.repo.update({ id: savedCredit.id }, { status: SettlementStatus.FAILED });
 
       // Notify both parties of settlement failure
       await this.notifications.notifyUser(
@@ -123,9 +105,7 @@ export class SettlementService {
         { tradeId: trade.id },
       );
 
-      throw new InternalServerErrorException(
-        `Settlement failed for trade ${trade.id}: ${msg}`,
-      );
+      throw new InternalServerErrorException(`Settlement failed for trade ${trade.id}: ${msg}`);
     }
   }
 

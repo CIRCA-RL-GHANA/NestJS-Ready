@@ -18,7 +18,7 @@ export class CreatePaymentDto {
   @IsOptional()
   rideId?: string;
 
-  @ApiProperty({ description: 'Payment amount', example: 50.00 })
+  @ApiProperty({ description: 'Payment amount', example: 50.0 })
   @IsNumber()
   @Min(0.01)
   amount: number;

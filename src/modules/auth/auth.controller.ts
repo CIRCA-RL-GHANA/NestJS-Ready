@@ -98,7 +98,7 @@ export class AuthController {
       example: { message: 'Logged out successfully' },
     },
   })
-  async logout(@CurrentUser() user: User) {
+  async logout(@CurrentUser() _user: User) {
     // In production: blacklist the JWT or remove from session store
     return { message: 'Logged out successfully' };
   }

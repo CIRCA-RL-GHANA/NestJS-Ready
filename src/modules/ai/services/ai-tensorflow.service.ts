@@ -30,7 +30,10 @@ export interface TFPredictResult {
 @Injectable()
 export class AITensorflowService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(AITensorflowService.name);
-  private readonly models = new Map<string, import('@tensorflow/tfjs-node').LayersModel | import('@tensorflow/tfjs-node').GraphModel>();
+  private readonly models = new Map<
+    string,
+    import('@tensorflow/tfjs-node').LayersModel | import('@tensorflow/tfjs-node').GraphModel
+  >();
   private enabled = false;
 
   constructor(private readonly configService: ConfigService) {}
@@ -108,9 +111,11 @@ export class AITensorflowService implements OnModuleInit, OnModuleDestroy {
     }
 
     const start = Date.now();
-    const inputTensor = tf!.tensor2d(input);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const tfAny = tf as any;
+    const inputTensor = tfAny.tensor2d(input);
     try {
-      const out = model.predict(inputTensor);
+      const out = (model as any).predict(inputTensor);
       // predict() may return a Tensor or Tensor[] — handle both
       const outputTensor = Array.isArray(out) ? out[0] : out;
       const values = (await outputTensor.array()) as number[][];
@@ -162,7 +167,7 @@ export class AITensorflowService implements OnModuleInit, OnModuleDestroy {
     const ta = tf.tensor1d(a);
     const tb = tf.tensor1d(b);
     try {
-      const dot   = ta.dot(tb).dataSync()[0];
+      const dot = ta.dot(tb).dataSync()[0];
       const normA = ta.norm().dataSync()[0];
       const normB = tb.norm().dataSync()[0];
       if (normA === 0 || normB === 0) return 0;
@@ -183,15 +188,15 @@ export class AITensorflowService implements OnModuleInit, OnModuleDestroy {
    */
   batchCosineSimilarity(query: number[], candidates: number[][]): number[] {
     if (!this.isEnabled() || !tf || candidates.length === 0) {
-      return candidates.map(c => this.jsCosineSimilarity(query, c));
+      return candidates.map((c) => this.jsCosineSimilarity(query, c));
     }
 
     const qTensor = tf.tensor1d(query);
     const cTensor = tf.tensor2d(candidates);
     try {
       const qNorm = qTensor.norm();
-      const cNorm = cTensor.norm('euclidean', 1, true);            // per-row norms [n×1]
-      const dots  = cTensor.matMul(qTensor.reshape([-1, 1]));     // [n×1]
+      const cNorm = cTensor.norm('euclidean', 1, true); // per-row norms [n×1]
+      const dots = cTensor.matMul(qTensor.reshape([-1, 1])); // [n×1]
       const denom = cNorm.mul(qNorm);
       const scores = dots.div(denom.add(1e-8)).squeeze([1]);
       return Array.from(scores.dataSync());
@@ -213,12 +218,12 @@ export class AITensorflowService implements OnModuleInit, OnModuleDestroy {
    */
   private async preloadModels(): Promise<void> {
     const modelDir = this.configService.get<string>('ai.modelPath') ?? './ml-models';
-    const absDir   = path.resolve(modelDir);
+    const absDir = path.resolve(modelDir);
 
     if (!fs.existsSync(absDir)) {
       this.logger.warn(
         `TF ml-models directory not found at "${absDir}" — no models preloaded. ` +
-        'Create ml-models/<name>/model.json to enable local inference.',
+          'Create ml-models/<name>/model.json to enable local inference.',
       );
       return;
     }
@@ -239,16 +244,18 @@ export class AITensorflowService implements OnModuleInit, OnModuleDestroy {
       loaded > 0
         ? `TensorFlow: ${loaded} model(s) preloaded from "${absDir}"`
         : `TensorFlow enabled — no models found in "${absDir}". ` +
-          'Place SavedModel or Keras model directories under ml-models/ to use local inference.',
+            'Place SavedModel or Keras model directories under ml-models/ to use local inference.',
     );
   }
 
   /** Pure-JS cosine similarity fallback (no TF dependency). */
   private jsCosineSimilarity(a: number[], b: number[]): number {
     if (a.length !== b.length || a.length === 0) return 0;
-    let dot = 0, normA = 0, normB = 0;
+    let dot = 0,
+      normA = 0,
+      normB = 0;
     for (let i = 0; i < a.length; i++) {
-      dot   += a[i] * b[i];
+      dot += a[i] * b[i];
       normA += a[i] * a[i];
       normB += b[i] * b[i];
     }

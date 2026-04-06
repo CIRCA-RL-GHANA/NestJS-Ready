@@ -37,8 +37,12 @@ export class CreateQPointsDetailTables1700002000000 implements MigrationInterfac
         CONSTRAINT "uq_general_ledgers_account_code" UNIQUE ("account_code")
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_general_ledgers_account_code" ON "general_ledgers" ("account_code")`);
-    await queryRunner.query(`CREATE INDEX "idx_general_ledgers_account_type" ON "general_ledgers" ("account_type")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_general_ledgers_account_code" ON "general_ledgers" ("account_code")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_general_ledgers_account_type" ON "general_ledgers" ("account_type")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_general_ledgers_updated_at
         BEFORE UPDATE ON "general_ledgers"
@@ -132,14 +136,30 @@ export class CreateQPointsDetailTables1700002000000 implements MigrationInterfac
           REFERENCES "qpoint_accounts"("id") ON DELETE SET NULL
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_qpoint_tx_source"       ON "qpoint_transactions" ("source_account_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_qpoint_tx_destination"  ON "qpoint_transactions" ("destination_account_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_qpoint_tx_type"         ON "qpoint_transactions" ("type")`);
-    await queryRunner.query(`CREATE INDEX "idx_qpoint_tx_status"       ON "qpoint_transactions" ("status")`);
-    await queryRunner.query(`CREATE INDEX "idx_qpoint_tx_initiated_by" ON "qpoint_transactions" ("initiated_by")`);
-    await queryRunner.query(`CREATE INDEX "idx_qpoint_tx_reference"    ON "qpoint_transactions" ("reference")`);
-    await queryRunner.query(`CREATE INDEX "idx_qpoint_tx_risk_level"   ON "qpoint_transactions" ("risk_level")`);
-    await queryRunner.query(`CREATE INDEX "idx_qpoint_tx_fraud_flag"   ON "qpoint_transactions" ("fraud_flag")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_qpoint_tx_source"       ON "qpoint_transactions" ("source_account_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_qpoint_tx_destination"  ON "qpoint_transactions" ("destination_account_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_qpoint_tx_type"         ON "qpoint_transactions" ("type")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_qpoint_tx_status"       ON "qpoint_transactions" ("status")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_qpoint_tx_initiated_by" ON "qpoint_transactions" ("initiated_by")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_qpoint_tx_reference"    ON "qpoint_transactions" ("reference")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_qpoint_tx_risk_level"   ON "qpoint_transactions" ("risk_level")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_qpoint_tx_fraud_flag"   ON "qpoint_transactions" ("fraud_flag")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_qpoint_transactions_updated_at
         BEFORE UPDATE ON "qpoint_transactions"
@@ -167,10 +187,18 @@ export class CreateQPointsDetailTables1700002000000 implements MigrationInterfac
           REFERENCES "qpoint_transactions"("id") ON DELETE CASCADE
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_journal_entries_tx_id"      ON "journal_entries" ("transaction_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_journal_entries_ledger_id"  ON "journal_entries" ("ledger_account_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_journal_entries_entry_type" ON "journal_entries" ("entry_type")`);
-    await queryRunner.query(`CREATE INDEX "idx_journal_entries_created_at" ON "journal_entries" ("created_at")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_journal_entries_tx_id"      ON "journal_entries" ("transaction_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_journal_entries_ledger_id"  ON "journal_entries" ("ledger_account_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_journal_entries_entry_type" ON "journal_entries" ("entry_type")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_journal_entries_created_at" ON "journal_entries" ("created_at")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_journal_entries_updated_at
         BEFORE UPDATE ON "journal_entries"
@@ -204,10 +232,18 @@ export class CreateQPointsDetailTables1700002000000 implements MigrationInterfac
           REFERENCES "qpoint_accounts"("id") ON DELETE CASCADE
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_behavior_logs_account_id"    ON "behavior_logs" ("account_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_behavior_logs_user_id"       ON "behavior_logs" ("user_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_behavior_logs_behavior_type" ON "behavior_logs" ("behavior_type")`);
-    await queryRunner.query(`CREATE INDEX "idx_behavior_logs_created_at"    ON "behavior_logs" ("created_at")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_behavior_logs_account_id"    ON "behavior_logs" ("account_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_behavior_logs_user_id"       ON "behavior_logs" ("user_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_behavior_logs_behavior_type" ON "behavior_logs" ("behavior_type")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_behavior_logs_created_at"    ON "behavior_logs" ("created_at")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_behavior_logs_updated_at
         BEFORE UPDATE ON "behavior_logs"
@@ -248,11 +284,21 @@ export class CreateQPointsDetailTables1700002000000 implements MigrationInterfac
           REFERENCES "qpoint_transactions"("id") ON DELETE CASCADE
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_fraud_logs_tx_id"       ON "fraud_logs" ("transaction_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_fraud_logs_account_id"  ON "fraud_logs" ("account_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_fraud_logs_reason"      ON "fraud_logs" ("fraud_detection_reason")`);
-    await queryRunner.query(`CREATE INDEX "idx_fraud_logs_action"      ON "fraud_logs" ("action_taken")`);
-    await queryRunner.query(`CREATE INDEX "idx_fraud_logs_created_at"  ON "fraud_logs" ("created_at")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_fraud_logs_tx_id"       ON "fraud_logs" ("transaction_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_fraud_logs_account_id"  ON "fraud_logs" ("account_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_fraud_logs_reason"      ON "fraud_logs" ("fraud_detection_reason")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_fraud_logs_action"      ON "fraud_logs" ("action_taken")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_fraud_logs_created_at"  ON "fraud_logs" ("created_at")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_fraud_logs_updated_at
         BEFORE UPDATE ON "fraud_logs"

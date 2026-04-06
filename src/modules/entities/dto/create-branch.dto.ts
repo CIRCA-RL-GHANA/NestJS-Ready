@@ -1,11 +1,4 @@
-import {
-  IsString,
-  IsNotEmpty,
-  IsEnum,
-  IsPhoneNumber,
-  IsUUID,
-  IsOptional,
-} from 'class-validator';
+import { IsString, IsNotEmpty, IsEnum, IsPhoneNumber, IsUUID, IsOptional } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BranchType } from '../entities/branch.entity';
 

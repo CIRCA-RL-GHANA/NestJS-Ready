@@ -32,7 +32,10 @@ async function bootstrap() {
   app.use(compression());
 
   // CORS
-  const corsOrigins = configService.get('CORS_ORIGIN')?.split(',').map((o: string) => o.trim());
+  const corsOrigins = configService
+    .get('CORS_ORIGIN')
+    ?.split(',')
+    .map((o: string) => o.trim());
   app.enableCors({
     origin: corsOrigins?.length ? corsOrigins : '*',
     credentials: configService.get('CORS_CREDENTIALS') === 'true',

@@ -30,7 +30,7 @@ export class VehiclePricing extends BaseEntity {
 
   @ApiProperty({
     description: 'Price per minute after allowable wait time',
-    example: 2.50,
+    example: 2.5,
   })
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   pricePerMinute: number;

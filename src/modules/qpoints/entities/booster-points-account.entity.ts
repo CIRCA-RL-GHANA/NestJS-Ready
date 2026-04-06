@@ -8,11 +8,19 @@ import { Branch } from '@modules/entities/entities/branch.entity';
 @Index(['entityId'], { unique: true, where: 'entity_id IS NOT NULL' })
 @Index(['branchId'], { unique: true, where: 'branch_id IS NOT NULL' })
 export class BoosterPointsAccount extends BaseEntity {
-  @ApiProperty({ description: 'Entity ID (for entity-level booster points)', required: false, example: 'uuid' })
+  @ApiProperty({
+    description: 'Entity ID (for entity-level booster points)',
+    required: false,
+    example: 'uuid',
+  })
   @Column({ type: 'uuid', nullable: true })
   entityId: string;
 
-  @ApiProperty({ description: 'Branch ID (for branch-level booster points)', required: false, example: 'uuid' })
+  @ApiProperty({
+    description: 'Branch ID (for branch-level booster points)',
+    required: false,
+    example: 'uuid',
+  })
   @Column({ type: 'uuid', nullable: true })
   branchId: string;
 

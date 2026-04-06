@@ -20,11 +20,19 @@ export class Profile extends BaseEntity {
   @Column({ type: 'varchar', length: 255, nullable: false })
   publicName: string;
 
-  @ApiProperty({ description: 'Profile picture URL', example: 'https://cdn.genieinprompt.app/profile.jpg', required: false })
+  @ApiProperty({
+    description: 'Profile picture URL',
+    example: 'https://cdn.genieinprompt.app/profile.jpg',
+    required: false,
+  })
   @Column({ type: 'varchar', length: 500, nullable: true })
   profilePictureUrl: string;
 
-  @ApiProperty({ description: 'Bio/description', example: 'Software developer passionate about...', required: false })
+  @ApiProperty({
+    description: 'Bio/description',
+    example: 'Software developer passionate about...',
+    required: false,
+  })
   @Column({ type: 'text', nullable: true })
   bio: string;
 

@@ -173,9 +173,7 @@ export class UsersService {
     return { message: 'OTP verified successfully.' };
   }
 
-  async verifyBiometric(
-    verifyBiometricDto: VerifyBiometricDto,
-  ): Promise<{ message: string }> {
+  async verifyBiometric(verifyBiometricDto: VerifyBiometricDto): Promise<{ message: string }> {
     const { userId, biometricStatus } = verifyBiometricDto;
 
     const user = await this.userRepository.findOne({ where: { id: userId } });
@@ -222,11 +220,8 @@ export class UsersService {
     }
   }
 
-  async assignStaffRole(
-    assignStaffRoleDto: AssignStaffRoleDto,
-  ): Promise<{ message: string }> {
-    const { adminId, userId, entityId, role, pin, isBranch, posId, branchId } =
-      assignStaffRoleDto;
+  async assignStaffRole(assignStaffRoleDto: AssignStaffRoleDto): Promise<{ message: string }> {
+    const { adminId, userId, entityId, role, pin, isBranch, posId, branchId } = assignStaffRoleDto;
 
     // Validate admin privileges
     const adminRole = isBranch ? StaffRole.BRANCH_MANAGER : StaffRole.ADMINISTRATOR;
@@ -264,7 +259,9 @@ export class UsersService {
         role,
         isBranch,
       });
-      throw new BadRequestException(`Invalid role for ${isBranch ? 'branch' : 'entity'} assignment.`);
+      throw new BadRequestException(
+        `Invalid role for ${isBranch ? 'branch' : 'entity'} assignment.`,
+      );
     }
 
     try {
@@ -350,7 +347,9 @@ export class UsersService {
   /**
    * AI: Analyse a user's bio for keywords and sentiment.
    */
-  async getAIUserInsights(userId: string): Promise<{ keywords: string[]; sentiment: string; summary: string }> {
+  async getAIUserInsights(
+    userId: string,
+  ): Promise<{ keywords: string[]; sentiment: string; summary: string }> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
     const bio = (user as any).bio ?? (user as any).socialUsername ?? '';
@@ -361,7 +360,7 @@ export class UsersService {
         this.aiNlp.analyzeSentiment(bio),
         this.aiNlp.summariseText(bio),
       ]);
-      return { keywords: kwResult.keywords, sentiment: sentResult.label, summary: sumResult.summary };
+      return { keywords: kwResult, sentiment: sentResult.label, summary: sumResult.summary };
     } catch {
       return { keywords: [], sentiment: 'neutral', summary: '' };
     }
@@ -371,15 +370,21 @@ export class UsersService {
    * AI: Score a login event for anomalous behaviour.
    * Returns riskScore 0-100 and flags array.
    */
-  async scoreLoginRisk(userId: string, ipAddress: string): Promise<{ riskScore: number; flags: string[] }> {
+  async scoreLoginRisk(
+    userId: string,
+    _ipAddress: string,
+  ): Promise<{ riskScore: number; flags: string[] }> {
     try {
       const result = await this.aiFraud.scoreTransaction({
         userId,
         amount: 0,
+        currency: 'NGN',
         paymentMethod: 'login',
-        metadata: { ipAddress },
       });
-      return { riskScore: Math.round(result.riskScore * 100), flags: result.reviewFlag ? ['AI review flag'] : [] };
+      return {
+        riskScore: Math.round(result.riskScore * 100),
+        flags: result.reviewFlag ? ['AI review flag'] : [],
+      };
     } catch {
       return { riskScore: 0, flags: [] };
     }
@@ -432,9 +437,7 @@ export class UsersService {
     return { available: !existing, username };
   }
 
-  async checkPhoneExists(
-    phoneNumber: string,
-  ): Promise<{ exists: boolean; phoneNumber: string }> {
+  async checkPhoneExists(phoneNumber: string): Promise<{ exists: boolean; phoneNumber: string }> {
     const existing = await this.userRepository.findOne({
       where: { phoneNumber },
     });

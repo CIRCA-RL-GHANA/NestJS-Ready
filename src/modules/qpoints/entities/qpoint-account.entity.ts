@@ -19,7 +19,7 @@ export class QPointAccount extends BaseEntity {
 
   @ApiProperty({
     description: 'Current Q-Points balance',
-    example: 1000.00,
+    example: 1000.0,
   })
   @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
   balance: number;
@@ -54,7 +54,7 @@ export class QPointAccount extends BaseEntity {
 
   @ApiProperty({
     description: 'Daily transaction limit',
-    example: 10000.00,
+    example: 10000.0,
     required: false,
   })
   @Column({ type: 'decimal', precision: 12, scale: 2, nullable: true })
@@ -62,7 +62,7 @@ export class QPointAccount extends BaseEntity {
 
   @ApiProperty({
     description: 'Monthly transaction limit',
-    example: 100000.00,
+    example: 100000.0,
     required: false,
   })
   @Column({ type: 'decimal', precision: 12, scale: 2, nullable: true })
@@ -70,14 +70,14 @@ export class QPointAccount extends BaseEntity {
 
   @ApiProperty({
     description: 'Total earned Q-Points',
-    example: 5000.00,
+    example: 5000.0,
   })
   @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
   totalEarned: number;
 
   @ApiProperty({
     description: 'Total spent Q-Points',
-    example: 4000.00,
+    example: 4000.0,
   })
   @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
   totalSpent: number;

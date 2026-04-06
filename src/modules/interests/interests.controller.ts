@@ -4,7 +4,10 @@ import { Request } from 'express';
 import { InterestsService } from './interests.service';
 import { AddFavoriteShopDto, RemoveFavoriteShopDto } from './dto/favorite-shop.dto';
 import { AddInterestDto, RemoveInterestDto } from './dto/interest.dto';
-import { CreateConnectionRequestDto, RespondConnectionRequestDto } from './dto/connection-request.dto';
+import {
+  CreateConnectionRequestDto,
+  RespondConnectionRequestDto,
+} from './dto/connection-request.dto';
 import { FavoriteShop } from './entities/favorite-shop.entity';
 import { Interest, TargetType } from './entities/interest.entity';
 import { ConnectionRequest, ConnectionStatus } from './entities/connection-request.entity';
@@ -12,9 +15,7 @@ import { ConnectionRequest, ConnectionStatus } from './entities/connection-reque
 @ApiTags('Interests')
 @Controller('interests')
 export class InterestsController {
-  constructor(
-    private readonly interestsService: InterestsService,
-  ) {}
+  constructor(private readonly interestsService: InterestsService) {}
 
   // FAVORITE SHOPS
 
@@ -72,10 +73,7 @@ export class InterestsController {
   @ApiOperation({ summary: 'Add an interest' })
   @ApiResponse({ status: 201, description: 'Interest added', type: Interest })
   @ApiResponse({ status: 409, description: 'Interest already exists' })
-  async addInterest(
-    @Body() dto: AddInterestDto,
-    @Req() req: Request,
-  ): Promise<Interest> {
+  async addInterest(@Body() dto: AddInterestDto, @Req() req: Request): Promise<Interest> {
     const user = (req as any).user;
     const userId = user?.id || 'system';
     const userRole = user?.role || 'Owner';
@@ -127,7 +125,9 @@ export class InterestsController {
   @ApiResponse({ status: 201, description: 'Connection request created', type: ConnectionRequest })
   @ApiResponse({ status: 400, description: 'Invalid request' })
   @ApiResponse({ status: 409, description: 'Connection request already exists' })
-  async createConnectionRequest(@Body() dto: CreateConnectionRequestDto): Promise<ConnectionRequest> {
+  async createConnectionRequest(
+    @Body() dto: CreateConnectionRequestDto,
+  ): Promise<ConnectionRequest> {
     return await this.interestsService.createConnectionRequest(dto);
   }
 
@@ -156,15 +156,25 @@ export class InterestsController {
 
   @Get('connection-requests/sent/:senderId')
   @ApiOperation({ summary: 'List sent connection requests' })
-  @ApiResponse({ status: 200, description: 'Connection requests retrieved', type: [ConnectionRequest] })
-  async listSentConnectionRequests(@Param('senderId') senderId: string): Promise<ConnectionRequest[]> {
+  @ApiResponse({
+    status: 200,
+    description: 'Connection requests retrieved',
+    type: [ConnectionRequest],
+  })
+  async listSentConnectionRequests(
+    @Param('senderId') senderId: string,
+  ): Promise<ConnectionRequest[]> {
     return await this.interestsService.listSentConnectionRequests(senderId);
   }
 
   @Get('connection-requests/received/:receiverId')
   @ApiOperation({ summary: 'List received connection requests' })
   @ApiQuery({ name: 'status', enum: ConnectionStatus, required: false })
-  @ApiResponse({ status: 200, description: 'Connection requests retrieved', type: [ConnectionRequest] })
+  @ApiResponse({
+    status: 200,
+    description: 'Connection requests retrieved',
+    type: [ConnectionRequest],
+  })
   async listReceivedConnectionRequests(
     @Param('receiverId') receiverId: string,
     @Query('status') status?: ConnectionStatus,
@@ -174,7 +184,11 @@ export class InterestsController {
 
   @Get('connection-requests/:id')
   @ApiOperation({ summary: 'Get a single connection request' })
-  @ApiResponse({ status: 200, description: 'Connection request retrieved', type: ConnectionRequest })
+  @ApiResponse({
+    status: 200,
+    description: 'Connection request retrieved',
+    type: ConnectionRequest,
+  })
   @ApiResponse({ status: 404, description: 'Connection request not found' })
   async getConnectionRequest(@Param('id') id: string): Promise<ConnectionRequest> {
     return await this.interestsService.getConnectionRequest(id);
@@ -199,10 +213,7 @@ export class InterestsController {
   @ApiResponse({ status: 200, description: 'Connection blocked', type: ConnectionRequest })
   @ApiResponse({ status: 400, description: 'Invalid request' })
   @ApiResponse({ status: 404, description: 'Connection request not found' })
-  async blockConnection(
-    @Param('id') id: string,
-    @Req() req: Request,
-  ): Promise<ConnectionRequest> {
+  async blockConnection(@Param('id') id: string, @Req() req: Request): Promise<ConnectionRequest> {
     const userId = (req as any).user?.id || 'system';
     return await this.interestsService.blockConnection(id, userId);
   }

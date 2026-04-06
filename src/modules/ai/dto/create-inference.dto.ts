@@ -1,4 +1,4 @@
-import { IsUUID, IsObject, IsOptional, IsString } from 'class-validator';
+import { IsUUID, IsObject, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateInferenceDto {

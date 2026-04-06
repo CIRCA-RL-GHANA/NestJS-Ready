@@ -70,20 +70,14 @@ export class RidesController {
   @Patch(':id/status')
   @ApiOperation({ summary: 'Update ride status (PATCH)' })
   @ApiResponse({ status: 200, description: 'Ride status updated', type: Ride })
-  async patchRideStatus(
-    @Param('id') id: string,
-    @Body() dto: UpdateRideStatusDto,
-  ): Promise<Ride> {
+  async patchRideStatus(@Param('id') id: string, @Body() dto: UpdateRideStatusDto): Promise<Ride> {
     return this.ridesService.updateRideStatus(id, dto);
   }
 
   @Put(':id/status')
   @ApiOperation({ summary: 'Update ride status' })
   @ApiResponse({ status: 200, description: 'Ride status updated', type: Ride })
-  async updateRideStatus(
-    @Param('id') id: string,
-    @Body() dto: UpdateRideStatusDto,
-  ): Promise<Ride> {
+  async updateRideStatus(@Param('id') id: string, @Body() dto: UpdateRideStatusDto): Promise<Ride> {
     return this.ridesService.updateRideStatus(id, dto);
   }
 
@@ -186,7 +180,10 @@ export class RidesController {
   @Post('sos')
   @ApiOperation({ summary: 'Create SOS alert' })
   @ApiResponse({ status: 201, description: 'SOS alert created', type: RideSOSAlert })
-  async createSOSAlert(@CurrentUser('id') userId: string, @Body() dto: CreateSOSAlertDto): Promise<RideSOSAlert> {
+  async createSOSAlert(
+    @CurrentUser('id') userId: string,
+    @Body() dto: CreateSOSAlertDto,
+  ): Promise<RideSOSAlert> {
     return this.ridesService.createSOSAlert(userId, dto);
   }
 

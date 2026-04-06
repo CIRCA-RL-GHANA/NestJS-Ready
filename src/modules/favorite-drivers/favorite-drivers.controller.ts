@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { FavoriteDriversService } from './favorite-drivers.service';
 import { AddFavoriteDriverDto } from './dto/add-favorite-driver.dto';
@@ -15,10 +26,7 @@ export class FavoriteDriversController {
   @ApiOperation({ summary: 'Add driver to favorites' })
   @ApiResponse({ status: HttpStatus.CREATED, description: 'Driver added to favorites' })
   @ApiResponse({ status: HttpStatus.CONFLICT, description: 'Driver already in favorites' })
-  addFavoriteDriver(
-    @Body() dto: AddFavoriteDriverDto,
-    @Query('addedById') addedById: string,
-  ) {
+  addFavoriteDriver(@Body() dto: AddFavoriteDriverDto, @Query('addedById') addedById: string) {
     return this.favoriteDriversService.addFavoriteDriver(addedById, dto);
   }
 
@@ -57,10 +65,7 @@ export class FavoriteDriversController {
 
   @Get('check/:entityId/:driverId')
   @ApiOperation({ summary: 'Check if driver is favorited by entity' })
-  checkIsFavorite(
-    @Param('entityId') entityId: string,
-    @Param('driverId') driverId: string,
-  ) {
+  checkIsFavorite(@Param('entityId') entityId: string, @Param('driverId') driverId: string) {
     return this.favoriteDriversService.checkIsFavorite(entityId, driverId);
   }
 
@@ -99,10 +104,7 @@ export class FavoriteDriversController {
   @Get('entity/:entityId/top-rated')
   @ApiOperation({ summary: 'Get top-rated favorite drivers for entity' })
   @ApiQuery({ name: 'limit', required: false, type: Number })
-  getTopRatedFavorites(
-    @Param('entityId') entityId: string,
-    @Query('limit') limit?: string,
-  ) {
+  getTopRatedFavorites(@Param('entityId') entityId: string, @Query('limit') limit?: string) {
     return this.favoriteDriversService.getTopRatedFavorites(
       entityId,
       limit ? parseInt(limit, 10) : 10,

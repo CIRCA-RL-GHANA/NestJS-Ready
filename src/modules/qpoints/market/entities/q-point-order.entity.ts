@@ -30,7 +30,9 @@ export class QPointOrder {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ApiProperty({ description: 'Owner of the order (AI participant uses 00000000-0000-0000-0000-000000000001)' })
+  @ApiProperty({
+    description: 'Owner of the order (AI participant uses 00000000-0000-0000-0000-000000000001)',
+  })
   @Column({ name: 'user_id', type: 'uuid' })
   @Index()
   userId: string;

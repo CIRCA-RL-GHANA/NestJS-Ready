@@ -64,9 +64,15 @@ export class CreateSocialTables1700001800000 implements MigrationInterface {
           REFERENCES "updates"("id") ON DELETE CASCADE
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_update_comments_update_id"  ON "update_comments" ("update_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_update_comments_author_id"  ON "update_comments" ("author_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_update_comments_created_at" ON "update_comments" ("created_at")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_update_comments_update_id"  ON "update_comments" ("update_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_update_comments_author_id"  ON "update_comments" ("author_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_update_comments_created_at" ON "update_comments" ("created_at")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_update_comments_updated_at
         BEFORE UPDATE ON "update_comments"
@@ -88,9 +94,15 @@ export class CreateSocialTables1700001800000 implements MigrationInterface {
         CONSTRAINT "pk_engagements" PRIMARY KEY ("id")
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_engagements_user_id"     ON "engagements" ("user_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_engagements_target"       ON "engagements" ("target_type","target_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_engagements_type"         ON "engagements" ("type")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_engagements_user_id"     ON "engagements" ("user_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_engagements_target"       ON "engagements" ("target_type","target_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_engagements_type"         ON "engagements" ("type")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_engagements_updated_at
         BEFORE UPDATE ON "engagements"
@@ -114,9 +126,15 @@ export class CreateSocialTables1700001800000 implements MigrationInterface {
         CONSTRAINT "pk_heyya_requests" PRIMARY KEY ("id")
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_heyya_requests_sender_id"    ON "heyya_requests" ("sender_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_heyya_requests_recipient_id" ON "heyya_requests" ("recipient_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_heyya_requests_status"       ON "heyya_requests" ("status")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_heyya_requests_sender_id"    ON "heyya_requests" ("sender_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_heyya_requests_recipient_id" ON "heyya_requests" ("recipient_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_heyya_requests_status"       ON "heyya_requests" ("status")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_heyya_requests_updated_at
         BEFORE UPDATE ON "heyya_requests"
@@ -141,10 +159,18 @@ export class CreateSocialTables1700001800000 implements MigrationInterface {
         CONSTRAINT "pk_chat_sessions" PRIMARY KEY ("id")
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_chat_sessions_p1"     ON "chat_sessions" ("participant1_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_chat_sessions_p2"     ON "chat_sessions" ("participant2_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_chat_sessions_p1_p2"  ON "chat_sessions" ("participant1_id","participant2_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_chat_sessions_active" ON "chat_sessions" ("is_active")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_chat_sessions_p1"     ON "chat_sessions" ("participant1_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_chat_sessions_p2"     ON "chat_sessions" ("participant2_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_chat_sessions_p1_p2"  ON "chat_sessions" ("participant1_id","participant2_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_chat_sessions_active" ON "chat_sessions" ("is_active")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_chat_sessions_updated_at
         BEFORE UPDATE ON "chat_sessions"
@@ -173,9 +199,15 @@ export class CreateSocialTables1700001800000 implements MigrationInterface {
           REFERENCES "chat_sessions"("id") ON DELETE CASCADE
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_chat_messages_session_id"  ON "chat_messages" ("session_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_chat_messages_sender_id"   ON "chat_messages" ("sender_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_chat_messages_created_at"  ON "chat_messages" ("created_at")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_chat_messages_session_id"  ON "chat_messages" ("session_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_chat_messages_sender_id"   ON "chat_messages" ("sender_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_chat_messages_created_at"  ON "chat_messages" ("created_at")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_chat_messages_updated_at
         BEFORE UPDATE ON "chat_messages"
@@ -202,9 +234,15 @@ export class CreateSocialTables1700001800000 implements MigrationInterface {
         CONSTRAINT "uq_connection_requests_sender_receiver" UNIQUE ("sender_id","receiver_id")
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_connection_requests_sender_id"   ON "connection_requests" ("sender_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_connection_requests_receiver_id" ON "connection_requests" ("receiver_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_connection_requests_status"      ON "connection_requests" ("status")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_connection_requests_sender_id"   ON "connection_requests" ("sender_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_connection_requests_receiver_id" ON "connection_requests" ("receiver_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_connection_requests_status"      ON "connection_requests" ("status")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_connection_requests_updated_at
         BEFORE UPDATE ON "connection_requests"

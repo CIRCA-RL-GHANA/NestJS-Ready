@@ -1,6 +1,12 @@
-import { Injectable, NotFoundException, ConflictException, BadRequestException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+  Logger,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Repository } from 'typeorm';
 import { HeyYaRequest, HeyYaStatus } from './entities/heyya-request.entity';
 import { ChatSession } from './entities/chat-session.entity';
 import { ChatMessage } from './entities/chat-message.entity';
@@ -33,7 +39,7 @@ export class SocialService {
     private commentRepository: Repository<UpdateComment>,
     @InjectRepository(Engagement)
     private engagementRepository: Repository<Engagement>,
-    private readonly aiNlp:             AINlpService,
+    private readonly aiNlp: AINlpService,
     private readonly aiRecommendations: AIRecommendationsService,
   ) {}
 
@@ -167,7 +173,11 @@ export class SocialService {
       .getMany();
   }
 
-  async getChatMessages(sessionId: string, userId: string, limit: number = 50): Promise<ChatMessage[]> {
+  async getChatMessages(
+    sessionId: string,
+    userId: string,
+    limit: number = 50,
+  ): Promise<ChatMessage[]> {
     const session = await this.chatSessionRepository.findOne({
       where: { id: sessionId },
     });
@@ -220,13 +230,15 @@ export class SocialService {
   // Updates
   async createUpdate(authorId: string, dto: CreateUpdateDto): Promise<Update> {
     // ── AI: Content moderation + sentiment tagging ────────────────────────────
-    const text        = [dto.content, dto.caption].filter(Boolean).join(' ');
-    const sentiment   = text ? this.aiNlp.analyzeSentiment(text) : null;
-    const intent      = text ? this.aiNlp.detectIntent(text) : null;
+    const text = [dto.content, (dto as any).caption].filter(Boolean).join(' ');
+    const sentiment = text ? this.aiNlp.analyzeSentiment(text) : null;
+    const intent = text ? this.aiNlp.detectIntent(text) : null;
 
     // Block high-spam-risk content (negative intent like 'complaint' with extreme score)
-    if (sentiment && sentiment.normalised < -0.8) {
-      this.logger.warn(`[AI-MOD] Potentially hostile content from ${authorId}: score=${sentiment.normalised}`);
+    if (sentiment && sentiment.score < -0.8) {
+      this.logger.warn(
+        `[AI-MOD] Potentially hostile content from ${authorId}: score=${sentiment.score}`,
+      );
     }
 
     const update = this.updateRepository.create({
@@ -235,8 +247,8 @@ export class SocialService {
       metadata: {
         ...(dto as any).metadata,
         ai: {
-          sentiment:   sentiment ? { score: sentiment.normalised, label: sentiment.label } : null,
-          intent:      intent ? { intent: intent.intent, confidence: intent.confidence } : null,
+          sentiment: sentiment ? { score: sentiment.score, label: sentiment.label } : null,
+          intent: intent ? { intent: intent.intent, confidence: intent.confidence } : null,
           moderatedAt: new Date().toISOString(),
         },
       },
@@ -380,7 +392,12 @@ export class SocialService {
     return savedEngagement;
   }
 
-  async removeEngagement(userId: string, targetType: EngagementTarget, targetId: string, type: EngagementType): Promise<void> {
+  async removeEngagement(
+    userId: string,
+    targetType: EngagementTarget,
+    targetId: string,
+    type: EngagementType,
+  ): Promise<void> {
     const engagement = await this.engagementRepository.findOne({
       where: { userId, targetType, targetId, type },
     });

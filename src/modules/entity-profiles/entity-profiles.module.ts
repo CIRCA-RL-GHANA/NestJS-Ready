@@ -10,12 +10,7 @@ import { AIModule } from '../ai/ai.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      EntityProfileSettings,
-      OperatingHours,
-      BusinessCategory,
-      AuditLog,
-    ]),
+    TypeOrmModule.forFeature([EntityProfileSettings, OperatingHours, BusinessCategory, AuditLog]),
     AIModule,
   ],
   controllers: [EntityProfilesController],

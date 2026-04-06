@@ -1,7 +1,7 @@
 /**
  * Centralized API route constants.
  * These MUST match between backend controllers and frontend API client.
- * 
+ *
  * All routes are relative to the global prefix: /api/v1/
  */
 export const API_ROUTES = {

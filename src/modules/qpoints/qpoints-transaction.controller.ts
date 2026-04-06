@@ -1,5 +1,5 @@
-import { Controller, Post, Body, Req, UseGuards, Get, Param, Query, Put } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { Controller, Post, Body, Req, Get, Query, Put } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Request } from 'express';
 import { QPointsTransactionService } from './qpoints-transaction.service';
 import { DepositQPointsDto } from './dto/deposit-qpoints.dto';
@@ -12,9 +12,7 @@ import { QPointTransaction } from './entities/qpoint-transaction.entity';
 @ApiTags('Q-Points Transactions')
 @Controller('qpoints/transactions')
 export class QPointsTransactionController {
-  constructor(
-    private readonly transactionService: QPointsTransactionService,
-  ) {}
+  constructor(private readonly transactionService: QPointsTransactionService) {}
 
   @Post('deposit')
   @ApiOperation({ summary: 'Deposit Q-Points into an account' })
@@ -29,12 +27,7 @@ export class QPointsTransactionController {
     const ipAddress = req.ip;
     const deviceFingerprint = req.headers['x-device-fingerprint'] as string;
 
-    return await this.transactionService.deposit(
-      depositDto,
-      userId,
-      ipAddress,
-      deviceFingerprint,
-    );
+    return await this.transactionService.deposit(depositDto, userId, ipAddress, deviceFingerprint);
   }
 
   @Post('transfer')
@@ -82,9 +75,7 @@ export class QPointsTransactionController {
   @Get()
   @ApiOperation({ summary: 'Get transactions with optional filters' })
   @ApiResponse({ status: 200, description: 'Transactions retrieved', type: [QPointTransaction] })
-  async getTransactions(
-    @Query() query: GetTransactionsDto,
-  ): Promise<QPointTransaction[]> {
+  async getTransactions(@Query() query: GetTransactionsDto): Promise<QPointTransaction[]> {
     return await this.transactionService.getTransactions(query);
   }
 

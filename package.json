@@ -26,9 +26,8 @@
     "seed": "ts-node -r tsconfig-paths/register src/database/seeds/run-seeds.ts"
   },
   "dependencies": {
-    "@nestjs/websockets": "^10.3.0",
-    "@nestjs/platform-socket.io": "^10.3.0",
-    "socket.io": "^4.6.2",
+    "@aws-sdk/client-s3": "^3.1024.0",
+    "@aws-sdk/s3-request-presigner": "^3.1024.0",
     "@nestjs/axios": "^4.0.1",
     "@nestjs/bull": "^10.0.1",
     "@nestjs/common": "^10.3.0",
@@ -37,13 +36,16 @@
     "@nestjs/jwt": "^10.2.0",
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.3.0",
+    "@nestjs/platform-socket.io": "^10.3.0",
     "@nestjs/schedule": "^4.0.0",
     "@nestjs/swagger": "^7.2.0",
     "@nestjs/terminus": "^11.0.0",
     "@nestjs/throttler": "^5.1.2",
     "@nestjs/typeorm": "^10.0.1",
+    "@nestjs/websockets": "^10.3.0",
     "@sendgrid/mail": "^8.1.6",
     "@tensorflow/tfjs-node": "^4.17.0",
+    "@types/multer": "^2.1.0",
     "axios": "^1.13.2",
     "bcrypt": "^5.1.1",
     "bull": "^4.12.2",
@@ -64,6 +66,7 @@
     "redis": "^4.6.12",
     "reflect-metadata": "^0.2.1",
     "rxjs": "^7.8.1",
+    "socket.io": "^4.6.2",
     "twilio": "^4.21.0",
     "typeorm": "^0.3.19",
     "uuid": "^9.0.1",
@@ -106,12 +109,25 @@
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
-      "^.+\\.(t|j)s$": ["ts-jest", { "tsconfig": "tsconfig.spec.json" }]
+      "^.+\\.(t|j)s$": [
+        "ts-jest",
+        {
+          "tsconfig": "tsconfig.spec.json"
+        }
+      ]
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/$1",
+      "^@common/(.*)$": "<rootDir>/common/$1",
+      "^@config/(.*)$": "<rootDir>/config/$1",
+      "^@modules/(.*)$": "<rootDir>/modules/$1",
+      "^@database/(.*)$": "<rootDir>/database/$1",
+      "^bcrypt$": "<rootDir>/__mocks__/bcrypt.js"
+    }
   }
 }

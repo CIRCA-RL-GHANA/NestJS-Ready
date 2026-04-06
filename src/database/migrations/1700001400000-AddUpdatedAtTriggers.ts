@@ -28,9 +28,7 @@ export class AddUpdatedAtTriggers1700001400000 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     for (const t of this.tables) {
-      await queryRunner.query(
-        `DROP TRIGGER IF EXISTS trg_${t}_updated_at ON "${t}"`,
-      );
+      await queryRunner.query(`DROP TRIGGER IF EXISTS trg_${t}_updated_at ON "${t}"`);
       await queryRunner.query(`
         CREATE TRIGGER trg_${t}_updated_at
           BEFORE UPDATE ON "${t}"
@@ -41,9 +39,7 @@ export class AddUpdatedAtTriggers1700001400000 implements MigrationInterface {
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     for (const t of this.tables) {
-      await queryRunner.query(
-        `DROP TRIGGER IF EXISTS trg_${t}_updated_at ON "${t}"`,
-      );
+      await queryRunner.query(`DROP TRIGGER IF EXISTS trg_${t}_updated_at ON "${t}"`);
     }
   }
 }

@@ -53,11 +53,6 @@ import { QPointsMarketController } from './qpoints-market.controller';
     AiLiquidityManagerService,
     QPointsMarketGateway,
   ],
-  exports: [
-    TypeOrmModule,
-    MarketBalanceService,
-    OrderBookService,
-    MarketNotificationService,
-  ],
+  exports: [TypeOrmModule, MarketBalanceService, OrderBookService, MarketNotificationService],
 })
 export class QPointsMarketModule {}

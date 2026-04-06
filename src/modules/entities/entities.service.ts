@@ -68,9 +68,7 @@ export class EntitiesService {
           otpVerified: user.otpVerified,
           biometricVerified: user.biometricVerified,
         });
-        throw new BadRequestException(
-          'User must complete OTP and biometric verification first.',
-        );
+        throw new BadRequestException('User must complete OTP and biometric verification first.');
       }
 
       // Check if entity already exists
@@ -114,9 +112,7 @@ export class EntitiesService {
         socialUsername: user.socialUsername,
       });
 
-      this.logger.log(
-        `Individual entity created for user ${userId}: ${savedEntity.id}`,
-      );
+      this.logger.log(`Individual entity created for user ${userId}: ${savedEntity.id}`);
 
       return {
         entityId: savedEntity.id,
@@ -134,8 +130,7 @@ export class EntitiesService {
    * - Assigns subscription plan if provided
    */
   async createOtherEntity(dto: CreateOtherEntityDto) {
-    const { createdBy, wireId, phoneNumber, name, type, subscriptionPlanId, metadata } =
-      dto;
+    const { createdBy, wireId, phoneNumber, name, type, subscriptionPlanId, metadata } = dto;
 
     return this.dataSource.transaction(async (manager) => {
       // Verify creator exists
@@ -222,9 +217,7 @@ export class EntitiesService {
         type,
       });
 
-      this.logger.log(
-        `Other entity created by user ${createdBy}: ${savedEntity.id} (${name})`,
-      );
+      this.logger.log(`Other entity created by user ${createdBy}: ${savedEntity.id} (${name})`);
 
       return {
         entityId: savedEntity.id,
@@ -243,7 +236,17 @@ export class EntitiesService {
    * - Creates Booster Points account for the branch
    */
   async createBranch(dto: CreateBranchDto) {
-    const { entityId, name, type, phoneNumber, location, managerId, subscriptionPlanId, serviceScope, metadata } = dto;
+    const {
+      entityId,
+      name,
+      type,
+      phoneNumber,
+      location,
+      managerId,
+      subscriptionPlanId,
+      serviceScope,
+      metadata,
+    } = dto;
 
     return this.dataSource.transaction(async (manager) => {
       // Verify entity exists
@@ -371,7 +374,7 @@ export class EntitiesService {
           .filter(Boolean)
           .join(' '),
       }));
-      const results = await this.aiSearch.rankByRelevance(query, corpus);
+      const results = await this.aiSearch.rankCandidates(query, corpus);
       return results.map((r) => ({ entityId: r.id, score: r.score }));
     } catch {
       return [];

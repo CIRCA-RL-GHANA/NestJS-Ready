@@ -7,7 +7,11 @@ export class CreateBusinessCategoryDto {
   @IsString()
   name: string;
 
-  @ApiProperty({ description: 'Category description', required: false, example: 'Retail and wholesale businesses' })
+  @ApiProperty({
+    description: 'Category description',
+    required: false,
+    example: 'Retail and wholesale businesses',
+  })
   @IsOptional()
   @IsString()
   description?: string;

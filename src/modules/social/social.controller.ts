@@ -1,4 +1,17 @@
-import { Controller, Get, Post, Put, Patch, Delete, Body, Param, Query, HttpCode, HttpStatus, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Query,
+  HttpCode,
+  HttpStatus,
+  Req,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { SocialService } from './social.service';
 import { CreateHeyYaRequestDto } from './dto/create-heyya-request.dto';
@@ -27,7 +40,11 @@ export class SocialController {
   @Post('heyya')
   @ApiOperation({ summary: 'Send HeyYa request' })
   @ApiResponse({ status: HttpStatus.CREATED, description: 'Request sent successfully' })
-  @ApiQuery({ name: 'senderId', required: false, description: 'Sender ID (falls back to JWT user)' })
+  @ApiQuery({
+    name: 'senderId',
+    required: false,
+    description: 'Sender ID (falls back to JWT user)',
+  })
   createHeyYaRequest(
     @Body() dto: CreateHeyYaRequestDto,
     @Query('senderId') senderId: string,
@@ -38,7 +55,11 @@ export class SocialController {
 
   @Patch('heyya/:id/respond')
   @ApiOperation({ summary: 'Respond to HeyYa request (PATCH)' })
-  @ApiQuery({ name: 'recipientId', required: false, description: 'Recipient ID (falls back to JWT user)' })
+  @ApiQuery({
+    name: 'recipientId',
+    required: false,
+    description: 'Recipient ID (falls back to JWT user)',
+  })
   patchRespondToHeyYa(
     @Param('id') id: string,
     @Query('recipientId') recipientId: string,
@@ -50,7 +71,11 @@ export class SocialController {
 
   @Put('heyya/:id/respond')
   @ApiOperation({ summary: 'Respond to HeyYa request' })
-  @ApiQuery({ name: 'recipientId', required: false, description: 'Recipient ID (falls back to JWT user)' })
+  @ApiQuery({
+    name: 'recipientId',
+    required: false,
+    description: 'Recipient ID (falls back to JWT user)',
+  })
   respondToHeyYa(
     @Param('id') id: string,
     @Query('recipientId') recipientId: string,
@@ -85,21 +110,18 @@ export class SocialController {
 
   @Post('chat/sessions')
   @ApiOperation({ summary: 'Get or create chat session' })
-  getOrCreateChatSession(
-    @Body('user1Id') user1Id: string,
-    @Body('user2Id') user2Id: string,
-  ) {
+  getOrCreateChatSession(@Body('user1Id') user1Id: string, @Body('user2Id') user2Id: string) {
     return this.socialService.getOrCreateChatSession(user1Id, user2Id);
   }
 
   @Post('chat/messages')
   @ApiOperation({ summary: 'Send chat message' })
-  @ApiQuery({ name: 'senderId', required: false, description: 'Sender ID (falls back to JWT user)' })
-  sendMessage(
-    @Body() dto: SendMessageDto,
-    @Query('senderId') senderId: string,
-    @Req() req?: any,
-  ) {
+  @ApiQuery({
+    name: 'senderId',
+    required: false,
+    description: 'Sender ID (falls back to JWT user)',
+  })
+  sendMessage(@Body() dto: SendMessageDto, @Query('senderId') senderId: string, @Req() req?: any) {
     return this.socialService.sendMessage(this.resolveUserId(senderId, req), dto);
   }
 
@@ -135,7 +157,11 @@ export class SocialController {
   // Updates
   @Post('updates')
   @ApiOperation({ summary: 'Create update' })
-  @ApiQuery({ name: 'authorId', required: false, description: 'Author ID (falls back to JWT user)' })
+  @ApiQuery({
+    name: 'authorId',
+    required: false,
+    description: 'Author ID (falls back to JWT user)',
+  })
   createUpdate(
     @Body() dto: CreateUpdateDto,
     @Query('authorId') authorId: string,
@@ -154,11 +180,7 @@ export class SocialController {
     @Query('visibility') visibility?: UpdateVisibility,
     @Query('limit') limit?: string,
   ) {
-    return this.socialService.getUpdates(
-      userId,
-      visibility,
-      limit ? parseInt(limit, 10) : 20,
-    );
+    return this.socialService.getUpdates(userId, visibility, limit ? parseInt(limit, 10) : 20);
   }
 
   @Get('updates/:id')
@@ -169,7 +191,11 @@ export class SocialController {
 
   @Put('updates/:id')
   @ApiOperation({ summary: 'Update post' })
-  @ApiQuery({ name: 'authorId', required: false, description: 'Author ID (falls back to JWT user)' })
+  @ApiQuery({
+    name: 'authorId',
+    required: false,
+    description: 'Author ID (falls back to JWT user)',
+  })
   updateUpdate(
     @Param('id') id: string,
     @Query('authorId') authorId: string,
@@ -182,19 +208,23 @@ export class SocialController {
   @Delete('updates/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete update' })
-  @ApiQuery({ name: 'authorId', required: false, description: 'Author ID (falls back to JWT user)' })
-  deleteUpdate(
-    @Param('id') id: string,
-    @Query('authorId') authorId: string,
-    @Req() req?: any,
-  ) {
+  @ApiQuery({
+    name: 'authorId',
+    required: false,
+    description: 'Author ID (falls back to JWT user)',
+  })
+  deleteUpdate(@Param('id') id: string, @Query('authorId') authorId: string, @Req() req?: any) {
     return this.socialService.deleteUpdate(id, this.resolveUserId(authorId, req));
   }
 
   // Comments
   @Post('comments')
   @ApiOperation({ summary: 'Create comment' })
-  @ApiQuery({ name: 'authorId', required: false, description: 'Author ID (falls back to JWT user)' })
+  @ApiQuery({
+    name: 'authorId',
+    required: false,
+    description: 'Author ID (falls back to JWT user)',
+  })
   createComment(
     @Body() dto: CreateCommentDto,
     @Query('authorId') authorId: string,
@@ -212,12 +242,12 @@ export class SocialController {
   @Delete('comments/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete comment' })
-  @ApiQuery({ name: 'authorId', required: false, description: 'Author ID (falls back to JWT user)' })
-  deleteComment(
-    @Param('id') id: string,
-    @Query('authorId') authorId: string,
-    @Req() req?: any,
-  ) {
+  @ApiQuery({
+    name: 'authorId',
+    required: false,
+    description: 'Author ID (falls back to JWT user)',
+  })
+  deleteComment(@Param('id') id: string, @Query('authorId') authorId: string, @Req() req?: any) {
     return this.socialService.deleteComment(id, this.resolveUserId(authorId, req));
   }
 
@@ -247,16 +277,18 @@ export class SocialController {
     @Query('type') type: EngagementType,
     @Req() req?: any,
   ) {
-    return this.socialService.removeEngagement(this.resolveUserId(userId, req), targetType, targetId, type);
+    return this.socialService.removeEngagement(
+      this.resolveUserId(userId, req),
+      targetType,
+      targetId,
+      type,
+    );
   }
 
   @Get('users/:userId/engagements')
   @ApiOperation({ summary: 'Get user engagements' })
   @ApiQuery({ name: 'type', required: false, enum: EngagementType })
-  getUserEngagements(
-    @Param('userId') userId: string,
-    @Query('type') type?: EngagementType,
-  ) {
+  getUserEngagements(@Param('userId') userId: string, @Query('type') type?: EngagementType) {
     return this.socialService.getUserEngagements(userId, type);
   }
 
@@ -264,7 +296,11 @@ export class SocialController {
 
   @Post('chat/sessions/:sessionId/messages')
   @ApiOperation({ summary: 'Send chat message (session-scoped path)' })
-  @ApiQuery({ name: 'senderId', required: false, description: 'Sender ID (falls back to JWT user)' })
+  @ApiQuery({
+    name: 'senderId',
+    required: false,
+    description: 'Sender ID (falls back to JWT user)',
+  })
   sendMessageInSession(
     @Param('sessionId') sessionId: string,
     @Body() dto: SendMessageDto,
@@ -277,7 +313,11 @@ export class SocialController {
 
   @Post('updates/:updateId/comments')
   @ApiOperation({ summary: 'Create comment on update (update-scoped path)' })
-  @ApiQuery({ name: 'authorId', required: false, description: 'Author ID (falls back to JWT user)' })
+  @ApiQuery({
+    name: 'authorId',
+    required: false,
+    description: 'Author ID (falls back to JWT user)',
+  })
   createCommentOnUpdate(
     @Param('updateId') updateId: string,
     @Body() dto: CreateCommentDto,

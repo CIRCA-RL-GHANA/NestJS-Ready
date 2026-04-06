@@ -1,11 +1,26 @@
-import { Controller, Get, Post, Put, Patch, Delete, Body, Param, HttpCode, HttpStatus, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  HttpCode,
+  HttpStatus,
+  Req,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { SubscriptionsService } from './subscriptions.service';
 import { CreateSubscriptionPlanDto } from './dto/create-subscription-plan.dto';
 import { UpdateSubscriptionPlanDto } from './dto/update-subscription-plan.dto';
 import { ActivateSubscriptionDto } from './dto/activate-subscription.dto';
 import { SubscriptionPlan } from './entities/subscription-plan.entity';
-import { SubscriptionAssignment, SubscriptionTargetType } from './entities/subscription-assignment.entity';
+import {
+  SubscriptionAssignment,
+  SubscriptionTargetType,
+} from './entities/subscription-assignment.entity';
 
 @ApiTags('Subscriptions')
 @Controller('subscriptions')
@@ -26,7 +41,11 @@ export class SubscriptionsController {
 
   @Get('plans')
   @ApiOperation({ summary: 'Get all active subscription plans' })
-  @ApiResponse({ status: 200, description: 'Plans retrieved successfully', type: [SubscriptionPlan] })
+  @ApiResponse({
+    status: 200,
+    description: 'Plans retrieved successfully',
+    type: [SubscriptionPlan],
+  })
   async getAllPlans(): Promise<SubscriptionPlan[]> {
     return this.subscriptionsService.getAllPlans();
   }
@@ -65,7 +84,11 @@ export class SubscriptionsController {
 
   @Post('activate')
   @ApiOperation({ summary: 'Activate subscription for Entity or Branch' })
-  @ApiResponse({ status: 201, description: 'Subscription activated successfully', type: SubscriptionAssignment })
+  @ApiResponse({
+    status: 201,
+    description: 'Subscription activated successfully',
+    type: SubscriptionAssignment,
+  })
   @ApiResponse({ status: 400, description: 'Insufficient Q-Points or invalid request' })
   @ApiResponse({ status: 404, description: 'Plan or target not found' })
   @HttpCode(HttpStatus.CREATED)
@@ -79,7 +102,11 @@ export class SubscriptionsController {
 
   @Get('active/:targetType/:targetId')
   @ApiOperation({ summary: 'Get active subscription for Entity or Branch' })
-  @ApiResponse({ status: 200, description: 'Active subscription retrieved', type: SubscriptionAssignment })
+  @ApiResponse({
+    status: 200,
+    description: 'Active subscription retrieved',
+    type: SubscriptionAssignment,
+  })
   @ApiResponse({ status: 404, description: 'No active subscription found' })
   async getActiveSubscription(
     @Param('targetType') targetType: SubscriptionTargetType,
@@ -108,10 +135,7 @@ export class SubscriptionsController {
   @ApiResponse({ status: 200, description: 'Subscription cancelled successfully' })
   @ApiResponse({ status: 404, description: 'Subscription not found' })
   @HttpCode(HttpStatus.OK)
-  async cancelSubscription(
-    @Param('id') id: string,
-    @Req() req: any,
-  ): Promise<{ message: string }> {
+  async cancelSubscription(@Param('id') id: string, @Req() req: any): Promise<{ message: string }> {
     const userId = req.user?.id || 'system';
     await this.subscriptionsService.cancelSubscription(id, userId);
     return { message: 'Subscription cancelled successfully' };

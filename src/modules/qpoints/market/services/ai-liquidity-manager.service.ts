@@ -1,17 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThan } from 'typeorm';
-import {
-  QPointOrder,
-  QPointOrderStatus,
-  QPointOrderType,
-} from '../entities/q-point-order.entity';
+import { Repository } from 'typeorm';
+import { QPointOrder, QPointOrderStatus, QPointOrderType } from '../entities/q-point-order.entity';
 import { OrderBookService } from './order-book.service';
 import { MarketBalanceService } from './market-balance.service';
 
-interface AIConfig {
+export interface AIConfig {
   enabled: boolean;
   participantUserId: string;
   targetInventory: number;
@@ -47,8 +43,7 @@ export class AiLiquidityManagerService {
     this.cfg = {
       enabled: config.get<boolean>('ai.market.enabled') ?? false,
       participantUserId:
-        config.get<string>('ai.market.participantUserId') ??
-        '00000000-0000-0000-0000-000000000001',
+        config.get<string>('ai.market.participantUserId') ?? '00000000-0000-0000-0000-000000000001',
       targetInventory: config.get<number>('ai.market.targetInventory') ?? 50_000,
       minInventory: config.get<number>('ai.market.minInventory') ?? 10_000,
       maxInventory: config.get<number>('ai.market.maxInventory') ?? 100_000,
@@ -57,10 +52,8 @@ export class AiLiquidityManagerService {
       maxOrderQty: config.get<number>('ai.market.maxOrderQty') ?? 2_500,
       maxOpenOrders: config.get<number>('ai.market.maxOpenOrders') ?? 10,
       orderTtlSeconds: config.get<number>('ai.market.orderTtlSeconds') ?? 300,
-      runIntervalSeconds:
-        config.get<number>('ai.market.runIntervalSeconds') ?? 30,
-      minCashReserveUsd:
-        config.get<number>('ai.market.minCashReserveUsd') ?? 5_000,
+      runIntervalSeconds: config.get<number>('ai.market.runIntervalSeconds') ?? 30,
+      minCashReserveUsd: config.get<number>('ai.market.minCashReserveUsd') ?? 5_000,
     };
   }
 
@@ -99,8 +92,7 @@ export class AiLiquidityManagerService {
 
     const bestBid = book.buys[0]?.price ?? null;
     const bestAsk = book.sells[0]?.price ?? null;
-    const midpoint =
-      bestBid && bestAsk ? (bestBid + bestAsk) / 2 : null;
+    const midpoint = bestBid && bestAsk ? (bestBid + bestAsk) / 2 : null;
 
     const currentAiOrders = await this._getAiOpenOrders();
 
@@ -146,36 +138,18 @@ export class AiLiquidityManagerService {
       if (spreadPct > this.cfg.targetSpreadPct) {
         const halfSpread = (bestAsk - bestBid) / 2;
 
-        const buyPrice = parseFloat(
-          (bestBid + halfSpread / 2).toFixed(4),
-        );
-        const sellPrice = parseFloat(
-          (bestAsk - halfSpread / 2).toFixed(4),
-        );
+        const buyPrice = parseFloat((bestBid + halfSpread / 2).toFixed(4));
+        const sellPrice = parseFloat((bestAsk - halfSpread / 2).toFixed(4));
 
         // Place tightening bid (if not crossing the spread)
-        if (
-          buyPrice < bestAsk - 0.0001 &&
-          afterInventory.length < this.cfg.maxOpenOrders - 1
-        ) {
-          await this._placeOrder(
-            QPointOrderType.BUY,
-            buyPrice,
-            this.cfg.orderBaseQty,
-          );
+        if (buyPrice < bestAsk - 0.0001 && afterInventory.length < this.cfg.maxOpenOrders - 1) {
+          await this._placeOrder(QPointOrderType.BUY, buyPrice, this.cfg.orderBaseQty);
         }
 
         // Place tightening ask
         const afterBid = await this._getAiOpenOrders();
-        if (
-          sellPrice > bestBid + 0.0001 &&
-          afterBid.length < this.cfg.maxOpenOrders
-        ) {
-          await this._placeOrder(
-            QPointOrderType.SELL,
-            sellPrice,
-            this.cfg.orderBaseQty,
-          );
+        if (sellPrice > bestBid + 0.0001 && afterBid.length < this.cfg.maxOpenOrders) {
+          await this._placeOrder(QPointOrderType.SELL, sellPrice, this.cfg.orderBaseQty);
         }
       }
     }
@@ -185,10 +159,7 @@ export class AiLiquidityManagerService {
   // Helpers
   // =====================================================================
 
-  private _calcQty(
-    currentBalance: number,
-    direction: 'buy' | 'sell',
-  ): number {
+  private _calcQty(currentBalance: number, direction: 'buy' | 'sell'): number {
     const delta =
       direction === 'buy'
         ? this.cfg.targetInventory - currentBalance
@@ -198,28 +169,17 @@ export class AiLiquidityManagerService {
     return qty < 0.0001 ? 0 : parseFloat(qty.toFixed(4));
   }
 
-  private async _placeOrder(
-    type: QPointOrderType,
-    price: number,
-    quantity: number,
-  ): Promise<void> {
+  private async _placeOrder(type: QPointOrderType, price: number, quantity: number): Promise<void> {
     this._incrementCircuitBreaker();
     if (this.circuitBreakerOpen) return;
 
     price = parseFloat(price.toFixed(4));
     quantity = parseFloat(quantity.toFixed(4));
 
-    this.logger.log(
-      `AI placing ${type} order: price=${price}, qty=${quantity}`,
-    );
+    this.logger.log(`AI placing ${type} order: price=${price}, qty=${quantity}`);
 
     try {
-      await this.orderBook.createOrder(
-        this.cfg.participantUserId,
-        type,
-        price,
-        quantity,
-      );
+      await this.orderBook.createOrder(this.cfg.participantUserId, type, price, quantity);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       this.logger.warn(`AI order placement failed: ${msg}`);
@@ -257,9 +217,7 @@ export class AiLiquidityManagerService {
     if (this.ordersPlacedThisMinute >= this.MAX_ORDERS_PER_MINUTE) {
       this.circuitBreakerOpen = true;
       this.circuitBreakerResetAt = new Date(Date.now() + 60_000);
-      this.logger.error(
-        'AI circuit breaker TRIPPED – too many orders placed in one minute',
-      );
+      this.logger.error('AI circuit breaker TRIPPED – too many orders placed in one minute');
     }
   }
 

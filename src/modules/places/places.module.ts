@@ -6,10 +6,7 @@ import { PlacesController } from './places.controller';
 import { AIModule } from '../ai/ai.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Place]),
-    AIModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Place]), AIModule],
   controllers: [PlacesController],
   providers: [PlacesService],
   exports: [TypeOrmModule, PlacesService],

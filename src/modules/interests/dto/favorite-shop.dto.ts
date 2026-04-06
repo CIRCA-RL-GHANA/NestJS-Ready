@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsUUID, IsEnum, IsOptional, IsString } from 'class-validator';
-import { AddedByRole } from '../entities/favorite-shop.entity';
+import { IsUUID, IsOptional, IsString } from 'class-validator';
 
 export class AddFavoriteShopDto {
   @ApiProperty({

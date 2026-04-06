@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { VehicleBand } from './entities/vehicle-band.entity';
@@ -59,7 +59,11 @@ export class VehiclesService {
     return await this.vehicleBandRepository.save(band);
   }
 
-  async getBands(branchId?: string, managerId?: string, isActive?: boolean): Promise<VehicleBand[]> {
+  async getBands(
+    branchId?: string,
+    managerId?: string,
+    isActive?: boolean,
+  ): Promise<VehicleBand[]> {
     const query = this.vehicleBandRepository.createQueryBuilder('band');
 
     if (branchId) {
@@ -87,7 +91,11 @@ export class VehiclesService {
     return band;
   }
 
-  async updateBand(id: string, managerId: string, updateBandDto: UpdateVehicleBandDto): Promise<VehicleBand> {
+  async updateBand(
+    id: string,
+    managerId: string,
+    updateBandDto: UpdateVehicleBandDto,
+  ): Promise<VehicleBand> {
     const band = await this.getBandById(id);
 
     // Ensure manager owns the band
@@ -169,7 +177,7 @@ export class VehiclesService {
       where: { bandId },
     });
 
-    const vehicleIds = memberships.map(m => m.vehicleId);
+    const vehicleIds = memberships.map((m) => m.vehicleId);
 
     if (vehicleIds.length === 0) {
       return [];
@@ -186,7 +194,7 @@ export class VehiclesService {
       where: { vehicleId },
     });
 
-    const bandIds = memberships.map(m => m.bandId);
+    const bandIds = memberships.map((m) => m.bandId);
 
     if (bandIds.length === 0) {
       return [];
@@ -213,11 +221,7 @@ export class VehiclesService {
     return await this.vehicleRepository.save(vehicle);
   }
 
-  async getVehicles(
-    branchId?: string,
-    status?: VehicleStatus,
-    type?: string,
-  ): Promise<Vehicle[]> {
+  async getVehicles(branchId?: string, status?: VehicleStatus, type?: string): Promise<Vehicle[]> {
     const query = this.vehicleRepository.createQueryBuilder('vehicle');
 
     if (branchId) {
@@ -343,7 +347,10 @@ export class VehiclesService {
     return assignment;
   }
 
-  async updateAssignment(id: string, updateAssignmentDto: UpdateVehicleAssignmentDto): Promise<VehicleAssignment> {
+  async updateAssignment(
+    id: string,
+    updateAssignmentDto: UpdateVehicleAssignmentDto,
+  ): Promise<VehicleAssignment> {
     const assignment = await this.getAssignmentById(id);
 
     Object.assign(assignment, updateAssignmentDto);
@@ -376,7 +383,10 @@ export class VehiclesService {
   }
 
   // Vehicle Media Management
-  async uploadMedia(uploadedBy: string, createMediaDto: CreateVehicleMediaDto): Promise<VehicleMedia> {
+  async uploadMedia(
+    uploadedBy: string,
+    createMediaDto: CreateVehicleMediaDto,
+  ): Promise<VehicleMedia> {
     // Check if vehicle exists
     const vehicle = await this.vehicleRepository.findOne({
       where: { id: createMediaDto.vehicleId },
@@ -466,7 +476,10 @@ export class VehiclesService {
     return pricing;
   }
 
-  async updatePricing(id: string, updatePricingDto: UpdateVehiclePricingDto): Promise<VehiclePricing> {
+  async updatePricing(
+    id: string,
+    updatePricingDto: UpdateVehiclePricingDto,
+  ): Promise<VehiclePricing> {
     const pricing = await this.getPricingById(id);
 
     Object.assign(pricing, updatePricingDto);
@@ -488,7 +501,9 @@ export class VehiclesService {
     });
 
     if (!pricing) {
-      throw new NotFoundException('Pricing configuration not found for this vehicle-branch combination');
+      throw new NotFoundException(
+        'Pricing configuration not found for this vehicle-branch combination',
+      );
     }
 
     if (actualWaitTimeMinutes <= pricing.allowableWaitTime) {
@@ -519,13 +534,8 @@ export class VehiclesService {
     demandFactor: number,
   ): Promise<{ suggestedPrice: number; confidence: number }> {
     try {
-      const result = await this.aiPricing.suggestDynamicPrice({
-        basePrice,
-        demandFactor,
-        category: 'vehicle',
-        entityId: vehicleId,
-      });
-      return { suggestedPrice: result.recommendedPrice, confidence: result.confidence };
+      const surge = this.aiPricing.computeSurgeMultiplier(demandFactor, 1.0);
+      return { suggestedPrice: parseFloat((basePrice * surge).toFixed(2)), confidence: 0.75 };
     } catch {
       return { suggestedPrice: basePrice, confidence: 0 };
     }
@@ -541,7 +551,7 @@ export class VehiclesService {
         id: v.id,
         text: `${v.plateNumber} ${(v as any).type ?? ''} ${(v as any).model ?? ''} ${(v as any).color ?? ''}`.trim(),
       }));
-      const results = await this.aiSearch.rankByRelevance(query, corpus);
+      const results = await this.aiSearch.rankCandidates(query, corpus);
       return results.map((r) => ({ vehicleId: r.id, score: r.score }));
     } catch {
       return [];

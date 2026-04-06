@@ -1,4 +1,4 @@
-import { IsUUID, IsEnum, IsNumber, IsString, IsOptional, ValidateNested } from 'class-validator';
+import { IsEnum, IsNumber, IsString, IsOptional, ValidateNested } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { RideType } from '../entities/ride.entity';
@@ -8,7 +8,7 @@ class LocationDto {
   @IsNumber()
   lat: number;
 
-  @ApiProperty({ example: -74.0060 })
+  @ApiProperty({ example: -74.006 })
   @IsNumber()
   lng: number;
 

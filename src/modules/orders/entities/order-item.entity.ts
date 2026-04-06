@@ -22,11 +22,11 @@ export class OrderItem extends BaseEntity {
   @Column({ type: 'int' })
   quantity: number;
 
-  @ApiProperty({ description: 'Unit price at time of order', example: 25.00 })
+  @ApiProperty({ description: 'Unit price at time of order', example: 25.0 })
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   unitPrice: number;
 
-  @ApiProperty({ description: 'Total price for this item', example: 50.00 })
+  @ApiProperty({ description: 'Total price for this item', example: 50.0 })
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   totalPrice: number;
 

@@ -7,7 +7,11 @@ export class UpdateVisibilitySettingsDto {
   @IsBoolean()
   isPublic?: boolean;
 
-  @ApiProperty({ description: 'Whether others can view this profile', required: false, example: true })
+  @ApiProperty({
+    description: 'Whether others can view this profile',
+    required: false,
+    example: true,
+  })
   @IsOptional()
   @IsBoolean()
   allowProfileView?: boolean;
