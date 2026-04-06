@@ -44,8 +44,8 @@ services:
     container_name: promptgenie-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_DB: ${DB_NAME:-promptgenie}
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_INITDB_ARGS: '--auth-host=scram-sha-256'
     ports:
@@ -94,7 +94,6 @@ services:
   # ---- NestJS Backend Application ----
   # context: '.' because this repo IS the NestJS application
   app:
-    image: nestjs-ready-app:latest
     build:
       context: .
       dockerfile: Dockerfile
