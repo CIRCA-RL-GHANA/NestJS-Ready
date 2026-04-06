@@ -36,7 +36,6 @@ services:
 
   # NestJS Application
   app:
-    image: nestjs-ready-app:latest
     build:
       context: .
       dockerfile: Dockerfile
