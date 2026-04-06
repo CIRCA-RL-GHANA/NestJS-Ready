@@ -6,14 +6,17 @@
 services:
   # ---- Nginx Reverse Proxy ----
   nginx:
-    image: nginx:1.25-alpine
+    # Build a custom image so nginx.conf is baked in (avoids bind-mount file-vs-directory issues on the VPS)
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    image: promptgenie-nginx:latest
     container_name: promptgenie-nginx
     restart: unless-stopped
     ports:
       - '80:80'
       - '443:443'
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - /home/promptgenie/certbot/conf:/etc/letsencrypt:ro
       - /home/promptgenie/certbot/www:/var/www/certbot:ro
