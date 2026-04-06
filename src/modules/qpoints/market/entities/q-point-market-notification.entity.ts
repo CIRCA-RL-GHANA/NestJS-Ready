@@ -24,17 +24,24 @@ export class QPointMarketNotification {
   user: User;
 
   @ApiProperty({
-    description: 'Notification type: order_filled | order_cancelled | market_alert | trade_executed',
+    description:
+      'Notification type: order_filled | order_cancelled | market_alert | trade_executed',
     example: 'order_filled',
   })
   @Column({ type: 'varchar', length: 50 })
   type: string;
 
-  @ApiProperty({ description: 'Human-readable message', example: 'Your buy order for 100 QP was filled at $0.99' })
+  @ApiProperty({
+    description: 'Human-readable message',
+    example: 'Your buy order for 100 QP was filled at $0.99',
+  })
   @Column({ type: 'text' })
   message: string;
 
-  @ApiProperty({ description: 'Structured data payload', example: { orderId: 'uuid', tradeId: 'uuid' } })
+  @ApiProperty({
+    description: 'Structured data payload',
+    example: { orderId: 'uuid', tradeId: 'uuid' },
+  })
   @Column({ type: 'jsonb', nullable: true })
   data: Record<string, unknown> | null;
 

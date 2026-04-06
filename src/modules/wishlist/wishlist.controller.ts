@@ -1,14 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Patch,
-  Delete,
-  Body,
-  Param,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Post, Put, Patch, Delete, Body, Param, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { WishlistService } from './wishlist.service';
@@ -78,7 +68,10 @@ export class WishlistController {
   @ApiOperation({ summary: 'Get a specific wishlist item' })
   @ApiResponse({ status: 200, description: 'Item retrieved successfully', type: WishlistItem })
   @ApiResponse({ status: 404, description: 'Item not found' })
-  async getItemById(@CurrentUser('id') userId: string, @Param('id') id: string): Promise<WishlistItem> {
+  async getItemById(
+    @CurrentUser('id') userId: string,
+    @Param('id') id: string,
+  ): Promise<WishlistItem> {
     return this.wishlistService.getItemById(id, userId);
   }
 
@@ -158,7 +151,10 @@ export class WishlistController {
   @ApiOperation({ summary: 'Delete a wishlist item' })
   @ApiResponse({ status: 200, description: 'Item deleted successfully' })
   @ApiResponse({ status: 404, description: 'Item not found' })
-  async deleteItem(@CurrentUser('id') userId: string, @Param('id') id: string): Promise<{ message: string }> {
+  async deleteItem(
+    @CurrentUser('id') userId: string,
+    @Param('id') id: string,
+  ): Promise<{ message: string }> {
     await this.wishlistService.deleteItem(id, userId);
     return { message: 'Wishlist item deleted successfully' };
   }

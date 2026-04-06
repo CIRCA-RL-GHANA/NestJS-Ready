@@ -82,10 +82,18 @@ export class CreateMiscTables1700002400000 implements MigrationInterface {
           REFERENCES "wallets"("id") ON DELETE RESTRICT
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_go_transactions_user_id"   ON "go_transactions" ("user_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_go_transactions_wallet_id" ON "go_transactions" ("wallet_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_go_transactions_status"    ON "go_transactions" ("status")`);
-    await queryRunner.query(`CREATE INDEX "idx_go_transactions_created_at" ON "go_transactions" ("created_at")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_go_transactions_user_id"   ON "go_transactions" ("user_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_go_transactions_wallet_id" ON "go_transactions" ("wallet_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_go_transactions_status"    ON "go_transactions" ("status")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_go_transactions_created_at" ON "go_transactions" ("created_at")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_go_transactions_updated_at
         BEFORE UPDATE ON "go_transactions"
@@ -119,9 +127,15 @@ export class CreateMiscTables1700002400000 implements MigrationInterface {
           REFERENCES "users"("id") ON DELETE CASCADE
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_planner_tx_user_id"   ON "planner_transactions" ("user_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_planner_tx_user_type" ON "planner_transactions" ("user_id","type")`);
-    await queryRunner.query(`CREATE INDEX "idx_planner_tx_month_year" ON "planner_transactions" ("month","year")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_planner_tx_user_id"   ON "planner_transactions" ("user_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_planner_tx_user_type" ON "planner_transactions" ("user_id","type")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_planner_tx_month_year" ON "planner_transactions" ("month","year")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_planner_transactions_updated_at
         BEFORE UPDATE ON "planner_transactions"
@@ -151,7 +165,9 @@ export class CreateMiscTables1700002400000 implements MigrationInterface {
           REFERENCES "users"("id") ON DELETE CASCADE
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_calendar_events_user_id" ON "calendar_events" ("user_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_calendar_events_user_id" ON "calendar_events" ("user_id")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_calendar_events_updated_at
         BEFORE UPDATE ON "calendar_events"
@@ -188,8 +204,12 @@ export class CreateMiscTables1700002400000 implements MigrationInterface {
           REFERENCES "users"("id") ON DELETE CASCADE
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_wishlist_items_user_id"      ON "wishlist_items" ("user_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_wishlist_items_user_status"  ON "wishlist_items" ("user_id","status")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_wishlist_items_user_id"      ON "wishlist_items" ("user_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_wishlist_items_user_status"  ON "wishlist_items" ("user_id","status")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_wishlist_items_updated_at
         BEFORE UPDATE ON "wishlist_items"
@@ -217,9 +237,15 @@ export class CreateMiscTables1700002400000 implements MigrationInterface {
           REFERENCES "entities"("id") ON DELETE CASCADE
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_favorite_drivers_entity_id"   ON "favorite_drivers" ("entity_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_favorite_drivers_driver_id"   ON "favorite_drivers" ("driver_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_favorite_drivers_added_by_id" ON "favorite_drivers" ("added_by_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_favorite_drivers_entity_id"   ON "favorite_drivers" ("entity_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_favorite_drivers_driver_id"   ON "favorite_drivers" ("driver_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_favorite_drivers_added_by_id" ON "favorite_drivers" ("added_by_id")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_favorite_drivers_updated_at
         BEFORE UPDATE ON "favorite_drivers"
@@ -250,7 +276,9 @@ export class CreateMiscTables1700002400000 implements MigrationInterface {
     `);
     await queryRunner.query(`CREATE INDEX "idx_interests_owner_id"   ON "interests" ("owner_id")`);
     await queryRunner.query(`CREATE INDEX "idx_interests_target_id"  ON "interests" ("target_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_interests_target_type" ON "interests" ("target_type")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_interests_target_type" ON "interests" ("target_type")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_interests_updated_at
         BEFORE UPDATE ON "interests"
@@ -277,8 +305,12 @@ export class CreateMiscTables1700002400000 implements MigrationInterface {
           REFERENCES "branches"("id") ON DELETE CASCADE
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_favorite_shops_entity_id" ON "favorite_shops" ("entity_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_favorite_shops_shop_id"   ON "favorite_shops" ("shop_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_favorite_shops_entity_id" ON "favorite_shops" ("entity_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_favorite_shops_shop_id"   ON "favorite_shops" ("shop_id")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_favorite_shops_updated_at
         BEFORE UPDATE ON "favorite_shops"
@@ -308,9 +340,15 @@ export class CreateMiscTables1700002400000 implements MigrationInterface {
         CONSTRAINT "uq_market_profiles_unique_market_identifier" UNIQUE ("unique_market_identifier")
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_market_profiles_creator"           ON "market_profiles" ("created_by_type","created_by_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_market_profiles_visibility"        ON "market_profiles" ("visibility")`);
-    await queryRunner.query(`CREATE INDEX "idx_market_profiles_business_category" ON "market_profiles" ("business_category")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_market_profiles_creator"           ON "market_profiles" ("created_by_type","created_by_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_market_profiles_visibility"        ON "market_profiles" ("visibility")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_market_profiles_business_category" ON "market_profiles" ("business_category")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_market_profiles_updated_at
         BEFORE UPDATE ON "market_profiles"
@@ -335,10 +373,18 @@ export class CreateMiscTables1700002400000 implements MigrationInterface {
         CONSTRAINT "pk_market_notifications" PRIMARY KEY ("id")
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_market_notifications_recipient"   ON "market_notifications" ("recipient_type","recipient_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_market_notifications_read"        ON "market_notifications" ("read")`);
-    await queryRunner.query(`CREATE INDEX "idx_market_notifications_type"        ON "market_notifications" ("type")`);
-    await queryRunner.query(`CREATE INDEX "idx_market_notifications_created_at"  ON "market_notifications" ("created_at")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_market_notifications_recipient"   ON "market_notifications" ("recipient_type","recipient_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_market_notifications_read"        ON "market_notifications" ("read")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_market_notifications_type"        ON "market_notifications" ("type")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_market_notifications_created_at"  ON "market_notifications" ("created_at")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_market_notifications_updated_at
         BEFORE UPDATE ON "market_notifications"

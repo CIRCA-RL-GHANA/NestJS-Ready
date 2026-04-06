@@ -26,8 +26,7 @@ export class RegisterUserDto {
   socialUsername: string;
 
   @ApiProperty({
-    description:
-      'Password (min 12 chars, must include uppercase, lowercase, number, special char)',
+    description: 'Password (min 12 chars, must include uppercase, lowercase, number, special char)',
     example: 'SecureP@ssw0rd123',
   })
   @IsString()

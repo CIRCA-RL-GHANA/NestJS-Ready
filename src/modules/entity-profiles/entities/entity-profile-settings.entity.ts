@@ -23,10 +23,10 @@ export enum ComplianceStatus {
 @Entity('entity_profile_settings')
 @Index(['profileType', 'profileId'], { unique: true })
 export class EntityProfileSettings extends BaseEntity {
-  @ApiProperty({ 
-    description: 'Profile type (Entity or Branch)', 
+  @ApiProperty({
+    description: 'Profile type (Entity or Branch)',
     enum: EntityProfileType,
-    example: EntityProfileType.ENTITY 
+    example: EntityProfileType.ENTITY,
   })
   @Column({ type: 'enum', enum: EntityProfileType })
   profileType: EntityProfileType;
@@ -35,7 +35,11 @@ export class EntityProfileSettings extends BaseEntity {
   @Column({ type: 'uuid' })
   profileId: string;
 
-  @ApiProperty({ description: 'Business location/address', required: false, example: '123 Main St, City' })
+  @ApiProperty({
+    description: 'Business location/address',
+    required: false,
+    example: '123 Main St, City',
+  })
   @Column({ type: 'text', nullable: true })
   location: string;
 
@@ -43,23 +47,27 @@ export class EntityProfileSettings extends BaseEntity {
   @Column({ type: 'uuid', nullable: true })
   businessCategoryId: string;
 
-  @ApiProperty({ 
-    description: 'Compliance status', 
+  @ApiProperty({
+    description: 'Compliance status',
     enum: ComplianceStatus,
-    example: ComplianceStatus.PENDING 
+    example: ComplianceStatus.PENDING,
   })
   @Column({ type: 'enum', enum: ComplianceStatus, default: ComplianceStatus.PENDING })
   complianceStatus: ComplianceStatus;
 
-  @ApiProperty({ 
-    description: 'Visibility/Access level', 
+  @ApiProperty({
+    description: 'Visibility/Access level',
     enum: AccessLevel,
-    example: AccessLevel.PRIVATE 
+    example: AccessLevel.PRIVATE,
   })
   @Column({ type: 'enum', enum: AccessLevel, default: AccessLevel.PRIVATE })
   visibility: AccessLevel;
 
-  @ApiProperty({ description: 'Service scope description', required: false, example: 'Food delivery and catering' })
+  @ApiProperty({
+    description: 'Service scope description',
+    required: false,
+    example: 'Food delivery and catering',
+  })
   @Column({ type: 'text', nullable: true })
   serviceScope: string;
 

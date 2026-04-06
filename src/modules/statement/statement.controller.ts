@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Patch,
-  Delete,
-  Body,
-} from '@nestjs/common';
+import { Controller, Get, Post, Put, Patch, Delete, Body } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { StatementService } from './statement.service';
@@ -21,7 +13,11 @@ export class StatementController {
 
   @Post()
   @ApiOperation({ summary: 'Create or update personal statement' })
-  @ApiResponse({ status: 201, description: 'Statement created/updated successfully', type: Statement })
+  @ApiResponse({
+    status: 201,
+    description: 'Statement created/updated successfully',
+    type: Statement,
+  })
   @ApiResponse({ status: 400, description: 'Invalid input' })
   async createOrUpdateStatement(
     @CurrentUser('id') userId: string,

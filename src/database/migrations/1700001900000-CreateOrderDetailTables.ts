@@ -39,8 +39,12 @@ export class CreateOrderDetailTables1700001900000 implements MigrationInterface 
           REFERENCES "products"("id") ON DELETE RESTRICT
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_order_items_order_id"   ON "order_items" ("order_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_order_items_product_id" ON "order_items" ("product_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_order_items_order_id"   ON "order_items" ("order_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_order_items_product_id" ON "order_items" ("product_id")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_order_items_updated_at
         BEFORE UPDATE ON "order_items"
@@ -65,8 +69,12 @@ export class CreateOrderDetailTables1700001900000 implements MigrationInterface 
         CONSTRAINT "uq_delivery_packages_number"    UNIQUE ("package_number")
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_delivery_packages_driver_id"   ON "delivery_packages" ("driver_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_delivery_packages_created_at"  ON "delivery_packages" ("created_at")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_delivery_packages_driver_id"   ON "delivery_packages" ("driver_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_delivery_packages_created_at"  ON "delivery_packages" ("created_at")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_delivery_packages_updated_at
         BEFORE UPDATE ON "delivery_packages"
@@ -102,8 +110,12 @@ export class CreateOrderDetailTables1700001900000 implements MigrationInterface 
           REFERENCES "delivery_packages"("id") ON DELETE SET NULL
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_deliveries_order_id"   ON "deliveries" ("order_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_deliveries_driver_id"  ON "deliveries" ("driver_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_deliveries_order_id"   ON "deliveries" ("order_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_deliveries_driver_id"  ON "deliveries" ("driver_id")`,
+    );
     await queryRunner.query(`CREATE INDEX "idx_deliveries_status"     ON "deliveries" ("status")`);
     await queryRunner.query(`
       CREATE TRIGGER trg_deliveries_updated_at
@@ -140,9 +152,15 @@ export class CreateOrderDetailTables1700001900000 implements MigrationInterface 
           REFERENCES "orders"("id") ON DELETE CASCADE
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_return_requests_order_id"      ON "return_requests" ("order_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_return_requests_requested_by"  ON "return_requests" ("requested_by")`);
-    await queryRunner.query(`CREATE INDEX "idx_return_requests_status"        ON "return_requests" ("status")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_return_requests_order_id"      ON "return_requests" ("order_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_return_requests_requested_by"  ON "return_requests" ("requested_by")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_return_requests_status"        ON "return_requests" ("status")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_return_requests_updated_at
         BEFORE UPDATE ON "return_requests"
@@ -169,9 +187,15 @@ export class CreateOrderDetailTables1700001900000 implements MigrationInterface 
           REFERENCES "orders"("id") ON DELETE CASCADE
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_fulfillment_sessions_fulfiller_id" ON "fulfillment_sessions" ("fulfiller_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_fulfillment_sessions_order_id"     ON "fulfillment_sessions" ("order_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_fulfillment_sessions_status"       ON "fulfillment_sessions" ("status")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_fulfillment_sessions_fulfiller_id" ON "fulfillment_sessions" ("fulfiller_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_fulfillment_sessions_order_id"     ON "fulfillment_sessions" ("order_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_fulfillment_sessions_status"       ON "fulfillment_sessions" ("status")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_fulfillment_sessions_updated_at
         BEFORE UPDATE ON "fulfillment_sessions"

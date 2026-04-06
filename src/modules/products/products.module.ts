@@ -11,13 +11,7 @@ import { AIModule } from '../ai/ai.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      Product,
-      ProductMedia,
-      DiscountTier,
-      SOSAlert,
-      DeliveryZone,
-    ]),
+    TypeOrmModule.forFeature([Product, ProductMedia, DiscountTier, SOSAlert, DeliveryZone]),
     AIModule,
   ],
   controllers: [ProductsController],

@@ -8,13 +8,21 @@ export class UpdateProfileDto {
   @MaxLength(255)
   publicName?: string;
 
-  @ApiProperty({ description: 'Profile picture URL', required: false, example: 'https://cdn.genieinprompt.app/profile.jpg' })
+  @ApiProperty({
+    description: 'Profile picture URL',
+    required: false,
+    example: 'https://cdn.genieinprompt.app/profile.jpg',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(500)
   profilePictureUrl?: string;
 
-  @ApiProperty({ description: 'Bio/description', required: false, example: 'Software developer...' })
+  @ApiProperty({
+    description: 'Bio/description',
+    required: false,
+    example: 'Software developer...',
+  })
   @IsOptional()
   @IsString()
   bio?: string;

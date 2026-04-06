@@ -9,7 +9,10 @@ import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UpdateVisibilitySettingsDto } from './dto/update-visibility-settings.dto';
 import { UpdateInteractionPreferencesDto } from './dto/update-interaction-preferences.dto';
-import { MessageRestriction, ProfileViewRestriction } from './entities/interaction-preferences.entity';
+import {
+  MessageRestriction,
+  ProfileViewRestriction,
+} from './entities/interaction-preferences.entity';
 import { AISearchService } from '../ai/services/ai-search.service';
 import { AINlpService } from '../ai/services/ai-nlp.service';
 
@@ -34,20 +37,28 @@ export class ProfilesService {
   /**
    * Create a new profile with default visibility and interaction settings
    */
-  async createProfile(dto: CreateProfileDto, ipAddress: string, userAgent: string): Promise<Profile> {
+  async createProfile(
+    dto: CreateProfileDto,
+    ipAddress: string,
+    userAgent: string,
+  ): Promise<Profile> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
       // Check if profile already exists for this user
-      const existingProfile = await this.profileRepository.findOne({ where: { userId: dto.userId } });
+      const existingProfile = await this.profileRepository.findOne({
+        where: { userId: dto.userId },
+      });
       if (existingProfile) {
         throw new ConflictException('Profile already exists for this user');
       }
 
       // Check if profile already exists for this entity
-      const existingEntityProfile = await this.profileRepository.findOne({ where: { entityId: dto.entityId } });
+      const existingEntityProfile = await this.profileRepository.findOne({
+        where: { entityId: dto.entityId },
+      });
       if (existingEntityProfile) {
         throw new ConflictException('Profile already exists for this entity');
       }
@@ -241,7 +252,12 @@ export class ProfilesService {
   /**
    * Delete profile (soft delete via base entity)
    */
-  async deleteProfile(profileId: string, userId: string, ipAddress: string, userAgent: string): Promise<void> {
+  async deleteProfile(
+    profileId: string,
+    userId: string,
+    ipAddress: string,
+    userAgent: string,
+  ): Promise<void> {
     try {
       const profile = await this.profileRepository.findOne({ where: { id: profileId } });
       if (!profile) {
@@ -251,14 +267,7 @@ export class ProfilesService {
       await this.profileRepository.softDelete(profileId);
 
       // Log audit
-      await this.logAudit(
-        'Delete Profile',
-        'SUCCESS',
-        userId,
-        { profileId },
-        ipAddress,
-        userAgent,
-      );
+      await this.logAudit('Delete Profile', 'SUCCESS', userId, { profileId }, ipAddress, userAgent);
 
       this.logger.log(`Profile ${profileId} deleted successfully`);
     } catch (error) {
@@ -296,7 +305,8 @@ export class ProfilesService {
       // Update fields if provided
       if (dto.isPublic !== undefined) settings.isPublic = dto.isPublic;
       if (dto.allowProfileView !== undefined) settings.allowProfileView = dto.allowProfileView;
-      if (dto.allowMessageReceive !== undefined) settings.allowMessageReceive = dto.allowMessageReceive;
+      if (dto.allowMessageReceive !== undefined)
+        settings.allowMessageReceive = dto.allowMessageReceive;
 
       const updatedSettings = await this.visibilityRepository.save(settings);
 
@@ -361,8 +371,10 @@ export class ProfilesService {
       }
 
       // Update fields if provided
-      if (dto.messageRestriction !== undefined) preferences.messageRestriction = dto.messageRestriction;
-      if (dto.profileViewRestriction !== undefined) preferences.profileViewRestriction = dto.profileViewRestriction;
+      if (dto.messageRestriction !== undefined)
+        preferences.messageRestriction = dto.messageRestriction;
+      if (dto.profileViewRestriction !== undefined)
+        preferences.profileViewRestriction = dto.profileViewRestriction;
 
       const updatedPreferences = await this.interactionRepository.save(preferences);
 
@@ -417,7 +429,9 @@ export class ProfilesService {
    * AI PROFILE INTELLIGENCE
    */
 
-  async getAIProfileKeywords(profileId: string): Promise<{ keywords: string[]; sentiment: any; summary: string }> {
+  async getAIProfileKeywords(
+    profileId: string,
+  ): Promise<{ keywords: string[]; sentiment: any; summary: string }> {
     const profile = await this.profileRepository.findOne({ where: { id: profileId } });
     if (!profile) throw new NotFoundException('Profile not found');
 
@@ -432,7 +446,7 @@ export class ProfilesService {
       this.aiNlp.summariseText(bioText),
     ]);
 
-    return { keywords, sentiment, summary };
+    return { keywords, sentiment, summary: summary.summary };
   }
 
   private async logAudit(

@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, HttpCode, HttpStatus, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  HttpCode,
+  HttpStatus,
+  Req,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { EntityProfilesService } from './entity-profiles.service';
 import { CreateEntityProfileSettingsDto } from './dto/create-entity-profile-settings.dto';
@@ -19,7 +30,11 @@ export class EntityProfilesController {
 
   @Post('settings')
   @ApiOperation({ summary: 'Create profile settings for Entity or Branch' })
-  @ApiResponse({ status: 201, description: 'Settings created successfully', type: EntityProfileSettings })
+  @ApiResponse({
+    status: 201,
+    description: 'Settings created successfully',
+    type: EntityProfileSettings,
+  })
   @ApiResponse({ status: 400, description: 'Settings already exist' })
   @HttpCode(HttpStatus.CREATED)
   async createProfileSettings(
@@ -32,7 +47,11 @@ export class EntityProfilesController {
 
   @Get('settings/:profileType/:profileId')
   @ApiOperation({ summary: 'Get profile settings' })
-  @ApiResponse({ status: 200, description: 'Settings retrieved successfully', type: EntityProfileSettings })
+  @ApiResponse({
+    status: 200,
+    description: 'Settings retrieved successfully',
+    type: EntityProfileSettings,
+  })
   @ApiResponse({ status: 404, description: 'Settings not found' })
   async getProfileSettings(
     @Param('profileType') profileType: ProfileType,
@@ -43,7 +62,11 @@ export class EntityProfilesController {
 
   @Put('settings/:id')
   @ApiOperation({ summary: 'Update profile settings' })
-  @ApiResponse({ status: 200, description: 'Settings updated successfully', type: EntityProfileSettings })
+  @ApiResponse({
+    status: 200,
+    description: 'Settings updated successfully',
+    type: EntityProfileSettings,
+  })
   @ApiResponse({ status: 404, description: 'Settings not found' })
   async updateProfileSettings(
     @Param('id') id: string,
@@ -59,7 +82,10 @@ export class EntityProfilesController {
   @ApiResponse({ status: 200, description: 'Settings deleted successfully' })
   @ApiResponse({ status: 404, description: 'Settings not found' })
   @HttpCode(HttpStatus.OK)
-  async deleteProfileSettings(@Param('id') id: string, @Req() req: any): Promise<{ message: string }> {
+  async deleteProfileSettings(
+    @Param('id') id: string,
+    @Req() req: any,
+  ): Promise<{ message: string }> {
     const userId = req.user?.id || 'system';
     await this.entityProfilesService.deleteProfileSettings(id, userId);
     return { message: 'Profile settings deleted successfully' };
@@ -69,7 +95,11 @@ export class EntityProfilesController {
 
   @Post('operating-hours')
   @ApiOperation({ summary: 'Create operating hours' })
-  @ApiResponse({ status: 201, description: 'Operating hours created successfully', type: OperatingHours })
+  @ApiResponse({
+    status: 201,
+    description: 'Operating hours created successfully',
+    type: OperatingHours,
+  })
   @HttpCode(HttpStatus.CREATED)
   async createOperatingHours(
     @Body() dto: CreateOperatingHoursDto,
@@ -81,7 +111,11 @@ export class EntityProfilesController {
 
   @Get('operating-hours/:profileType/:profileId')
   @ApiOperation({ summary: 'Get operating hours for profile' })
-  @ApiResponse({ status: 200, description: 'Operating hours retrieved successfully', type: [OperatingHours] })
+  @ApiResponse({
+    status: 200,
+    description: 'Operating hours retrieved successfully',
+    type: [OperatingHours],
+  })
   async getOperatingHours(
     @Param('profileType') profileType: ProfileType,
     @Param('profileId') profileId: string,
@@ -91,7 +125,11 @@ export class EntityProfilesController {
 
   @Put('operating-hours/:id')
   @ApiOperation({ summary: 'Update operating hours' })
-  @ApiResponse({ status: 200, description: 'Operating hours updated successfully', type: OperatingHours })
+  @ApiResponse({
+    status: 200,
+    description: 'Operating hours updated successfully',
+    type: OperatingHours,
+  })
   @ApiResponse({ status: 404, description: 'Operating hours not found' })
   async updateOperatingHours(
     @Param('id') id: string,
@@ -107,7 +145,10 @@ export class EntityProfilesController {
   @ApiResponse({ status: 200, description: 'Operating hours deleted successfully' })
   @ApiResponse({ status: 404, description: 'Operating hours not found' })
   @HttpCode(HttpStatus.OK)
-  async deleteOperatingHours(@Param('id') id: string, @Req() req: any): Promise<{ message: string }> {
+  async deleteOperatingHours(
+    @Param('id') id: string,
+    @Req() req: any,
+  ): Promise<{ message: string }> {
     const userId = req.user?.id || 'system';
     await this.entityProfilesService.deleteOperatingHours(id, userId);
     return { message: 'Operating hours deleted successfully' };
@@ -117,7 +158,11 @@ export class EntityProfilesController {
 
   @Post('categories')
   @ApiOperation({ summary: 'Create business category' })
-  @ApiResponse({ status: 201, description: 'Category created successfully', type: BusinessCategory })
+  @ApiResponse({
+    status: 201,
+    description: 'Category created successfully',
+    type: BusinessCategory,
+  })
   @ApiResponse({ status: 400, description: 'Category already exists' })
   @HttpCode(HttpStatus.CREATED)
   async createBusinessCategory(
@@ -130,14 +175,22 @@ export class EntityProfilesController {
 
   @Get('categories')
   @ApiOperation({ summary: 'Get all active business categories' })
-  @ApiResponse({ status: 200, description: 'Categories retrieved successfully', type: [BusinessCategory] })
+  @ApiResponse({
+    status: 200,
+    description: 'Categories retrieved successfully',
+    type: [BusinessCategory],
+  })
   async getAllBusinessCategories(): Promise<BusinessCategory[]> {
     return this.entityProfilesService.getAllBusinessCategories();
   }
 
   @Get('categories/:id')
   @ApiOperation({ summary: 'Get business category by ID' })
-  @ApiResponse({ status: 200, description: 'Category retrieved successfully', type: BusinessCategory })
+  @ApiResponse({
+    status: 200,
+    description: 'Category retrieved successfully',
+    type: BusinessCategory,
+  })
   @ApiResponse({ status: 404, description: 'Category not found' })
   async getBusinessCategoryById(@Param('id') id: string): Promise<BusinessCategory> {
     return this.entityProfilesService.getBusinessCategoryById(id);
@@ -145,7 +198,11 @@ export class EntityProfilesController {
 
   @Put('categories/:id')
   @ApiOperation({ summary: 'Update business category' })
-  @ApiResponse({ status: 200, description: 'Category updated successfully', type: BusinessCategory })
+  @ApiResponse({
+    status: 200,
+    description: 'Category updated successfully',
+    type: BusinessCategory,
+  })
   @ApiResponse({ status: 404, description: 'Category not found' })
   async updateBusinessCategory(
     @Param('id') id: string,
@@ -161,7 +218,10 @@ export class EntityProfilesController {
   @ApiResponse({ status: 200, description: 'Category deleted successfully' })
   @ApiResponse({ status: 404, description: 'Category not found' })
   @HttpCode(HttpStatus.OK)
-  async deleteBusinessCategory(@Param('id') id: string, @Req() req: any): Promise<{ message: string }> {
+  async deleteBusinessCategory(
+    @Param('id') id: string,
+    @Req() req: any,
+  ): Promise<{ message: string }> {
     const userId = req.user?.id || 'system';
     await this.entityProfilesService.deleteBusinessCategory(id, userId);
     return { message: 'Business category deleted successfully' };

@@ -24,7 +24,10 @@ export enum PaymentStatus {
 @Index(['status'])
 @Index(['createdAt'])
 export class Payment extends BaseEntity {
-  @ApiProperty({ description: 'User who made the payment', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiProperty({
+    description: 'User who made the payment',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   @Column({ type: 'uuid' })
   userId: string;
 
@@ -36,7 +39,7 @@ export class Payment extends BaseEntity {
   @Column({ type: 'uuid', nullable: true })
   rideId: string | null;
 
-  @ApiProperty({ description: 'Payment amount', example: 50.00 })
+  @ApiProperty({ description: 'Payment amount', example: 50.0 })
   @Column({ type: 'decimal', precision: 12, scale: 2 })
   amount: number;
 

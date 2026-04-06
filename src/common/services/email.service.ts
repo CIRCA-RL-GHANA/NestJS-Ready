@@ -27,7 +27,7 @@ export class EmailService {
 
   constructor(private readonly configService: ConfigService) {
     const apiKey = this.configService.get<string>('email.sendgridApiKey');
-    
+
     if (!apiKey) {
       this.logger.warn('SendGrid API key not configured. Email sending will be disabled.');
     } else {
@@ -59,7 +59,9 @@ export class EmailService {
       };
 
       await sgMail.send(msg as sgMail.MailDataRequired);
-      this.logger.log(`Email sent successfully to ${Array.isArray(options.to) ? options.to.join(', ') : options.to}`);
+      this.logger.log(
+        `Email sent successfully to ${Array.isArray(options.to) ? options.to.join(', ') : options.to}`,
+      );
     } catch (error) {
       this.logger.error(`Failed to send email: ${error.message}`, error.stack);
       throw error;
@@ -84,7 +86,9 @@ export class EmailService {
       };
 
       await sgMail.send(msg as sgMail.MailDataRequired);
-      this.logger.log(`Template email sent successfully to ${Array.isArray(options.to) ? options.to.join(', ') : options.to}`);
+      this.logger.log(
+        `Template email sent successfully to ${Array.isArray(options.to) ? options.to.join(', ') : options.to}`,
+      );
     } catch (error) {
       this.logger.error(`Failed to send template email: ${error.message}`, error.stack);
       throw error;

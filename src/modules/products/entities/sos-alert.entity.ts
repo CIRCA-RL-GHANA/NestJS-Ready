@@ -39,7 +39,7 @@ export class SOSAlert extends BaseEntity {
     description: 'Location coordinates',
     type: 'object',
     required: false,
-    example: { latitude: 40.7128, longitude: -74.0060 },
+    example: { latitude: 40.7128, longitude: -74.006 },
   })
   @Column({ type: 'jsonb', nullable: true })
   location: { latitude: number; longitude: number } | null;

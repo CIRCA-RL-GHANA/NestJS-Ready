@@ -1,14 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Patch,
-  Delete,
-  Body,
-  Param,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Post, Put, Patch, Delete, Body, Param, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { PlannerService } from './planner.service';
@@ -149,7 +139,10 @@ export class PlannerController {
   @ApiOperation({ summary: 'Delete a transaction' })
   @ApiResponse({ status: 200, description: 'Transaction deleted successfully' })
   @ApiResponse({ status: 404, description: 'Transaction not found' })
-  async deleteTransaction(@CurrentUser('id') userId: string, @Param('id') id: string): Promise<{ message: string }> {
+  async deleteTransaction(
+    @CurrentUser('id') userId: string,
+    @Param('id') id: string,
+  ): Promise<{ message: string }> {
     await this.plannerService.deleteTransaction(id, userId);
     return { message: 'Transaction deleted successfully' };
   }

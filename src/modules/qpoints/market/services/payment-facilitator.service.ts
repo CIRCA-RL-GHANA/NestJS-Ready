@@ -49,14 +49,12 @@ export class PaymentFacilitatorService {
   ) {
     this.secretKey = this.config.get<string>('payments.facilitatorSecretKey') ?? '';
     this.publicKey = this.config.get<string>('payments.facilitatorPublicKey') ?? '';
-    this.currency  = this.config.get<string>('payments.facilitatorCurrency') ?? 'NGN';
+    this.currency = this.config.get<string>('payments.facilitatorCurrency') ?? 'NGN';
     const raw = this.config.get<string>('payments.facilitatorProvider') ?? 'mock';
 
     // Auto-downgrade to mock when key looks like a placeholder
     this.provider =
-      !this.secretKey || this.secretKey.startsWith('mock_')
-        ? 'mock'
-        : (raw as FacilitatorProvider);
+      !this.secretKey || this.secretKey.startsWith('mock_') ? 'mock' : (raw as FacilitatorProvider);
 
     this.logger.log(`PaymentFacilitatorService initialised — provider=${this.provider}`);
   }
@@ -99,7 +97,11 @@ export class PaymentFacilitatorService {
    * Must be called at onboarding and before the first trade.
    * Returns the facilitator-side account/recipient ID to be stored by the caller.
    */
-  async ensureUserAccount(userId: string, email: string, meta?: Record<string, string>): Promise<string> {
+  async ensureUserAccount(
+    userId: string,
+    email: string,
+    meta?: Record<string, string>,
+  ): Promise<string> {
     switch (this.provider) {
       case 'flutterwave':
         return this._flutterwaveEnsureRecipient(userId, email, meta);
@@ -183,7 +185,7 @@ export class PaymentFacilitatorService {
       const { data } = await axios.post(
         'https://api.flutterwave.com/v3/transfers',
         {
-          account_bank: recipientCode.split('|')[0],  // e.g. "044"
+          account_bank: recipientCode.split('|')[0], // e.g. "044"
           account_number: recipientCode.split('|')[1], // e.g. "0690000031"
           amount: Math.round(amount * 100) / 100,
           narration: `QP trade settlement ref:${reference}`,
@@ -191,10 +193,7 @@ export class PaymentFacilitatorService {
           reference,
           callback_url: this.config.get<string>('payments.facilitatorWebhookUrl') ?? '',
           debit_currency: this.currency,
-          meta: [
-            { sender: fromUserId },
-            { receiver: toUserId },
-          ],
+          meta: [{ sender: fromUserId }, { receiver: toUserId }],
         },
         {
           headers: {
@@ -248,7 +247,9 @@ export class PaymentFacilitatorService {
       if (data.status === 'success') {
         // Store as "bankCode|accountNumber" composite for use in transfers
         const composite = `${meta?.bankCode}|${meta?.accountNumber}`;
-        this.logger.log(`Flutterwave account verified for user ${userId}: ${data.data?.account_name}`);
+        this.logger.log(
+          `Flutterwave account verified for user ${userId}: ${data.data?.account_name}`,
+        );
         return composite;
       }
 
@@ -287,7 +288,7 @@ export class PaymentFacilitatorService {
       const { data } = await axios.post(
         'https://api.paystack.co/transfer',
         {
-          source: 'balance',      // platform's Paystack balance funds the transfer
+          source: 'balance', // platform's Paystack balance funds the transfer
           amount: Math.round(amount * 100), // kobo / lowest denomination
           recipient: recipientCode,
           reason: `QP trade settlement ref:${reference}`,
@@ -331,7 +332,7 @@ export class PaymentFacilitatorService {
       const { data } = await axios.post(
         'https://api.paystack.co/transferrecipient',
         {
-          type: meta?.type ?? 'nuban',      // nuban | mobile_money | basa
+          type: meta?.type ?? 'nuban', // nuban | mobile_money | basa
           name: meta?.accountName ?? email,
           account_number: meta?.accountNumber ?? '',
           bank_code: meta?.bankCode ?? '',
@@ -404,11 +405,7 @@ export class PaymentFacilitatorService {
       // Cast explicitly — type narrowing from isAxiosError requires axios types to be loaded.
       const axErr = err as { response?: { data?: Record<string, unknown> }; message: string };
       const resp = axErr.response?.data;
-      return (
-        (resp?.['message'] as string) ??
-        (resp?.['error'] as string) ??
-        axErr.message
-      );
+      return (resp?.['message'] as string) ?? (resp?.['error'] as string) ?? axErr.message;
     }
     return err instanceof Error ? err.message : String(err);
   }

@@ -8,12 +8,28 @@ export class CreateRidesTable1700000900000 implements MigrationInterface {
       new Table({
         name: 'rides',
         columns: [
-          { name: 'id', type: 'uuid', isPrimary: true, generationStrategy: 'uuid', default: 'uuid_generate_v4()' },
+          {
+            name: 'id',
+            type: 'uuid',
+            isPrimary: true,
+            generationStrategy: 'uuid',
+            default: 'uuid_generate_v4()',
+          },
           { name: 'passenger_id', type: 'uuid' },
           { name: 'driver_id', type: 'uuid', isNullable: true },
           { name: 'vehicle_id', type: 'uuid', isNullable: true },
-          { name: 'ride_type', type: 'enum', enum: ['ECONOMY', 'PREMIUM', 'SHARED'], default: "'ECONOMY'" },
-          { name: 'status', type: 'enum', enum: ['REQUESTED', 'ACCEPTED', 'STARTED', 'COMPLETED', 'CANCELLED'], default: "'REQUESTED'" },
+          {
+            name: 'ride_type',
+            type: 'enum',
+            enum: ['ECONOMY', 'PREMIUM', 'SHARED'],
+            default: "'ECONOMY'",
+          },
+          {
+            name: 'status',
+            type: 'enum',
+            enum: ['REQUESTED', 'ACCEPTED', 'STARTED', 'COMPLETED', 'CANCELLED'],
+            default: "'REQUESTED'",
+          },
           { name: 'pickup_location', type: 'varchar' },
           { name: 'dropoff_location', type: 'varchar' },
           { name: 'pickup_lat', type: 'decimal', precision: 10, scale: 8 },
@@ -31,12 +47,32 @@ export class CreateRidesTable1700000900000 implements MigrationInterface {
           { name: 'started_at', type: 'timestamp', isNullable: true },
           { name: 'completed_at', type: 'timestamp', isNullable: true },
           { name: 'created_at', type: 'timestamp', default: 'CURRENT_TIMESTAMP' },
-          { name: 'updated_at', type: 'timestamp', default: 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' },
+          {
+            name: 'updated_at',
+            type: 'timestamp',
+            default: 'CURRENT_TIMESTAMP',
+            onUpdate: 'CURRENT_TIMESTAMP',
+          },
         ],
         foreignKeys: [
-          { columnNames: ['passenger_id'], referencedTableName: 'users', referencedColumnNames: ['id'], onDelete: 'CASCADE' },
-          { columnNames: ['driver_id'], referencedTableName: 'users', referencedColumnNames: ['id'], onDelete: 'SET NULL' },
-          { columnNames: ['vehicle_id'], referencedTableName: 'vehicles', referencedColumnNames: ['id'], onDelete: 'SET NULL' },
+          {
+            columnNames: ['passenger_id'],
+            referencedTableName: 'users',
+            referencedColumnNames: ['id'],
+            onDelete: 'CASCADE',
+          },
+          {
+            columnNames: ['driver_id'],
+            referencedTableName: 'users',
+            referencedColumnNames: ['id'],
+            onDelete: 'SET NULL',
+          },
+          {
+            columnNames: ['vehicle_id'],
+            referencedTableName: 'vehicles',
+            referencedColumnNames: ['id'],
+            onDelete: 'SET NULL',
+          },
         ],
       }),
     );

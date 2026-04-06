@@ -1,10 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import {
-  ChatMessage as ChatMessageEntity,
-  MessageType,
-} from '../entities/chat-message.entity';
+import { ChatMessage as ChatMessageEntity, MessageType } from '../entities/chat-message.entity';
 import { ChatSession } from '../entities/chat-session.entity';
 import { HeyYaRequest, HeyYaStatus } from '../entities/heyya-request.entity';
 import { AINlpService } from '../../ai/services/ai-nlp.service';
@@ -91,19 +88,19 @@ export class ChatService {
 
     // AI enrichment: sentiment + intent stored as metadata
     const sentiment = this.aiNlp.analyzeSentiment(trimmedContent);
-    const intent    = this.aiNlp.detectIntent(trimmedContent);
+    const intent = this.aiNlp.detectIntent(trimmedContent);
 
     const entity = this.chatMessageRepository.create({
       sessionId: payload.conversationId,
-      senderId:  payload.senderId,
-      content:   trimmedContent,
-      type:      (payload.type as MessageType) || MessageType.TEXT,
-      isRead:    false,
+      senderId: payload.senderId,
+      content: trimmedContent,
+      type: (payload.type as MessageType) || MessageType.TEXT,
+      isRead: false,
       metadata: {
         ...(payload.attachmentUrls?.length ? { attachmentUrls: payload.attachmentUrls } : {}),
         ai: {
           sentiment: { score: sentiment.score, label: sentiment.label },
-          intent:    { intent: intent.intent, confidence: intent.confidence },
+          intent: { intent: intent.intent, confidence: intent.confidence },
         },
       },
     });
@@ -256,8 +253,7 @@ export class ChatService {
       });
 
       return sessions.map((s: ChatSession) => {
-        const contactId =
-          s.participant1Id === userId ? s.participant2Id : s.participant1Id;
+        const contactId = s.participant1Id === userId ? s.participant2Id : s.participant1Id;
         return {
           userId: contactId,
           lastMessageAt: s.lastMessageAt,

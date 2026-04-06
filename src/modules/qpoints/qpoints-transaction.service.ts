@@ -1,4 +1,10 @@
-import { Injectable, Logger, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  BadRequestException,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource, FindOptionsWhere } from 'typeorm';
 import { DepositQPointsDto } from './dto/deposit-qpoints.dto';
@@ -6,7 +12,12 @@ import { TransferQPointsDto } from './dto/transfer-qpoints.dto';
 import { WithdrawQPointsDto } from './dto/withdraw-qpoints.dto';
 import { GetTransactionsDto } from './dto/get-transactions.dto';
 import { ReviewFraudDto } from './dto/review-fraud.dto';
-import { QPointTransaction, TransactionType, TransactionStatus, RiskLevel } from './entities/qpoint-transaction.entity';
+import {
+  QPointTransaction,
+  TransactionType,
+  TransactionStatus,
+  RiskLevel,
+} from './entities/qpoint-transaction.entity';
 import { QPointAccount } from './entities/qpoint-account.entity';
 import { FraudLog, FraudDetectionReason, FraudActionTaken } from './entities/fraud-log.entity';
 import { BehaviorLog, BehaviorType } from './entities/behavior-log.entity';
@@ -35,7 +46,7 @@ interface RiskAssessmentResult {
 @Injectable()
 export class QPointsTransactionService {
   private readonly logger = new Logger(QPointsTransactionService.name);
-  
+
   // AML thresholds
   private readonly HIGH_VALUE_THRESHOLD = 5000;
   private readonly DAILY_VELOCITY_THRESHOLD = 10000;
@@ -63,7 +74,12 @@ export class QPointsTransactionService {
   /**
    * Deposit Q-Points into an account
    */
-  async deposit(dto: DepositQPointsDto, userId?: string, ipAddress?: string, deviceFingerprint?: string): Promise<QPointTransaction> {
+  async deposit(
+    dto: DepositQPointsDto,
+    userId?: string,
+    ipAddress?: string,
+    deviceFingerprint?: string,
+  ): Promise<QPointTransaction> {
     this.logger.log(`Processing deposit of ${dto.amount} Q-Points to account ${dto.accountId}`);
 
     const account = await this.accountRepository.findOne({
@@ -121,7 +137,9 @@ export class QPointsTransactionService {
         destinationAccountId: dto.accountId,
         amount: dto.amount,
         type: TransactionType.DEPOSIT,
-        status: riskAssessment.requiresApproval ? TransactionStatus.FLAGGED : TransactionStatus.COMPLETED,
+        status: riskAssessment.requiresApproval
+          ? TransactionStatus.FLAGGED
+          : TransactionStatus.COMPLETED,
         fee: 0,
         feeWaived: true,
         reference,
@@ -154,25 +172,35 @@ export class QPointsTransactionService {
         await queryRunner.manager.save(account);
 
         // Create double-entry journal entries
-        await this.createJournalEntries(queryRunner, savedTransaction, dto.amount, TransactionType.DEPOSIT);
+        await this.createJournalEntries(
+          queryRunner,
+          savedTransaction,
+          dto.amount,
+          TransactionType.DEPOSIT,
+        );
       }
 
       // Log fraud if flagged
       if (riskAssessment.isFlagged) {
-        await this.logFraud({
-          transactionId: savedTransaction.id,
-          accountId: dto.accountId,
-          fraudDetectionReason: this.determineFraudReason(riskAssessment),
-          actionTaken: riskAssessment.requiresApproval ? FraudActionTaken.MANUAL_REVIEW : FraudActionTaken.FLAGGED,
-          riskScore: riskAssessment.riskScore,
-          detectionDetails: {
-            flagReason: riskAssessment.flagReason,
-            riskLevel: riskAssessment.riskLevel,
+        await this.logFraud(
+          {
+            transactionId: savedTransaction.id,
+            accountId: dto.accountId,
+            fraudDetectionReason: this.determineFraudReason(riskAssessment),
+            actionTaken: riskAssessment.requiresApproval
+              ? FraudActionTaken.MANUAL_REVIEW
+              : FraudActionTaken.FLAGGED,
+            riskScore: riskAssessment.riskScore,
+            detectionDetails: {
+              flagReason: riskAssessment.flagReason,
+              riskLevel: riskAssessment.riskLevel,
+            },
+            ipAddress,
+            deviceFingerprint,
+            geolocation: dto.metadata?.geolocation,
           },
-          ipAddress,
-          deviceFingerprint,
-          geolocation: dto.metadata?.geolocation,
-        }, queryRunner);
+          queryRunner,
+        );
       }
 
       await queryRunner.commitTransaction();
@@ -190,8 +218,15 @@ export class QPointsTransactionService {
   /**
    * Transfer Q-Points between accounts
    */
-  async transfer(dto: TransferQPointsDto, userId?: string, ipAddress?: string, deviceFingerprint?: string): Promise<QPointTransaction> {
-    this.logger.log(`Processing transfer of ${dto.amount} Q-Points from ${dto.sourceAccountId} to ${dto.destinationAccountId}`);
+  async transfer(
+    dto: TransferQPointsDto,
+    userId?: string,
+    ipAddress?: string,
+    deviceFingerprint?: string,
+  ): Promise<QPointTransaction> {
+    this.logger.log(
+      `Processing transfer of ${dto.amount} Q-Points from ${dto.sourceAccountId} to ${dto.destinationAccountId}`,
+    );
 
     // Fetch both accounts
     const sourceAccount = await this.accountRepository.findOne({
@@ -262,12 +297,16 @@ export class QPointsTransactionService {
         destinationAccountId: dto.destinationAccountId,
         amount: dto.amount,
         type: TransactionType.TRANSFER,
-        status: riskAssessment.requiresApproval ? TransactionStatus.FLAGGED : TransactionStatus.COMPLETED,
+        status: riskAssessment.requiresApproval
+          ? TransactionStatus.FLAGGED
+          : TransactionStatus.COMPLETED,
         fee: transferFee,
         feeWaived: false,
         reference,
         balanceBefore: sourceBalance,
-        balanceAfter: riskAssessment.requiresApproval ? sourceBalance : (sourceBalance - totalRequired),
+        balanceAfter: riskAssessment.requiresApproval
+          ? sourceBalance
+          : sourceBalance - totalRequired,
         initiatedBy: userId,
         description: dto.description || `Transfer of ${dto.amount} Q-Points`,
         metadata: {
@@ -292,31 +331,42 @@ export class QPointsTransactionService {
       if (!riskAssessment.requiresApproval) {
         sourceAccount.balance = sourceBalance - totalRequired;
         destinationAccount.balance = parseFloat(destinationAccount.balance.toString()) + dto.amount;
-        
+
         await queryRunner.manager.save(sourceAccount);
         await queryRunner.manager.save(destinationAccount);
 
         // Create double-entry journal entries
-        await this.createJournalEntries(queryRunner, savedTransaction, dto.amount, TransactionType.TRANSFER, transferFee);
+        await this.createJournalEntries(
+          queryRunner,
+          savedTransaction,
+          dto.amount,
+          TransactionType.TRANSFER,
+          transferFee,
+        );
       }
 
       // Log fraud if flagged
       if (riskAssessment.isFlagged) {
-        await this.logFraud({
-          transactionId: savedTransaction.id,
-          accountId: dto.sourceAccountId,
-          fraudDetectionReason: this.determineFraudReason(riskAssessment),
-          actionTaken: riskAssessment.requiresApproval ? FraudActionTaken.MANUAL_REVIEW : FraudActionTaken.FLAGGED,
-          riskScore: riskAssessment.riskScore,
-          detectionDetails: {
-            flagReason: riskAssessment.flagReason,
-            riskLevel: riskAssessment.riskLevel,
-            destinationAccountId: dto.destinationAccountId,
+        await this.logFraud(
+          {
+            transactionId: savedTransaction.id,
+            accountId: dto.sourceAccountId,
+            fraudDetectionReason: this.determineFraudReason(riskAssessment),
+            actionTaken: riskAssessment.requiresApproval
+              ? FraudActionTaken.MANUAL_REVIEW
+              : FraudActionTaken.FLAGGED,
+            riskScore: riskAssessment.riskScore,
+            detectionDetails: {
+              flagReason: riskAssessment.flagReason,
+              riskLevel: riskAssessment.riskLevel,
+              destinationAccountId: dto.destinationAccountId,
+            },
+            ipAddress,
+            deviceFingerprint,
+            geolocation: dto.metadata?.geolocation,
           },
-          ipAddress,
-          deviceFingerprint,
-          geolocation: dto.metadata?.geolocation,
-        }, queryRunner);
+          queryRunner,
+        );
       }
 
       await queryRunner.commitTransaction();
@@ -334,8 +384,15 @@ export class QPointsTransactionService {
   /**
    * Withdraw Q-Points from an account
    */
-  async withdraw(dto: WithdrawQPointsDto, userId?: string, ipAddress?: string, deviceFingerprint?: string): Promise<QPointTransaction> {
-    this.logger.log(`Processing withdrawal of ${dto.amount} Q-Points from account ${dto.accountId}`);
+  async withdraw(
+    dto: WithdrawQPointsDto,
+    userId?: string,
+    ipAddress?: string,
+    deviceFingerprint?: string,
+  ): Promise<QPointTransaction> {
+    this.logger.log(
+      `Processing withdrawal of ${dto.amount} Q-Points from account ${dto.accountId}`,
+    );
 
     const account = await this.accountRepository.findOne({
       where: { id: dto.accountId },
@@ -398,12 +455,16 @@ export class QPointsTransactionService {
         destinationAccountId: null,
         amount: dto.amount,
         type: TransactionType.WITHDRAWAL,
-        status: riskAssessment.requiresApproval ? TransactionStatus.FLAGGED : TransactionStatus.COMPLETED,
+        status: riskAssessment.requiresApproval
+          ? TransactionStatus.FLAGGED
+          : TransactionStatus.COMPLETED,
         fee: withdrawalFee,
         feeWaived: false,
         reference,
         balanceBefore: accountBalance,
-        balanceAfter: riskAssessment.requiresApproval ? accountBalance : (accountBalance - totalRequired),
+        balanceAfter: riskAssessment.requiresApproval
+          ? accountBalance
+          : accountBalance - totalRequired,
         initiatedBy: userId,
         description: `Withdrawal of ${dto.amount} Q-Points`,
         metadata: {
@@ -432,26 +493,37 @@ export class QPointsTransactionService {
         await queryRunner.manager.save(account);
 
         // Create double-entry journal entries
-        await this.createJournalEntries(queryRunner, savedTransaction, dto.amount, TransactionType.WITHDRAWAL, withdrawalFee);
+        await this.createJournalEntries(
+          queryRunner,
+          savedTransaction,
+          dto.amount,
+          TransactionType.WITHDRAWAL,
+          withdrawalFee,
+        );
       }
 
       // Log fraud if flagged
       if (riskAssessment.isFlagged) {
-        await this.logFraud({
-          transactionId: savedTransaction.id,
-          accountId: dto.accountId,
-          fraudDetectionReason: this.determineFraudReason(riskAssessment),
-          actionTaken: riskAssessment.requiresApproval ? FraudActionTaken.MANUAL_REVIEW : FraudActionTaken.FLAGGED,
-          riskScore: riskAssessment.riskScore,
-          detectionDetails: {
-            flagReason: riskAssessment.flagReason,
-            riskLevel: riskAssessment.riskLevel,
-            withdrawalMethod: dto.withdrawalMethod,
+        await this.logFraud(
+          {
+            transactionId: savedTransaction.id,
+            accountId: dto.accountId,
+            fraudDetectionReason: this.determineFraudReason(riskAssessment),
+            actionTaken: riskAssessment.requiresApproval
+              ? FraudActionTaken.MANUAL_REVIEW
+              : FraudActionTaken.FLAGGED,
+            riskScore: riskAssessment.riskScore,
+            detectionDetails: {
+              flagReason: riskAssessment.flagReason,
+              riskLevel: riskAssessment.riskLevel,
+              withdrawalMethod: dto.withdrawalMethod,
+            },
+            ipAddress,
+            deviceFingerprint,
+            geolocation: dto.metadata?.geolocation,
           },
-          ipAddress,
-          deviceFingerprint,
-          geolocation: dto.metadata?.geolocation,
-        }, queryRunner);
+          queryRunner,
+        );
       }
 
       await queryRunner.commitTransaction();
@@ -496,7 +568,7 @@ export class QPointsTransactionService {
     // Check 4: Rapid transactions
     const recentCount = await this.getRecentTransactionCount(
       context.accountId,
-      this.RAPID_TRANSACTION_WINDOW_MINUTES
+      this.RAPID_TRANSACTION_WINDOW_MINUTES,
     );
     if (recentCount >= this.MAX_TRANSACTIONS_IN_WINDOW) {
       riskScore += 25;
@@ -528,7 +600,8 @@ export class QPointsTransactionService {
       const aiResult = this.aiFraud.scoreTransaction({
         userId: context.userId || context.accountId,
         amount: context.amount,
-        paymentMethod: context.transactionType,
+        currency: 'NGN',
+        paymentMethod: String(context.transactionType),
       });
       finalRiskScore = Math.round(0.4 * riskScore + 0.6 * (aiResult.riskScore * 100));
       if (aiResult.reviewFlag && !flags.includes('AI review flag')) flags.push('AI review flag');
@@ -746,13 +819,13 @@ export class QPointsTransactionService {
   private calculateTransferFee(amount: number): number {
     // 0.2% fee with minimum 0.10 and maximum 10.00
     const feePercent = amount * 0.002;
-    return Math.min(Math.max(feePercent, 0.10), 10.00);
+    return Math.min(Math.max(feePercent, 0.1), 10.0);
   }
 
   private calculateWithdrawalFee(amount: number): number {
     // 0.5% fee with minimum 0.50 and maximum 25.00
     const feePercent = amount * 0.005;
-    return Math.min(Math.max(feePercent, 0.50), 25.00);
+    return Math.min(Math.max(feePercent, 0.5), 25.0);
   }
 
   private async getDailyTransactionVolume(accountId: string): Promise<number> {
@@ -762,7 +835,9 @@ export class QPointsTransactionService {
     const result = await this.transactionRepository
       .createQueryBuilder('txn')
       .select('COALESCE(SUM(txn.amount), 0)', 'total')
-      .where('(txn.sourceAccountId = :accountId OR txn.destinationAccountId = :accountId)', { accountId })
+      .where('(txn.sourceAccountId = :accountId OR txn.destinationAccountId = :accountId)', {
+        accountId,
+      })
       .andWhere('txn.createdAt >= :startOfDay', { startOfDay })
       .andWhere('txn.status = :status', { status: TransactionStatus.COMPLETED })
       .getRawOne();
@@ -776,7 +851,9 @@ export class QPointsTransactionService {
 
     return await this.transactionRepository
       .createQueryBuilder('txn')
-      .where('(txn.sourceAccountId = :accountId OR txn.destinationAccountId = :accountId)', { accountId })
+      .where('(txn.sourceAccountId = :accountId OR txn.destinationAccountId = :accountId)', {
+        accountId,
+      })
       .andWhere('txn.createdAt >= :startOfDay', { startOfDay })
       .getCount();
   }
@@ -786,7 +863,9 @@ export class QPointsTransactionService {
 
     return await this.transactionRepository
       .createQueryBuilder('txn')
-      .where('(txn.sourceAccountId = :accountId OR txn.destinationAccountId = :accountId)', { accountId })
+      .where('(txn.sourceAccountId = :accountId OR txn.destinationAccountId = :accountId)', {
+        accountId,
+      })
       .andWhere('txn.createdAt >= :cutoffTime', { cutoffTime })
       .getCount();
   }
@@ -794,7 +873,9 @@ export class QPointsTransactionService {
   private async isNewDevice(accountId: string, deviceFingerprint: string): Promise<boolean> {
     const count = await this.transactionRepository
       .createQueryBuilder('txn')
-      .where('(txn.sourceAccountId = :accountId OR txn.destinationAccountId = :accountId)', { accountId })
+      .where('(txn.sourceAccountId = :accountId OR txn.destinationAccountId = :accountId)', {
+        accountId,
+      })
       .andWhere('txn.deviceFingerprint = :deviceFingerprint', { deviceFingerprint })
       .getCount();
 
@@ -806,7 +887,9 @@ export class QPointsTransactionService {
 
     return await this.transactionRepository
       .createQueryBuilder('txn')
-      .where('(txn.sourceAccountId = :accountId OR txn.destinationAccountId = :accountId)', { accountId })
+      .where('(txn.sourceAccountId = :accountId OR txn.destinationAccountId = :accountId)', {
+        accountId,
+      })
       .andWhere('txn.status = :status', { status: TransactionStatus.FAILED })
       .andWhere('txn.createdAt >= :last24Hours', { last24Hours })
       .getCount();
@@ -814,14 +897,14 @@ export class QPointsTransactionService {
 
   private determineFraudReason(riskAssessment: RiskAssessmentResult): FraudDetectionReason {
     const reason = riskAssessment.flagReason || '';
-    
+
     if (reason.includes('High value')) return FraudDetectionReason.UNUSUAL_AMOUNT;
     if (reason.includes('High daily')) return FraudDetectionReason.HIGH_VELOCITY;
     if (reason.includes('Excessive daily')) return FraudDetectionReason.UNUSUAL_FREQUENCY;
     if (reason.includes('Rapid transaction')) return FraudDetectionReason.HIGH_VELOCITY;
     if (reason.includes('New device')) return FraudDetectionReason.DEVICE_MISMATCH;
     if (reason.includes('failed')) return FraudDetectionReason.MULTIPLE_FAILURES;
-    
+
     return FraudDetectionReason.SUSPICIOUS_BEHAVIOR;
   }
 
@@ -829,32 +912,20 @@ export class QPointsTransactionService {
    * Get transactions with filters
    */
   async getTransactions(dto: GetTransactionsDto): Promise<QPointTransaction[]> {
-    const where: FindOptionsWhere<QPointTransaction> = {};
+    const baseConditions: FindOptionsWhere<QPointTransaction> = {};
 
-    if (dto.accountId) {
-      where.sourceAccountId = dto.accountId;
-      // Also include transactions where this account is the destination
-      where = {
-        ...where,
-        $or: [{ sourceAccountId: dto.accountId }, { destinationAccountId: dto.accountId }],
-      };
-    }
+    if (dto.status) baseConditions.status = dto.status;
+    if (dto.type) baseConditions.type = dto.type;
+    if (dto.riskLevel) baseConditions.riskLevel = dto.riskLevel;
+    if (dto.flaggedOnly) baseConditions.fraudFlag = true;
 
-    if (dto.status) {
-      where.status = dto.status;
-    }
-
-    if (dto.type) {
-      where.type = dto.type;
-    }
-
-    if (dto.riskLevel) {
-      where.riskLevel = dto.riskLevel;
-    }
-
-    if (dto.flaggedOnly) {
-      where.fraudFlag = true;
-    }
+    const where: FindOptionsWhere<QPointTransaction>[] | FindOptionsWhere<QPointTransaction> =
+      dto.accountId
+        ? [
+            { ...baseConditions, sourceAccountId: dto.accountId },
+            { ...baseConditions, destinationAccountId: dto.accountId },
+          ]
+        : baseConditions;
 
     return await this.transactionRepository.find({
       where,
@@ -866,7 +937,10 @@ export class QPointsTransactionService {
   /**
    * Review a flagged transaction
    */
-  async reviewFlaggedTransaction(dto: ReviewFraudDto, reviewerId: string): Promise<QPointTransaction> {
+  async reviewFlaggedTransaction(
+    dto: ReviewFraudDto,
+    reviewerId: string,
+  ): Promise<QPointTransaction> {
     const transaction = await this.transactionRepository.findOne({
       where: { id: dto.transactionId },
     });
@@ -920,7 +994,7 @@ export class QPointsTransactionService {
               const totalDeduction = transaction.amount + transaction.fee;
               sourceAccount.balance = parseFloat(sourceAccount.balance.toString()) - totalDeduction;
               destAccount.balance = parseFloat(destAccount.balance.toString()) + transaction.amount;
-              
+
               await queryRunner.manager.save(sourceAccount);
               await queryRunner.manager.save(destAccount);
             }
@@ -958,7 +1032,9 @@ export class QPointsTransactionService {
       });
 
       if (fraudLog) {
-        fraudLog.actionTaken = dto.approved ? FraudActionTaken.VERIFIED : FraudActionTaken.FALSE_POSITIVE;
+        fraudLog.actionTaken = dto.approved
+          ? FraudActionTaken.VERIFIED
+          : FraudActionTaken.FALSE_POSITIVE;
         fraudLog.reviewedBy = reviewerId;
         fraudLog.reviewedAt = new Date();
         fraudLog.reviewNotes = dto.reviewNotes || null;
@@ -966,7 +1042,9 @@ export class QPointsTransactionService {
       }
 
       await queryRunner.commitTransaction();
-      this.logger.log(`Transaction ${transaction.id} reviewed: ${dto.approved ? 'Approved' : 'Rejected'}`);
+      this.logger.log(
+        `Transaction ${transaction.id} reviewed: ${dto.approved ? 'Approved' : 'Rejected'}`,
+      );
       return transaction;
     } catch (error) {
       await queryRunner.rollbackTransaction();

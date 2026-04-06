@@ -38,7 +38,7 @@ export class GeneralLedger extends BaseEntity {
 
   @ApiProperty({
     description: 'Current balance',
-    example: 10000.00,
+    example: 10000.0,
   })
   @Column({ type: 'decimal', precision: 18, scale: 2, default: 0 })
   balance: number;

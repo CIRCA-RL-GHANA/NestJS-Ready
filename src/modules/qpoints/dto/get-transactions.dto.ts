@@ -1,6 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsUUID, IsOptional, IsEnum } from 'class-validator';
-import { TransactionStatus, TransactionType, RiskLevel } from '../entities/qpoint-transaction.entity';
+import {
+  TransactionStatus,
+  TransactionType,
+  RiskLevel,
+} from '../entities/qpoint-transaction.entity';
 
 export class GetTransactionsDto {
   @ApiProperty({

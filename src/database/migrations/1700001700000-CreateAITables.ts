@@ -42,7 +42,9 @@ export class CreateAITables1700001700000 implements MigrationInterface {
       )
     `);
     await queryRunner.query(`CREATE INDEX "idx_ai_models_status"     ON "ai_models" ("status")`);
-    await queryRunner.query(`CREATE INDEX "idx_ai_models_model_type" ON "ai_models" ("model_type")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_ai_models_model_type" ON "ai_models" ("model_type")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_ai_models_updated_at
         BEFORE UPDATE ON "ai_models"
@@ -71,9 +73,15 @@ export class CreateAITables1700001700000 implements MigrationInterface {
           REFERENCES "ai_models"("id") ON DELETE CASCADE
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_ai_inferences_model_id" ON "ai_inferences" ("model_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_ai_inferences_user_id"  ON "ai_inferences" ("user_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_ai_inferences_status"   ON "ai_inferences" ("status")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_ai_inferences_model_id" ON "ai_inferences" ("model_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_ai_inferences_user_id"  ON "ai_inferences" ("user_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_ai_inferences_status"   ON "ai_inferences" ("status")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_ai_inferences_updated_at
         BEFORE UPDATE ON "ai_inferences"
@@ -99,9 +107,15 @@ export class CreateAITables1700001700000 implements MigrationInterface {
         CONSTRAINT "pk_ai_features" PRIMARY KEY ("id")
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_ai_features_entity_type"  ON "ai_features" ("entity_type")`);
-    await queryRunner.query(`CREATE INDEX "idx_ai_features_feature_name" ON "ai_features" ("feature_name")`);
-    await queryRunner.query(`CREATE INDEX "idx_ai_features_entity"       ON "ai_features" ("entity_type","entity_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_ai_features_entity_type"  ON "ai_features" ("entity_type")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_ai_features_feature_name" ON "ai_features" ("feature_name")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_ai_features_entity"       ON "ai_features" ("entity_type","entity_id")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_ai_features_updated_at
         BEFORE UPDATE ON "ai_features"
@@ -132,9 +146,15 @@ export class CreateAITables1700001700000 implements MigrationInterface {
         CONSTRAINT "pk_ai_recommendations" PRIMARY KEY ("id")
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_ai_recommendations_user_id" ON "ai_recommendations" ("user_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_ai_recommendations_type"    ON "ai_recommendations" ("recommendation_type")`);
-    await queryRunner.query(`CREATE INDEX "idx_ai_recommendations_item_id" ON "ai_recommendations" ("item_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_ai_recommendations_user_id" ON "ai_recommendations" ("user_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_ai_recommendations_type"    ON "ai_recommendations" ("recommendation_type")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_ai_recommendations_item_id" ON "ai_recommendations" ("item_id")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_ai_recommendations_updated_at
         BEFORE UPDATE ON "ai_recommendations"
@@ -164,8 +184,12 @@ export class CreateAITables1700001700000 implements MigrationInterface {
         CONSTRAINT "pk_ai_workflows" PRIMARY KEY ("id")
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_ai_workflows_status"       ON "ai_workflows" ("status")`);
-    await queryRunner.query(`CREATE INDEX "idx_ai_workflows_triggered_by" ON "ai_workflows" ("triggered_by")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_ai_workflows_status"       ON "ai_workflows" ("status")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_ai_workflows_triggered_by" ON "ai_workflows" ("triggered_by")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_ai_workflows_updated_at
         BEFORE UPDATE ON "ai_workflows"
@@ -194,10 +218,16 @@ export class CreateAITables1700001700000 implements MigrationInterface {
         CONSTRAINT "pk_ai_events" PRIMARY KEY ("id")
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_ai_events_event_type"  ON "ai_events" ("event_type")`);
-    await queryRunner.query(`CREATE INDEX "idx_ai_events_entity"       ON "ai_events" ("entity_type","entity_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_ai_events_event_type"  ON "ai_events" ("event_type")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_ai_events_entity"       ON "ai_events" ("entity_type","entity_id")`,
+    );
     await queryRunner.query(`CREATE INDEX "idx_ai_events_user_id"      ON "ai_events" ("user_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_ai_events_processed"    ON "ai_events" ("processed")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_ai_events_processed"    ON "ai_events" ("processed")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_ai_events_updated_at
         BEFORE UPDATE ON "ai_events"

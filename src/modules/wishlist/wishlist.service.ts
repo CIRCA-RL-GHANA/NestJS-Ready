@@ -14,9 +14,9 @@ export class WishlistService {
   constructor(
     @InjectRepository(WishlistItem)
     private readonly wishlistRepository: Repository<WishlistItem>,
-    private readonly emailService:        EmailService,
-    private readonly aiRecommendations:   AIRecommendationsService,
-    private readonly aiNlp:               AINlpService,
+    private readonly emailService: EmailService,
+    private readonly aiRecommendations: AIRecommendationsService,
+    private readonly aiNlp: AINlpService,
   ) {}
 
   async addItem(userId: string, createDto: CreateWishlistItemDto): Promise<WishlistItem> {
@@ -107,7 +107,9 @@ export class WishlistService {
       // Filter for priority 1-2
       const highPriorityItems = items.filter((item) => item.priority <= 2);
 
-      this.logger.log(`Retrieved ${highPriorityItems.length} high priority items for user ${userId}`);
+      this.logger.log(
+        `Retrieved ${highPriorityItems.length} high priority items for user ${userId}`,
+      );
       return highPriorityItems;
     } catch (error) {
       this.logger.error(`Failed to fetch high priority items: ${error.message}`, error.stack);
@@ -230,15 +232,13 @@ export class WishlistService {
 
     if (!items.length) return [];
 
-    const input = items.map(item => ({
-      id:              item.id,
-      name:            item.item,
-      priority:        item.priority ?? 3,
-      addedDaysAgo:    Math.floor(
-        (Date.now() - new Date(item.createdAt).getTime()) / 86_400_000,
-      ),
-      estimatedPrice:  Number(item.estimatedPrice ?? 0),
-      budget:          Number(item.targetBudget ?? 0) || undefined,
+    const input = items.map((item) => ({
+      id: item.id,
+      name: item.item,
+      priority: item.priority ?? 3,
+      addedDaysAgo: Math.floor((Date.now() - new Date(item.createdAt).getTime()) / 86_400_000),
+      estimatedPrice: Number(item.estimatedPrice ?? 0),
+      budget: Number(item.estimatedPrice ?? 0) || undefined,
     }));
 
     return this.aiRecommendations.scoreWishlistConversion(input);
@@ -255,7 +255,7 @@ export class WishlistService {
 
     return this.aiRecommendations.getSimilarItems(
       productText,
-      items.map(i => ({ id: i.id, tags: i.item + ' ' + (i.notes ?? '') })),
+      items.map((i) => ({ id: i.id, tags: i.item + ' ' + (i.notes ?? '') })),
       topN,
     );
   }

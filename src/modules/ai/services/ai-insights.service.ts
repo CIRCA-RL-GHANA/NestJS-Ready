@@ -26,8 +26,8 @@ export interface RevenueForecaste {
 }
 
 export interface CollaborativeScore {
-  itemId:    string;
-  score:     number;
+  itemId: string;
+  score: number;
   algorithm: string;
 }
 
@@ -40,34 +40,34 @@ export class AIInsightsService {
   // ─────────────────────────────────────────────────────────────────────────
 
   analyseFinancials(
-    incomeTransactions:  Array<{ amount: number; category: string; date: Date }>,
+    incomeTransactions: Array<{ amount: number; category: string; date: Date }>,
     expenseTransactions: Array<{ amount: number; category: string; date: Date }>,
   ): FinancialInsight[] {
     const insights: FinancialInsight[] = [];
 
     if (!incomeTransactions.length && !expenseTransactions.length) return insights;
 
-    const totalIncome  = incomeTransactions.reduce((s, t) => s + t.amount, 0);
+    const totalIncome = incomeTransactions.reduce((s, t) => s + t.amount, 0);
     const totalExpense = expenseTransactions.reduce((s, t) => s + t.amount, 0);
-    const balance      = totalIncome - totalExpense;
-    const savingsRate  = totalIncome > 0 ? (balance / totalIncome) : 0;
+    const balance = totalIncome - totalExpense;
+    const savingsRate = totalIncome > 0 ? balance / totalIncome : 0;
 
     // 1. Savings rate insight
-    if (savingsRate < 0.10 && totalIncome > 0) {
+    if (savingsRate < 0.1 && totalIncome > 0) {
       insights.push({
-        type:       'alert',
-        title:      'Low savings rate',
-        body:       `Your current savings rate is ${(savingsRate * 100).toFixed(1)}%. Financial advisors recommend saving at least 20% of income.`,
-        impact:     'negative',
-        confidence: 0.90,
-        metadata:   { savingsRate, totalIncome, totalExpense },
+        type: 'alert',
+        title: 'Low savings rate',
+        body: `Your current savings rate is ${(savingsRate * 100).toFixed(1)}%. Financial advisors recommend saving at least 20% of income.`,
+        impact: 'negative',
+        confidence: 0.9,
+        metadata: { savingsRate, totalIncome, totalExpense },
       });
-    } else if (savingsRate >= 0.20) {
+    } else if (savingsRate >= 0.2) {
       insights.push({
-        type:       'recommendation',
-        title:      'Great savings discipline',
-        body:       `You are saving ${(savingsRate * 100).toFixed(1)}% of income. Consider investing the surplus for compounding returns.`,
-        impact:     'positive',
+        type: 'recommendation',
+        title: 'Great savings discipline',
+        body: `You are saving ${(savingsRate * 100).toFixed(1)}% of income. Consider investing the surplus for compounding returns.`,
+        impact: 'positive',
         confidence: 0.88,
       });
     }
@@ -79,46 +79,46 @@ export class AIInsightsService {
     }
     const topCat = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])[0];
     if (topCat) {
-      const pct = (topCat[1] / totalExpense * 100).toFixed(1);
+      const pct = ((topCat[1] / totalExpense) * 100).toFixed(1);
       insights.push({
-        type:       'trend',
-        title:      `Highest spend: ${topCat[0]}`,
-        body:       `${pct}% of your expenses are in "${topCat[0]}" (₦${topCat[1].toLocaleString()}). Review if this aligns with your priorities.`,
-        impact:     'neutral',
+        type: 'trend',
+        title: `Highest spend: ${topCat[0]}`,
+        body: `${pct}% of your expenses are in "${topCat[0]}" (₦${topCat[1].toLocaleString()}). Review if this aligns with your priorities.`,
+        impact: 'neutral',
         confidence: 0.92,
-        metadata:   { category: topCat[0], amount: topCat[1], pct },
+        metadata: { category: topCat[0], amount: topCat[1], pct },
       });
     }
 
     // 3. Overspend detection: if any single month > 150% of monthly average
     const monthlyExpenses = this.groupByMonth(expenseTransactions);
-    const monthlyAmounts  = Object.values(monthlyExpenses);
+    const monthlyAmounts = Object.values(monthlyExpenses);
     if (monthlyAmounts.length > 1) {
       const avg = monthlyAmounts.reduce((s, v) => s + v, 0) / monthlyAmounts.length;
       const max = Math.max(...monthlyAmounts);
       if (max > avg * 1.5) {
         insights.push({
-          type:       'anomaly',
-          title:      'Unusual spending spike',
-          body:       `One of your months had ₦${max.toLocaleString()} in expenses — ${((max / avg - 1) * 100).toFixed(0)}% above your average. Check for unexpected charges.`,
-          impact:     'negative',
+          type: 'anomaly',
+          title: 'Unusual spending spike',
+          body: `One of your months had ₦${max.toLocaleString()} in expenses — ${((max / avg - 1) * 100).toFixed(0)}% above your average. Check for unexpected charges.`,
+          impact: 'negative',
           confidence: 0.85,
-          metadata:   { peakMonth: max, averageMonth: avg },
+          metadata: { peakMonth: max, averageMonth: avg },
         });
       }
     }
 
     // 4. Income consistency
     const monthlyIncome = this.groupByMonth(incomeTransactions);
-    const incomeVals    = Object.values(monthlyIncome);
+    const incomeVals = Object.values(monthlyIncome);
     if (incomeVals.length >= 2) {
       const coeffVariation = this.coeffOfVariation(incomeVals);
       if (coeffVariation > 0.35) {
         insights.push({
-          type:       'alert',
-          title:      'Income volatility detected',
-          body:       `Your monthly income varies significantly (CV=${(coeffVariation * 100).toFixed(0)}%). Building a 3-month emergency fund could provide stability.`,
-          impact:     'negative',
+          type: 'alert',
+          title: 'Income volatility detected',
+          body: `Your monthly income varies significantly (CV=${(coeffVariation * 100).toFixed(0)}%). Building a 3-month emergency fund could provide stability.`,
+          impact: 'negative',
           confidence: 0.78,
         });
       }
@@ -135,10 +135,13 @@ export class AIInsightsService {
     transactions: Array<{ amount: number; category: string; date: Date }>,
   ): SpendingPattern {
     const total = transactions.reduce((s, t) => s + t.amount, 0);
-    const days  = Math.max(1, this.daysBetween(
-      Math.min(...transactions.map(t => t.date.getTime())),
-      Math.max(...transactions.map(t => t.date.getTime())),
-    ));
+    const days = Math.max(
+      1,
+      this.daysBetween(
+        Math.min(...transactions.map((t) => t.date.getTime())),
+        Math.max(...transactions.map((t) => t.date.getTime())),
+      ),
+    );
 
     const categoryTotals: Record<string, number> = {};
     for (const t of transactions) {
@@ -156,10 +159,10 @@ export class AIInsightsService {
 
     return {
       topCategories,
-      avgDailySpend:         parseFloat((total / days).toFixed(2)),
-      avgWeeklySpend:        parseFloat((total / Math.max(1, days / 7)).toFixed(2)),
-      highestSingleExpense:  Math.max(...transactions.map(t => t.amount)),
-      largestCategory:       topCategories[0]?.category ?? 'none',
+      avgDailySpend: parseFloat((total / days).toFixed(2)),
+      avgWeeklySpend: parseFloat((total / Math.max(1, days / 7)).toFixed(2)),
+      highestSingleExpense: Math.max(...transactions.map((t) => t.amount)),
+      largestCategory: topCategories[0]?.category ?? 'none',
     };
   }
 
@@ -167,37 +170,35 @@ export class AIInsightsService {
   // REVENUE FORECAST (simple linear trend)
   // ─────────────────────────────────────────────────────────────────────────
 
-  forecastRevenue(
-    dailySales: Array<{ date: Date; revenue: number }>,
-  ): RevenueForecaste {
+  forecastRevenue(dailySales: Array<{ date: Date; revenue: number }>): RevenueForecaste {
     if (dailySales.length < 3) {
-      return { next7Days: 0, next30Days: 0, trend: 'flat', confidence: 0.30 };
+      return { next7Days: 0, next30Days: 0, trend: 'flat', confidence: 0.3 };
     }
 
     const sorted = [...dailySales].sort((a, b) => a.date.getTime() - b.date.getTime());
-    const n      = sorted.length;
-    const values = sorted.map(d => d.revenue);
+    const n = sorted.length;
+    const values = sorted.map((d) => d.revenue);
 
     // Simple linear regression
     const { slope, intercept } = this.linearRegression(values);
 
-    const lastY    = values[n - 1];
-    const next7    = Math.max(0, lastY + slope * 7  + intercept / n);
-    const next30   = Math.max(0, lastY + slope * 30 + intercept / n);
+    const lastY = values[n - 1];
+    const next7 = Math.max(0, lastY + slope * 7 + intercept / n);
+    const next30 = Math.max(0, lastY + slope * 30 + intercept / n);
 
     const trend: RevenueForecaste['trend'] =
       slope > lastY * 0.005 ? 'up' : slope < -lastY * 0.005 ? 'down' : 'flat';
 
     // Weekly seasonality note
     const weeklyAvg = this.groupByDayOfWeek(sorted);
-    const peakDay   = Object.entries(weeklyAvg).sort((a, b) => b[1] - a[1])[0];
-    const dayNames  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const peakDay = Object.entries(weeklyAvg).sort((a, b) => b[1] - a[1])[0];
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
     return {
-      next7Days:  parseFloat(next7.toFixed(2)),
+      next7Days: parseFloat(next7.toFixed(2)),
       next30Days: parseFloat(next30.toFixed(2)),
       trend,
-      confidence: Math.min(0.90, 0.50 + (n / 100) * 0.40),
+      confidence: Math.min(0.9, 0.5 + (n / 100) * 0.4),
       seasonalityNote: peakDay
         ? `Peak sales typically occur on ${dayNames[Number(peakDay[0])]}`
         : undefined,
@@ -218,11 +219,11 @@ export class AIInsightsService {
    * @param topN          number of recommendations
    */
   collaborativeFilter(
-    targetVector:  Record<string, number>,
-    allVectors:    Record<string, Record<string, number>>,
+    targetVector: Record<string, number>,
+    allVectors: Record<string, Record<string, number>>,
     topN = 10,
   ): CollaborativeScore[] {
-    const targetItems    = new Set(Object.keys(targetVector));
+    const targetItems = new Set(Object.keys(targetVector));
     const userSimilarities: Array<{ userId: string; sim: number }> = [];
 
     for (const [userId, uvec] of Object.entries(allVectors)) {
@@ -248,7 +249,7 @@ export class AIInsightsService {
       .slice(0, topN)
       .map(([itemId, score]) => ({
         itemId,
-        score:     parseFloat(score.toFixed(4)),
+        score: parseFloat(score.toFixed(4)),
         algorithm: 'user-based-cf',
       }));
   }
@@ -261,7 +262,7 @@ export class AIInsightsService {
     const map: Record<string, number> = {};
     for (const t of txns) {
       const key = `${t.date.getFullYear()}-${t.date.getMonth()}`;
-      map[key]  = (map[key] ?? 0) + t.amount;
+      map[key] = (map[key] ?? 0) + t.amount;
     }
     return map;
   }
@@ -269,8 +270,8 @@ export class AIInsightsService {
   private groupByDayOfWeek(items: Array<{ date: Date; revenue: number }>): Record<number, number> {
     const map: Record<number, number> = {};
     for (const item of items) {
-      const d    = item.date.getDay();
-      map[d]     = (map[d] ?? 0) + item.revenue;
+      const d = item.date.getDay();
+      map[d] = (map[d] ?? 0) + item.revenue;
     }
     return map;
   }
@@ -287,27 +288,26 @@ export class AIInsightsService {
   }
 
   private linearRegression(values: number[]): { slope: number; intercept: number } {
-    const n     = values.length;
-    const xs    = values.map((_, i) => i);
+    const n = values.length;
+    const xs = values.map((_, i) => i);
     const meanX = xs.reduce((s, x) => s + x, 0) / n;
     const meanY = values.reduce((s, y) => s + y, 0) / n;
-    const num   = xs.reduce((s, x, i) => s + (x - meanX) * (values[i] - meanY), 0);
-    const den   = xs.reduce((s, x) => s + (x - meanX) ** 2, 0);
-    const slope     = den !== 0 ? num / den : 0;
+    const num = xs.reduce((s, x, i) => s + (x - meanX) * (values[i] - meanY), 0);
+    const den = xs.reduce((s, x) => s + (x - meanX) ** 2, 0);
+    const slope = den !== 0 ? num / den : 0;
     const intercept = meanY - slope * meanX;
     return { slope, intercept };
   }
 
-  private cosineSimilarity(
-    a: Record<string, number>,
-    b: Record<string, number>,
-  ): number {
+  private cosineSimilarity(a: Record<string, number>, b: Record<string, number>): number {
     const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
-    let dot = 0, magA = 0, magB = 0;
+    let dot = 0,
+      magA = 0,
+      magB = 0;
     for (const k of keys) {
       const va = a[k] ?? 0;
       const vb = b[k] ?? 0;
-      dot  += va * vb;
+      dot += va * vb;
       magA += va * va;
       magB += vb * vb;
     }

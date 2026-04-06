@@ -1,4 +1,12 @@
-import { IsOptional, IsString, IsNumber, IsBoolean, IsArray, Min, MaxLength } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsNumber,
+  IsBoolean,
+  IsArray,
+  Min,
+  MaxLength,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateSubscriptionPlanDto {
@@ -8,7 +16,11 @@ export class UpdateSubscriptionPlanDto {
   @MaxLength(50)
   name?: string;
 
-  @ApiProperty({ description: 'Plan description', required: false, example: 'Basic tier with standard features' })
+  @ApiProperty({
+    description: 'Plan description',
+    required: false,
+    example: 'Basic tier with standard features',
+  })
   @IsOptional()
   @IsString()
   description?: string;

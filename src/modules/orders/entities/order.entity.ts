@@ -42,23 +42,23 @@ export class Order extends BaseEntity {
   @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.PENDING })
   status: OrderStatus;
 
-  @ApiProperty({ description: 'Subtotal amount', example: 100.00 })
+  @ApiProperty({ description: 'Subtotal amount', example: 100.0 })
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   subtotal: number;
 
-  @ApiProperty({ description: 'Delivery fee', example: 5.00 })
+  @ApiProperty({ description: 'Delivery fee', example: 5.0 })
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   deliveryFee: number;
 
-  @ApiProperty({ description: 'Tax amount', example: 7.50 })
+  @ApiProperty({ description: 'Tax amount', example: 7.5 })
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   tax: number;
 
-  @ApiProperty({ description: 'Discount amount', example: 10.00 })
+  @ApiProperty({ description: 'Discount amount', example: 10.0 })
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   discount: number;
 
-  @ApiProperty({ description: 'Total amount', example: 102.50 })
+  @ApiProperty({ description: 'Total amount', example: 102.5 })
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   total: number;
 

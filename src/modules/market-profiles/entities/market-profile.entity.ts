@@ -103,7 +103,7 @@ export class MarketProfile extends BaseEntity {
       conversions: 150,
       regionEngagement: {
         'North America': 0.7,
-        'Europe': 0.3,
+        Europe: 0.3,
       },
     },
   })

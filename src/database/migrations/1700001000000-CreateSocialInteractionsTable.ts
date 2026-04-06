@@ -8,18 +8,44 @@ export class CreateSocialInteractionsTable1700001000000 implements MigrationInte
       new Table({
         name: 'social_interactions',
         columns: [
-          { name: 'id', type: 'uuid', isPrimary: true, generationStrategy: 'uuid', default: 'uuid_generate_v4()' },
+          {
+            name: 'id',
+            type: 'uuid',
+            isPrimary: true,
+            generationStrategy: 'uuid',
+            default: 'uuid_generate_v4()',
+          },
           { name: 'user_id', type: 'uuid' },
           { name: 'followed_user_id', type: 'uuid' },
-          { name: 'interaction_type', type: 'enum', enum: ['FOLLOW', 'LIKE', 'COMMENT', 'SHARE'], default: "'FOLLOW'" },
+          {
+            name: 'interaction_type',
+            type: 'enum',
+            enum: ['FOLLOW', 'LIKE', 'COMMENT', 'SHARE'],
+            default: "'FOLLOW'",
+          },
           { name: 'post_id', type: 'uuid', isNullable: true },
           { name: 'comment_text', type: 'text', isNullable: true },
           { name: 'created_at', type: 'timestamp', default: 'CURRENT_TIMESTAMP' },
-          { name: 'updated_at', type: 'timestamp', default: 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' },
+          {
+            name: 'updated_at',
+            type: 'timestamp',
+            default: 'CURRENT_TIMESTAMP',
+            onUpdate: 'CURRENT_TIMESTAMP',
+          },
         ],
         foreignKeys: [
-          { columnNames: ['user_id'], referencedTableName: 'users', referencedColumnNames: ['id'], onDelete: 'CASCADE' },
-          { columnNames: ['followed_user_id'], referencedTableName: 'users', referencedColumnNames: ['id'], onDelete: 'CASCADE' },
+          {
+            columnNames: ['user_id'],
+            referencedTableName: 'users',
+            referencedColumnNames: ['id'],
+            onDelete: 'CASCADE',
+          },
+          {
+            columnNames: ['followed_user_id'],
+            referencedTableName: 'users',
+            referencedColumnNames: ['id'],
+            onDelete: 'CASCADE',
+          },
         ],
         indices: [
           new TableIndex({ columnNames: ['user_id', 'interaction_type'] }),

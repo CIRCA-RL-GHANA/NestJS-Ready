@@ -1,5 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsEnum, IsOptional, IsObject, IsArray, IsNumber, Min, Max, Length } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsEnum,
+  IsOptional,
+  IsObject,
+  IsArray,
+  IsNumber,
+  Min,
+  Max,
+  Length,
+} from 'class-validator';
 import { PlaceVisibility } from '../entities/place.entity';
 
 export class CreatePlaceDto {

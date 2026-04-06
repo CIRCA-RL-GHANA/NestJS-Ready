@@ -34,8 +34,12 @@ export class CreateVehicleDetailTables1700002100000 implements MigrationInterfac
           REFERENCES "branches"("id") ON DELETE CASCADE
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_vehicle_bands_branch_id"  ON "vehicle_bands" ("branch_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_vehicle_bands_manager_id" ON "vehicle_bands" ("manager_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_vehicle_bands_branch_id"  ON "vehicle_bands" ("branch_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_vehicle_bands_manager_id" ON "vehicle_bands" ("manager_id")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_vehicle_bands_updated_at
         BEFORE UPDATE ON "vehicle_bands"
@@ -60,8 +64,12 @@ export class CreateVehicleDetailTables1700002100000 implements MigrationInterfac
           REFERENCES "vehicle_bands"("id") ON DELETE CASCADE
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_vehicle_band_mem_vehicle_id" ON "vehicle_band_memberships" ("vehicle_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_vehicle_band_mem_band_id"    ON "vehicle_band_memberships" ("band_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_vehicle_band_mem_vehicle_id" ON "vehicle_band_memberships" ("vehicle_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_vehicle_band_mem_band_id"    ON "vehicle_band_memberships" ("band_id")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_vehicle_band_memberships_updated_at
         BEFORE UPDATE ON "vehicle_band_memberships"
@@ -87,8 +95,12 @@ export class CreateVehicleDetailTables1700002100000 implements MigrationInterfac
           REFERENCES "branches"("id") ON DELETE CASCADE
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_vehicle_pricing_vehicle_id" ON "vehicle_pricing" ("vehicle_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_vehicle_pricing_branch_id"  ON "vehicle_pricing" ("branch_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_vehicle_pricing_vehicle_id" ON "vehicle_pricing" ("vehicle_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_vehicle_pricing_branch_id"  ON "vehicle_pricing" ("branch_id")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_vehicle_pricing_updated_at
         BEFORE UPDATE ON "vehicle_pricing"
@@ -112,8 +124,12 @@ export class CreateVehicleDetailTables1700002100000 implements MigrationInterfac
           REFERENCES "vehicles"("id") ON DELETE CASCADE
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_vehicle_media_vehicle_id" ON "vehicle_media" ("vehicle_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_vehicle_media_type"       ON "vehicle_media" ("type")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_vehicle_media_vehicle_id" ON "vehicle_media" ("vehicle_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_vehicle_media_type"       ON "vehicle_media" ("type")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_vehicle_media_updated_at
         BEFORE UPDATE ON "vehicle_media"
@@ -139,9 +155,15 @@ export class CreateVehicleDetailTables1700002100000 implements MigrationInterfac
           REFERENCES "vehicles"("id") ON DELETE CASCADE
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_vehicle_assignments_vehicle_id" ON "vehicle_assignments" ("vehicle_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_vehicle_assignments_driver_id"  ON "vehicle_assignments" ("driver_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_vehicle_assignments_status"     ON "vehicle_assignments" ("status")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_vehicle_assignments_vehicle_id" ON "vehicle_assignments" ("vehicle_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_vehicle_assignments_driver_id"  ON "vehicle_assignments" ("driver_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_vehicle_assignments_status"     ON "vehicle_assignments" ("status")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_vehicle_assignments_updated_at
         BEFORE UPDATE ON "vehicle_assignments"

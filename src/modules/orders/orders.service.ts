@@ -40,8 +40,8 @@ export class OrdersService {
     @InjectRepository(QPointAccount)
     private readonly qpointAccountRepository: Repository<QPointAccount>,
     private readonly qpointsService: QPointsTransactionService,
-    private readonly aiFraud:  AIFraudService,
-    private readonly aiNlp:    AINlpService,
+    private readonly aiFraud: AIFraudService,
+    private readonly aiNlp: AINlpService,
     private readonly aiSearch: AISearchService,
   ) {}
 
@@ -66,18 +66,23 @@ export class OrdersService {
 
     // ── AI Fraud check ─────────────────────────────────────────────────────────
     const fraudResult = this.aiFraud.scoreTransaction({
-      userId:        buyerId,
-      amount:        total,
+      userId: buyerId,
+      amount: total,
+      currency: 'NGN',
       paymentMethod: dto.paymentMethod ?? 'unknown',
     });
 
     if (fraudResult.blocked) {
-      this.logger.warn(`[AI-FRAUD] Order blocked for buyer ${buyerId}: score=${fraudResult.riskScore}`);
+      this.logger.warn(
+        `[AI-FRAUD] Order blocked for buyer ${buyerId}: score=${fraudResult.riskScore}`,
+      );
       throw new BadRequestException('Order declined due to suspicious activity. Contact support.');
     }
 
     if (fraudResult.reviewFlag) {
-      this.logger.warn(`[AI-FRAUD] Order flagged for review — buyer=${buyerId} score=${fraudResult.riskScore}`);
+      this.logger.warn(
+        `[AI-FRAUD] Order flagged for review — buyer=${buyerId} score=${fraudResult.riskScore}`,
+      );
     }
 
     // ── AI: Index delivery notes for searchability ─────────────────────────────
@@ -102,9 +107,9 @@ export class OrdersService {
       deliveryNotes: dto.deliveryNotes || null,
       metadata: {
         ai: {
-          fraudScore:     fraudResult.riskScore,
+          fraudScore: fraudResult.riskScore,
           fraudRiskLevel: fraudResult.riskLevel,
-          reviewFlagged:  fraudResult.reviewFlag,
+          reviewFlagged: fraudResult.reviewFlag,
         },
       },
     });
@@ -170,7 +175,7 @@ export class OrdersService {
 
   async startFulfillment(orderId: string, fulfillerId: string): Promise<FulfillmentSession> {
     const order = await this.getOrder(orderId);
-    
+
     if (order.status !== OrderStatus.CONFIRMED) {
       throw new BadRequestException('Order must be confirmed before fulfillment');
     }
@@ -182,7 +187,7 @@ export class OrdersService {
       startedAt: new Date(),
     });
 
-    await this.orderRepository.update(orderId, { 
+    await this.orderRepository.update(orderId, {
       status: OrderStatus.PROCESSING,
       fulfillerId,
     });
@@ -208,7 +213,7 @@ export class OrdersService {
 
   async createReturnRequest(userId: string, dto: CreateReturnRequestDto): Promise<ReturnRequest> {
     const order = await this.getOrder(dto.orderId);
-    
+
     if (order.buyerId !== userId) {
       throw new BadRequestException('Unauthorized to request return for this order');
     }
@@ -248,7 +253,9 @@ export class OrdersService {
 
     if (dto.status === ReturnStatus.REFUNDED && returnRequest.refundAmount) {
       // Credit refund amount as QPoints to the buyer's account
-      const buyerOrder = await this.orderRepository.findOne({ where: { id: returnRequest.orderId } });
+      const buyerOrder = await this.orderRepository.findOne({
+        where: { id: returnRequest.orderId },
+      });
       if (buyerOrder) {
         const buyerAccount = await this.qpointAccountRepository.findOne({
           where: { entityId: buyerOrder.buyerId },

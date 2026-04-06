@@ -7,7 +7,7 @@ export class WithdrawQPointsDto {
   @IsUUID()
   accountId: string;
 
-  @ApiProperty({ description: 'Amount to withdraw', example: 75.00 })
+  @ApiProperty({ description: 'Amount to withdraw', example: 75.0 })
   @IsNotEmpty()
   @IsNumber()
   @Min(0.01)

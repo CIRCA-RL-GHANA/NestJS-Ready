@@ -57,9 +57,7 @@ export const validationSchema = Joi.object({
   CORS_CREDENTIALS: Joi.boolean().default(true),
 
   // Logging
-  LOG_LEVEL: Joi.string()
-    .valid('error', 'warn', 'info', 'debug', 'verbose')
-    .default('info'),
+  LOG_LEVEL: Joi.string().valid('error', 'warn', 'info', 'debug', 'verbose').default('info'),
   LOG_FILE_PATH: Joi.string().default('./logs'),
 
   // AI Services

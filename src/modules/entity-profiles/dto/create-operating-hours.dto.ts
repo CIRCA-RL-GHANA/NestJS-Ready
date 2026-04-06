@@ -3,10 +3,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { ProfileType, DayOfWeek } from '../entities/operating-hours.entity';
 
 export class CreateOperatingHoursDto {
-  @ApiProperty({ 
-    description: 'Profile type (Entity or Branch)', 
+  @ApiProperty({
+    description: 'Profile type (Entity or Branch)',
     enum: ProfileType,
-    example: ProfileType.ENTITY 
+    example: ProfileType.ENTITY,
   })
   @IsNotEmpty()
   @IsEnum(ProfileType)
@@ -17,10 +17,10 @@ export class CreateOperatingHoursDto {
   @IsUUID()
   profileId: string;
 
-  @ApiProperty({ 
-    description: 'Day of week', 
+  @ApiProperty({
+    description: 'Day of week',
     enum: DayOfWeek,
-    example: DayOfWeek.MONDAY 
+    example: DayOfWeek.MONDAY,
   })
   @IsNotEmpty()
   @IsEnum(DayOfWeek)

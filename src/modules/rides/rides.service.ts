@@ -57,13 +57,13 @@ export class RidesService {
     );
     const aiPrice = this.aiPricing.computeRidePrice(
       {
-        baseDistance:  distance,
-        pickupLat:     dto.pickupLocation.lat,
-        pickupLng:     dto.pickupLocation.lng,
-        dropoffLat:    dto.dropoffLocation.lat,
-        dropoffLng:    dto.dropoffLocation.lng,
-        rideType:      dto.rideType,
-        requestedAt:   new Date(),
+        baseDistance: distance,
+        pickupLat: dto.pickupLocation.lat,
+        pickupLng: dto.pickupLocation.lng,
+        dropoffLat: dto.dropoffLocation.lat,
+        dropoffLng: dto.dropoffLocation.lng,
+        rideType: dto.rideType,
+        requestedAt: new Date(),
       },
       // demand/supply loaded externally; defaults to 1.0 for now
     );
@@ -121,7 +121,7 @@ export class RidesService {
 
     if (dto.status === RideStatus.RIDE_COMPLETED) {
       ride.rideCompletedAt = new Date();
-      
+
       // Calculate final fare with wait time charges
       ride.finalFare = (ride.estimatedFare || 0) + ride.waitTimeCharges;
     }
@@ -273,14 +273,22 @@ export class RidesService {
 
     if (referrerAccount) {
       await this.qpointsService.deposit(
-        { accountId: referrerAccount.id, amount: 100, paymentReference: `REFERRAL_REWARD_${referralId}` },
+        {
+          accountId: referrerAccount.id,
+          amount: 100,
+          paymentReference: `REFERRAL_REWARD_${referralId}`,
+        },
         referral.referrerId,
       );
     }
 
     if (refereeAccount) {
       await this.qpointsService.deposit(
-        { accountId: refereeAccount.id, amount: 50, paymentReference: `REFERRAL_SIGNUP_BONUS_${referralId}` },
+        {
+          accountId: refereeAccount.id,
+          amount: 50,
+          paymentReference: `REFERRAL_SIGNUP_BONUS_${referralId}`,
+        },
         referral.refereeId,
       );
     }
@@ -296,9 +304,7 @@ export class RidesService {
       order: { createdAt: 'DESC' },
     });
 
-    const location = latestTracking
-      ? latestTracking.location
-      : ride.pickupLocation;
+    const location = latestTracking ? latestTracking.location : ride.pickupLocation;
 
     const alert = this.sosRepository.create({
       rideId: dto.rideId,

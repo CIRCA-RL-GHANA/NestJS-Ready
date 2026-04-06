@@ -1,4 +1,16 @@
-import { IsUUID, IsString, IsNumber, IsInt, IsBoolean, IsOptional, IsDateString, IsArray, Min, Max, Length } from 'class-validator';
+import {
+  IsUUID,
+  IsString,
+  IsNumber,
+  IsInt,
+  IsBoolean,
+  IsOptional,
+  IsDateString,
+  IsArray,
+  Min,
+  Max,
+  Length,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateDiscountTierDto {

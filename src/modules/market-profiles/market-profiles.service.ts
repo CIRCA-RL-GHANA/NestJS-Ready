@@ -1,10 +1,20 @@
-import { Injectable, Logger, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { CreateMarketProfileDto } from './dto/create-market-profile.dto';
 import { UpdateMarketProfileDto } from './dto/update-market-profile.dto';
 import { MarketProfile, CreatedByType, ProfileVisibility } from './entities/market-profile.entity';
-import { MarketNotification, NotificationType, RecipientType } from './entities/market-notification.entity';
+import {
+  MarketNotification,
+  NotificationType,
+  RecipientType,
+} from './entities/market-notification.entity';
 import { AINlpService } from '../ai/services/ai-nlp.service';
 import { AIRecommendationsService } from '../ai/services/ai-recommendations.service';
 
@@ -103,7 +113,10 @@ export class MarketProfilesService {
   /**
    * Get all market profiles for a creator
    */
-  async getMarketProfiles(creatorId: string, creatorType?: CreatedByType): Promise<MarketProfile[]> {
+  async getMarketProfiles(
+    creatorId: string,
+    creatorType?: CreatedByType,
+  ): Promise<MarketProfile[]> {
     const where: any = { createdById: creatorId };
     if (creatorType) {
       where.createdByType = creatorType;
@@ -155,7 +168,7 @@ export class MarketProfilesService {
 
     // Fraud detection for suspicious fields
     const suspiciousFields = ['visibility', 'advertisementExposureRules'];
-    const flagged = suspiciousFields.some(field => dto.hasOwnProperty(field));
+    const flagged = suspiciousFields.some((field) => dto.hasOwnProperty(field));
 
     if (flagged) {
       this.logger.warn(`Suspicious modification detected on profile ${id}`);
@@ -173,7 +186,9 @@ export class MarketProfilesService {
 
       // Create notification
       await this.createNotification(
-        profile.createdByType === CreatedByType.ENTITY ? RecipientType.ENTITY : RecipientType.BRANCH,
+        profile.createdByType === CreatedByType.ENTITY
+          ? RecipientType.ENTITY
+          : RecipientType.BRANCH,
         profile.createdById,
         `Market Profile ${profile.uniqueMarketIdentifier} updated.`,
         NotificationType.SUCCESS,
@@ -222,7 +237,9 @@ export class MarketProfilesService {
 
       // Create notification
       await this.createNotification(
-        profile.createdByType === CreatedByType.ENTITY ? RecipientType.ENTITY : RecipientType.BRANCH,
+        profile.createdByType === CreatedByType.ENTITY
+          ? RecipientType.ENTITY
+          : RecipientType.BRANCH,
         profile.createdById,
         `Market Profile ${profile.uniqueMarketIdentifier} deleted.`,
         NotificationType.SUCCESS,
@@ -244,10 +261,7 @@ export class MarketProfilesService {
   /**
    * Apply AI segmentation refinement
    */
-  async applyAiSegmentation(
-    id: string,
-    analytics: EngagementAnalytics,
-  ): Promise<MarketProfile> {
+  async applyAiSegmentation(id: string, analytics: EngagementAnalytics): Promise<MarketProfile> {
     this.logger.log(`Applying AI segmentation to profile: ${id}`);
 
     const profile = await this.marketProfileRepository.findOne({
@@ -306,7 +320,7 @@ export class MarketProfilesService {
 
     // Interest matching
     const profileInterests = profile.demographicMetrics?.interests || [];
-    const matchingInterests = userEngagementData.interests.filter(interest =>
+    const matchingInterests = userEngagementData.interests.filter((interest) =>
       profileInterests.includes(interest),
     );
 
@@ -380,7 +394,10 @@ export class MarketProfilesService {
   /**
    * Get notifications for a user
    */
-  async getNotifications(recipientId: string, recipientType?: RecipientType): Promise<MarketNotification[]> {
+  async getNotifications(
+    recipientId: string,
+    recipientType?: RecipientType,
+  ): Promise<MarketNotification[]> {
     const where: any = { recipientId };
     if (recipientType) {
       where.recipientType = recipientType;
@@ -430,7 +447,7 @@ export class MarketProfilesService {
         this.aiNlp.analyzeSentiment(text),
         this.aiNlp.summariseText(text),
       ]);
-      return { keywords: kw.keywords, sentiment: sent.label, summary: sum.summary };
+      return { keywords: kw, sentiment: sent.label, summary: sum.summary };
     } catch {
       return { keywords: [], sentiment: 'neutral', summary: '' };
     }
@@ -447,7 +464,7 @@ export class MarketProfilesService {
       const allProfiles = await this.marketProfileRepository.find({ take: 200 });
       const corpus = allProfiles.map((p) => ({
         id: p.id,
-        text: [
+        tags: [
           (p as any).businessName ?? '',
           (p as any).description ?? '',
           (p as any).category ?? '',

@@ -10,7 +10,7 @@ export class Wallet extends BaseEntity {
   @Column({ type: 'uuid', unique: true })
   userId: string;
 
-  @ApiProperty({ description: 'Current balance', example: 0.00 })
+  @ApiProperty({ description: 'Current balance', example: 0.0 })
   @Column({ type: 'decimal', precision: 14, scale: 2, default: 0 })
   balance: number;
 

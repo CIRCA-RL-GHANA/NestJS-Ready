@@ -132,9 +132,8 @@ export class AIService {
       let output: Record<string, any>;
 
       if (apiKey && !apiKey.startsWith('YOUR_')) {
-        const prompt = typeof inference.input === 'string'
-          ? inference.input
-          : JSON.stringify(inference.input);
+        const prompt =
+          typeof inference.input === 'string' ? inference.input : JSON.stringify(inference.input);
 
         const systemPrompt = model?.config?.systemPrompt || 'You are a helpful assistant.';
 
@@ -155,7 +154,7 @@ export class AIService {
                 Authorization: `Bearer ${apiKey}`,
                 'Content-Type': 'application/json',
               },
-              timeout: (this.configService.get<number>('AI_REQUEST_TIMEOUT') || 30000),
+              timeout: this.configService.get<number>('AI_REQUEST_TIMEOUT') || 30000,
             },
           ),
         );
@@ -369,7 +368,9 @@ export class AIService {
             break;
           }
           default: {
-            this.logger.log(`Workflow ${workflowId}: executing step '${step.name}' (type: ${step.type})`);
+            this.logger.log(
+              `Workflow ${workflowId}: executing step '${step.name}' (type: ${step.type})`,
+            );
             stepResult = { step: step.name, type: step.type, status: 'completed' };
           }
         }
@@ -449,7 +450,7 @@ export class AIService {
 
   async getModelStats(modelId: string): Promise<any> {
     const model = await this.getModel(modelId);
-    
+
     const totalInferences = await this.inferenceRepository.count({
       where: { modelId },
     });
@@ -541,15 +542,23 @@ export class AIService {
     });
   }
 
-  async getInferencesByEntity(entityType: string, entityId: string, limit = 50): Promise<AIInference[]> {
+  async getInferencesByEntity(
+    entityType: string,
+    entityId: string,
+    limit = 50,
+  ): Promise<AIInference[]> {
     return await this.inferenceRepository.find({
-      where: { inputData: { entityType, entityId } as any },
+      where: { input: { entityType, entityId } as any },
       order: { createdAt: 'DESC' },
       take: limit,
     });
   }
 
-  async getRecommendationsForEntity(entityType: string, entityId: string, limit = 50): Promise<AIRecommendation[]> {
+  async getRecommendationsForEntity(
+    entityType: string,
+    entityId: string,
+    limit = 50,
+  ): Promise<AIRecommendation[]> {
     return await this.recommendationRepository.find({
       where: { userId: entityId },
       order: { createdAt: 'DESC' },

@@ -11,7 +11,17 @@ import { BoosterPointsAccount } from '../qpoints/entities/booster-points-account
 import { AIModule } from '../ai/ai.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([EntityProfile, Branch, User, AuditLog, QPointAccount, BoosterPointsAccount]), AIModule],
+  imports: [
+    TypeOrmModule.forFeature([
+      EntityProfile,
+      Branch,
+      User,
+      AuditLog,
+      QPointAccount,
+      BoosterPointsAccount,
+    ]),
+    AIModule,
+  ],
   controllers: [EntitiesController],
   providers: [EntitiesService],
   exports: [EntitiesService, TypeOrmModule],

@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Put, Patch, Delete, Body, Param, Query, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Query,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -157,10 +169,7 @@ export class ProductsController {
   // Discount Tier Endpoints
   @Post('discounts')
   @ApiOperation({ summary: 'Create a discount tier' })
-  createDiscountTier(
-    @Body() dto: CreateDiscountTierDto,
-    @Query('createdBy') createdBy: string,
-  ) {
+  createDiscountTier(@Body() dto: CreateDiscountTierDto, @Query('createdBy') createdBy: string) {
     return this.productsService.createDiscountTier(createdBy, dto);
   }
 
@@ -243,14 +252,8 @@ export class ProductsController {
   @ApiOperation({ summary: 'Get delivery zones with optional filters' })
   @ApiQuery({ name: 'branchId', required: false })
   @ApiQuery({ name: 'active', required: false, type: Boolean })
-  getDeliveryZones(
-    @Query('branchId') branchId?: string,
-    @Query('active') active?: string,
-  ) {
-    return this.productsService.getDeliveryZones(
-      branchId,
-      active ? active === 'true' : undefined,
-    );
+  getDeliveryZones(@Query('branchId') branchId?: string, @Query('active') active?: string) {
+    return this.productsService.getDeliveryZones(branchId, active ? active === 'true' : undefined);
   }
 
   @Get('delivery-zones/:id')

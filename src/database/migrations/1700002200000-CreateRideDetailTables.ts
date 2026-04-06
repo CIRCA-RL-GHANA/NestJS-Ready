@@ -34,8 +34,12 @@ export class CreateRideDetailTables1700002200000 implements MigrationInterface {
           REFERENCES "rides"("id") ON DELETE CASCADE
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_ride_tracking_ride_id"    ON "ride_tracking" ("ride_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_ride_tracking_created_at" ON "ride_tracking" ("created_at")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_ride_tracking_ride_id"    ON "ride_tracking" ("ride_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_ride_tracking_created_at" ON "ride_tracking" ("created_at")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_ride_tracking_updated_at
         BEFORE UPDATE ON "ride_tracking"
@@ -60,8 +64,12 @@ export class CreateRideDetailTables1700002200000 implements MigrationInterface {
           REFERENCES "rides"("id") ON DELETE CASCADE
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_ride_feedback_ride_id"     ON "ride_feedback" ("ride_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_ride_feedback_reviewer_id" ON "ride_feedback" ("reviewer_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_ride_feedback_ride_id"     ON "ride_feedback" ("ride_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_ride_feedback_reviewer_id" ON "ride_feedback" ("reviewer_id")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_ride_feedback_updated_at
         BEFORE UPDATE ON "ride_feedback"
@@ -91,9 +99,15 @@ export class CreateRideDetailTables1700002200000 implements MigrationInterface {
         CONSTRAINT "uq_ride_referrals_referral_code"    UNIQUE ("referral_code")
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_ride_referrals_referrer_id" ON "ride_referrals" ("referrer_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_ride_referrals_referee_id"  ON "ride_referrals" ("referee_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_ride_referrals_status"      ON "ride_referrals" ("status")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_ride_referrals_referrer_id" ON "ride_referrals" ("referrer_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_ride_referrals_referee_id"  ON "ride_referrals" ("referee_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_ride_referrals_status"      ON "ride_referrals" ("status")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_ride_referrals_updated_at
         BEFORE UPDATE ON "ride_referrals"
@@ -122,9 +136,15 @@ export class CreateRideDetailTables1700002200000 implements MigrationInterface {
           REFERENCES "rides"("id") ON DELETE CASCADE
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_ride_sos_alerts_ride_id"  ON "ride_sos_alerts" ("ride_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_ride_sos_alerts_user_id"  ON "ride_sos_alerts" ("user_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_ride_sos_alerts_status"   ON "ride_sos_alerts" ("status")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_ride_sos_alerts_ride_id"  ON "ride_sos_alerts" ("ride_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_ride_sos_alerts_user_id"  ON "ride_sos_alerts" ("user_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_ride_sos_alerts_status"   ON "ride_sos_alerts" ("status")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_ride_sos_alerts_updated_at
         BEFORE UPDATE ON "ride_sos_alerts"
@@ -152,8 +172,12 @@ export class CreateRideDetailTables1700002200000 implements MigrationInterface {
           REFERENCES "rides"("id") ON DELETE CASCADE
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_wait_time_tracking_ride_id" ON "wait_time_tracking" ("ride_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_wait_time_tracking_user_id" ON "wait_time_tracking" ("user_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_wait_time_tracking_ride_id" ON "wait_time_tracking" ("ride_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_wait_time_tracking_user_id" ON "wait_time_tracking" ("user_id")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_wait_time_tracking_updated_at
         BEFORE UPDATE ON "wait_time_tracking"

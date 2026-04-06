@@ -8,14 +8,7 @@ import { InterestsController } from './interests.controller';
 import { AIModule } from '../ai/ai.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      FavoriteShop,
-      Interest,
-      ConnectionRequest,
-    ]),
-    AIModule,
-  ],
+  imports: [TypeOrmModule.forFeature([FavoriteShop, Interest, ConnectionRequest]), AIModule],
   controllers: [InterestsController],
   providers: [InterestsService],
   exports: [TypeOrmModule, InterestsService],

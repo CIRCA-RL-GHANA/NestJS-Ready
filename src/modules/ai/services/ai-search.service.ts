@@ -2,16 +2,16 @@ import { Injectable, Logger } from '@nestjs/common';
 import { AINlpService } from './ai-nlp.service';
 
 export interface SearchHit {
-  id:         string;
+  id: string;
   entityType: string;
-  score:      number;
-  snippet?:   string;
+  score: number;
+  snippet?: string;
 }
 
 export interface RankedResult {
-  id:         string;
+  id: string;
   entityType: string;
-  score:      number;
+  score: number;
 }
 
 /**
@@ -61,26 +61,22 @@ export class AISearchService {
    * Full-corpus TF-IDF search.
    * Optionally filter by entityType (e.g. 'product', 'update', 'order').
    */
-  search(
-    query: string,
-    entityType?: string,
-    topN = 20,
-  ): SearchHit[] {
+  search(query: string, entityType?: string, topN = 20): SearchHit[] {
     const rawResults = this.nlpService.searchDocuments(query, topN * (entityType ? 4 : 1));
 
     return rawResults
-      .filter(r => {
+      .filter((r) => {
         if (!entityType) return true;
         return this.meta.get(r.id)?.entityType === entityType;
       })
       .slice(0, topN)
-      .map(r => {
+      .map((r) => {
         const m = this.meta.get(r.id);
         const snippet = m?.text ? m.text.slice(0, 120) + (m.text.length > 120 ? '…' : '') : '';
         return {
-          id:         m?.id ?? r.id,
+          id: m?.id ?? r.id,
           entityType: m?.entityType ?? 'unknown',
-          score:      r.score,
+          score: r.score,
           snippet,
         };
       });
@@ -95,15 +91,13 @@ export class AISearchService {
     candidates: Array<{ id: string; text: string; entityType?: string }>,
     topN = 20,
   ): RankedResult[] {
-    const scored = candidates.map(c => ({
-      id:         c.id,
+    const scored = candidates.map((c) => ({
+      id: c.id,
       entityType: c.entityType ?? 'unknown',
-      score:      this.nlpService.similarity(query, c.text),
+      score: this.nlpService.similarity(query, c.text),
     }));
 
-    return scored
-      .sort((a, b) => b.score - a.score)
-      .slice(0, topN);
+    return scored.sort((a, b) => b.score - a.score).slice(0, topN);
   }
 
   // ─── Suggestions ─────────────────────────────────────────────────────────────
@@ -145,13 +139,13 @@ export class AISearchService {
     }
 
     const rawResults = this.nlpService.searchDocuments(query, topN);
-    return rawResults.map(r => {
+    return rawResults.map((r) => {
       const m = tempMeta.get(r.id);
       return {
-        id:         m?.id ?? r.id,
+        id: m?.id ?? r.id,
         entityType: m?.entityType ?? 'doc',
-        score:      r.score,
-        snippet:    m?.text.slice(0, 120) ?? '',
+        score: r.score,
+        snippet: m?.text.slice(0, 120) ?? '',
       };
     });
   }

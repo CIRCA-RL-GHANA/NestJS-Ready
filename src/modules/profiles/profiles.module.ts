@@ -10,12 +10,7 @@ import { AIModule } from '../ai/ai.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      Profile,
-      VisibilitySettings,
-      InteractionPreferences,
-      AuditLog,
-    ]),
+    TypeOrmModule.forFeature([Profile, VisibilitySettings, InteractionPreferences, AuditLog]),
     AIModule,
   ],
   controllers: [ProfilesController],

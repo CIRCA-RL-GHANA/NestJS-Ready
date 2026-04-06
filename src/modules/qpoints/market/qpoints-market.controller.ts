@@ -12,24 +12,18 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { Request } from 'express';
-import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
-import { OrderBookService } from '../services/order-book.service';
-import { MarketBalanceService } from '../services/market-balance.service';
-import { MarketNotificationService } from '../services/market-notification.service';
-import { AiLiquidityManagerService } from '../services/ai-liquidity-manager.service';
-import { PaymentFacilitatorService } from '../services/payment-facilitator.service';
-import { CreateOrderDto } from '../dto/create-order.dto';
-import { CashQuantityDto } from '../dto/cash-quantity.dto';
-import { ReadNotificationsDto } from '../dto/read-notifications.dto';
-import { RegisterFacilitatorAccountDto } from '../dto/register-facilitator-account.dto';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { OrderBookService } from './services/order-book.service';
+import { MarketBalanceService } from './services/market-balance.service';
+import { MarketNotificationService } from './services/market-notification.service';
+import { AiLiquidityManagerService } from './services/ai-liquidity-manager.service';
+import { PaymentFacilitatorService } from './services/payment-facilitator.service';
+import { CreateOrderDto } from './dto/create-order.dto';
+import { CashQuantityDto } from './dto/cash-quantity.dto';
+import { ReadNotificationsDto } from './dto/read-notifications.dto';
+import { RegisterFacilitatorAccountDto } from './dto/register-facilitator-account.dto';
 
 function userId(req: Request): string {
   return (req as Request & { user: { id: string } }).user.id;
@@ -51,7 +45,7 @@ export class QPointsMarketController {
   // ---------------------------------------------------------------------- balance
 
   @Get('balance')
-  @ApiOperation({ summary: 'Get authenticated user\'s Q Point market balance' })
+  @ApiOperation({ summary: "Get authenticated user's Q Point market balance" })
   @ApiResponse({ status: 200, description: 'Balance returned' })
   async getBalance(@Req() req: Request) {
     return this.balance.getBalance(userId(req));
@@ -61,7 +55,10 @@ export class QPointsMarketController {
 
   @Post('orders')
   @ApiOperation({ summary: 'Place a new limit order (buy or sell)' })
-  @ApiResponse({ status: 201, description: 'Order created; trades array contains any immediate fills' })
+  @ApiResponse({
+    status: 201,
+    description: 'Order created; trades array contains any immediate fills',
+  })
   async createOrder(@Req() req: Request, @Body() dto: CreateOrderDto) {
     return this.orderBook.createOrder(userId(req), dto.type, dto.price, dto.quantity);
   }
@@ -70,15 +67,12 @@ export class QPointsMarketController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Cancel an open order' })
   @ApiResponse({ status: 200, description: 'Order cancelled' })
-  async cancelOrder(
-    @Req() req: Request,
-    @Param('orderId', ParseUUIDPipe) orderId: string,
-  ) {
+  async cancelOrder(@Req() req: Request, @Param('orderId', ParseUUIDPipe) orderId: string) {
     return this.orderBook.cancelOrder(orderId, userId(req));
   }
 
   @Get('orders/open')
-  @ApiOperation({ summary: 'List authenticated user\'s open orders' })
+  @ApiOperation({ summary: "List authenticated user's open orders" })
   async getOpenOrders(@Req() req: Request) {
     return this.orderBook.getOpenOrders(userId(req));
   }
@@ -158,10 +152,7 @@ export class QPointsMarketController {
   @Post('notifications/read')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Mark notifications as read' })
-  async markNotificationsRead(
-    @Req() req: Request,
-    @Body() dto: ReadNotificationsDto,
-  ) {
+  async markNotificationsRead(@Req() req: Request, @Body() dto: ReadNotificationsDto) {
     const uid = userId(req);
     if (dto.all) {
       await this.notifications.markAllAsRead(uid);
@@ -177,21 +168,18 @@ export class QPointsMarketController {
   @ApiOperation({
     summary: 'Register a bank account with the payment facilitator',
     description:
-      'Submits the user\'s bank details to the active payment facilitator (Flutterwave or ' +
+      "Submits the user's bank details to the active payment facilitator (Flutterwave or " +
       'Paystack) and persists the resulting recipient/account ID. Must be called before ' +
       'executing cash-in or cash-out trades that settle via fiat.',
   })
   @ApiResponse({ status: 201, description: 'Account registered and stored successfully' })
-  async registerPaymentAccount(
-    @Req() req: Request,
-    @Body() dto: RegisterFacilitatorAccountDto,
-  ) {
+  async registerPaymentAccount(@Req() req: Request, @Body() dto: RegisterFacilitatorAccountDto) {
     const uid = userId(req);
     const meta: Record<string, string> = {};
     if (dto.accountNumber) meta['accountNumber'] = dto.accountNumber;
-    if (dto.bankCode)      meta['bankCode']       = dto.bankCode;
-    if (dto.accountName)   meta['accountName']    = dto.accountName;
-    if (dto.type)          meta['type']           = dto.type;
+    if (dto.bankCode) meta['bankCode'] = dto.bankCode;
+    if (dto.accountName) meta['accountName'] = dto.accountName;
+    if (dto.type) meta['type'] = dto.type;
 
     const account = await this.facilitator.registerUserAccount(
       uid,
@@ -203,7 +191,9 @@ export class QPointsMarketController {
   }
 
   @Get('payment/accounts')
-  @ApiOperation({ summary: 'List registered payment facilitator accounts for the authenticated user' })
+  @ApiOperation({
+    summary: 'List registered payment facilitator accounts for the authenticated user',
+  })
   @ApiResponse({ status: 200, description: 'List of registered facilitator accounts' })
   async getPaymentAccounts(@Req() req: Request) {
     return this.facilitator.getUserAccounts(userId(req));

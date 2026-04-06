@@ -1,4 +1,13 @@
-import { IsString, IsNotEmpty, IsDate, IsBoolean, IsEnum, IsOptional, IsInt, Min } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsDate,
+  IsBoolean,
+  IsEnum,
+  IsOptional,
+  IsInt,
+  Min,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { RecurrenceFrequency } from '../entities/calendar-event.entity';

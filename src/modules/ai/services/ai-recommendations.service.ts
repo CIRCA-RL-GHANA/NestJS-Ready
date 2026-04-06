@@ -3,16 +3,16 @@ import { AIInsightsService } from './ai-insights.service';
 import { AINlpService } from './ai-nlp.service';
 
 export interface RecommendedItem {
-  id:         string;
-  score:      number;
-  reason:     string;
+  id: string;
+  score: number;
+  reason: string;
 }
 
 export interface FeedItem {
-  id:         string;
-  type:       string;
-  score:      number;
-  reason:     string;
+  id: string;
+  type: string;
+  score: number;
+  reason: string;
 }
 
 /**
@@ -32,7 +32,7 @@ export class AIRecommendationsService {
 
   constructor(
     private readonly insightsService: AIInsightsService,
-    private readonly nlpService:      AINlpService,
+    private readonly nlpService: AINlpService,
   ) {}
 
   // ─── Content-Based Filtering ─────────────────────────────────────────────────
@@ -49,9 +49,9 @@ export class AIRecommendationsService {
     topN = 10,
   ): RecommendedItem[] {
     return allItems
-      .map(item => ({
-        id:     item.id,
-        score:  this.nlpService.similarity(targetTags, item.tags),
+      .map((item) => ({
+        id: item.id,
+        score: this.nlpService.similarity(targetTags, item.tags),
         reason: 'content similarity',
       }))
       .sort((a, b) => b.score - a.score)
@@ -70,15 +70,17 @@ export class AIRecommendationsService {
   ): RecommendedItem[] {
     if (!purchasedTexts) {
       // Cold start — return top-N by neutral score
-      return catalogueItems.slice(0, topN).map(i => ({
-        id: i.id, score: 0.5, reason: 'popular item',
+      return catalogueItems.slice(0, topN).map((i) => ({
+        id: i.id,
+        score: 0.5,
+        reason: 'popular item',
       }));
     }
 
     return catalogueItems
-      .map(item => ({
-        id:     item.id,
-        score:  this.nlpService.similarity(purchasedTexts, item.text),
+      .map((item) => ({
+        id: item.id,
+        score: this.nlpService.similarity(purchasedTexts, item.text),
         reason: 'purchase history match',
       }))
       .sort((a, b) => b.score - a.score)
@@ -95,11 +97,11 @@ export class AIRecommendationsService {
    */
   collaborativeRecommend(
     targetVector: Record<string, number>,
-    allVectors:   Record<string, Record<string, number>>,
+    allVectors: Record<string, Record<string, number>>,
     topN = 10,
   ): Array<{ id: string; score: number }> {
     const results = this.insightsService.collaborativeFilter(targetVector, allVectors, topN);
-    return results.map(r => ({ id: r.id, score: r.score }));
+    return results.map((r) => ({ id: r.itemId, score: r.score }));
   }
 
   // ─── Personalised Feed ───────────────────────────────────────────────────────
@@ -114,19 +116,19 @@ export class AIRecommendationsService {
     topN = 20,
   ): FeedItem[] {
     if (!userInterestText) {
-      return contentItems.slice(0, topN).map(i => ({
-        id:     i.id,
-        type:   i.type,
-        score:  0.4,
+      return contentItems.slice(0, topN).map((i) => ({
+        id: i.id,
+        type: i.type,
+        score: 0.4,
         reason: 'default ranking',
       }));
     }
 
     return contentItems
-      .map(item => ({
-        id:     item.id,
-        type:   item.type,
-        score:  this.nlpService.similarity(userInterestText, item.text),
+      .map((item) => ({
+        id: item.id,
+        type: item.type,
+        score: this.nlpService.similarity(userInterestText, item.text),
         reason: 'interest match',
       }))
       .sort((a, b) => b.score - a.score)
@@ -142,7 +144,7 @@ export class AIRecommendationsService {
    */
   blendRecommendations(
     collaborative: Array<{ id: string; score: number }>,
-    contentBased:  Array<{ id: string; score: number }>,
+    contentBased: Array<{ id: string; score: number }>,
     topN = 10,
   ): Array<{ id: string; score: number; source: string }> {
     const scores = new Map<string, { score: number; sources: string[] }>();
@@ -164,7 +166,7 @@ export class AIRecommendationsService {
     return Array.from(scores.entries())
       .map(([id, v]) => ({
         id,
-        score:  parseFloat(v.score.toFixed(4)),
+        score: parseFloat(v.score.toFixed(4)),
         source: v.sources.join('+'),
       }))
       .sort((a, b) => b.score - a.score)
@@ -186,37 +188,37 @@ export class AIRecommendationsService {
   ): { planId: string; planName: string; reason: string; urgency: 'low' | 'medium' | 'high' } {
     // High usage + low tier → upgrade
     if (monthlyUsageScore > 0.8) {
-      const upgrade = plans.find(p => p.featureScore > 0.7 && p.tier !== currentTier);
+      const upgrade = plans.find((p) => p.featureScore > 0.7 && p.tier !== currentTier);
       if (upgrade) {
         return {
-          planId:   upgrade.id,
+          planId: upgrade.id,
           planName: upgrade.name,
-          reason:   'Your usage suggests you\'d benefit from more features',
-          urgency:  'high',
+          reason: "Your usage suggests you'd benefit from more features",
+          urgency: 'high',
         };
       }
     }
 
     // Very low usage → downgrade suggestion
     if (monthlyUsageScore < 0.2) {
-      const downgrade = plans.find(p => p.featureScore < 0.4);
+      const downgrade = plans.find((p) => p.featureScore < 0.4);
       if (downgrade) {
         return {
-          planId:   downgrade.id,
+          planId: downgrade.id,
           planName: downgrade.name,
-          reason:   'Optimise costs — a lighter plan matches your usage',
-          urgency:  'low',
+          reason: 'Optimise costs — a lighter plan matches your usage',
+          urgency: 'low',
         };
       }
     }
 
     // Default — keep current
-    const current = plans.find(p => p.tier === currentTier) ?? plans[0];
+    const current = plans.find((p) => p.tier === currentTier) ?? plans[0];
     return {
-      planId:   current?.id ?? '',
+      planId: current?.id ?? '',
       planName: current?.name ?? currentTier,
-      reason:   'Your current plan is a good fit',
-      urgency:  'low',
+      reason: 'Your current plan is a good fit',
+      urgency: 'low',
     };
   }
 
@@ -228,39 +230,43 @@ export class AIRecommendationsService {
    */
   scoreWishlistConversion(
     items: Array<{
-      id:          string;
-      name:        string;
-      priority:    number;   // 1-5, 1 = highest
+      id: string;
+      name: string;
+      priority: number; // 1-5, 1 = highest
       addedDaysAgo: number;
       estimatedPrice: number;
       budget?: number;
     }>,
   ): Array<{ id: string; conversionScore: number; suggestion: string }> {
-    return items.map(item => {
-      let score = 0;
+    return items
+      .map((item) => {
+        let score = 0;
 
-      // Priority weight: 1 = high → score 0.4, 5 = low → score 0.08
-      score += (6 - item.priority) / 5 * 0.4;
+        // Priority weight: 1 = high → score 0.4, 5 = low → score 0.08
+        score += ((6 - item.priority) / 5) * 0.4;
 
-      // Recency weight: items added within 7 days score higher
-      const recency = Math.max(0, 1 - item.addedDaysAgo / 30);
-      score += recency * 0.3;
+        // Recency weight: items added within 7 days score higher
+        const recency = Math.max(0, 1 - item.addedDaysAgo / 30);
+        score += recency * 0.3;
 
-      // Affordability: within budget → +0.3
-      if (item.budget && item.estimatedPrice <= item.budget) {
-        score += 0.3;
-      } else if (!item.budget) {
-        score += 0.15; // neutral
-      }
+        // Affordability: within budget → +0.3
+        if (item.budget && item.estimatedPrice <= item.budget) {
+          score += 0.3;
+        } else if (!item.budget) {
+          score += 0.15; // neutral
+        }
 
-      score = parseFloat(Math.min(1, score).toFixed(3));
+        score = parseFloat(Math.min(1, score).toFixed(3));
 
-      const suggestion =
-        score > 0.7  ? 'High chance — consider buying now'
-        : score > 0.4 ? 'Moderate interest — monitor for price drops'
-        : 'Low urgency — keep on wishlist';
+        const suggestion =
+          score > 0.7
+            ? 'High chance — consider buying now'
+            : score > 0.4
+              ? 'Moderate interest — monitor for price drops'
+              : 'Low urgency — keep on wishlist';
 
-      return { id: item.id, conversionScore: score, suggestion };
-    }).sort((a, b) => b.conversionScore - a.conversionScore);
+        return { id: item.id, conversionScore: score, suggestion };
+      })
+      .sort((a, b) => b.conversionScore - a.conversionScore);
   }
 }

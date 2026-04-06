@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Put, Patch, Delete, Body, Param, Query, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Query,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { VehiclesService } from './vehicles.service';
 import { CreateVehicleBandDto } from './dto/create-vehicle-band.dto';
@@ -24,10 +36,7 @@ export class VehiclesController {
   @ApiOperation({ summary: 'Create a vehicle band (manager can only create ONE)' })
   @ApiResponse({ status: HttpStatus.CREATED, description: 'Band created successfully' })
   @ApiResponse({ status: HttpStatus.CONFLICT, description: 'Manager already has a band' })
-  createBand(
-    @Body() createBandDto: CreateVehicleBandDto,
-    @Query('managerId') managerId: string,
-  ) {
+  createBand(@Body() createBandDto: CreateVehicleBandDto, @Query('managerId') managerId: string) {
     return this.vehiclesService.createBand(managerId, createBandDto);
   }
 
@@ -88,10 +97,7 @@ export class VehiclesController {
   @Delete('bands/:bandId/vehicles/:vehicleId')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remove vehicle from a band' })
-  removeVehicleFromBand(
-    @Param('bandId') bandId: string,
-    @Param('vehicleId') vehicleId: string,
-  ) {
+  removeVehicleFromBand(@Param('bandId') bandId: string, @Param('vehicleId') vehicleId: string) {
     return this.vehiclesService.removeVehicleFromBand(vehicleId, bandId);
   }
 
@@ -162,19 +168,13 @@ export class VehiclesController {
 
   @Patch(':id/status')
   @ApiOperation({ summary: 'Partially update vehicle status' })
-  patchVehicleStatus(
-    @Param('id') id: string,
-    @Body('status') status: VehicleStatus,
-  ) {
+  patchVehicleStatus(@Param('id') id: string, @Body('status') status: VehicleStatus) {
     return this.vehiclesService.updateVehicleStatus(id, status);
   }
 
   @Put(':id/status')
   @ApiOperation({ summary: 'Update vehicle status' })
-  updateVehicleStatus(
-    @Param('id') id: string,
-    @Body('status') status: VehicleStatus,
-  ) {
+  updateVehicleStatus(@Param('id') id: string, @Body('status') status: VehicleStatus) {
     return this.vehiclesService.updateVehicleStatus(id, status);
   }
 
@@ -246,10 +246,7 @@ export class VehiclesController {
   @Get(':vehicleId/media')
   @ApiOperation({ summary: 'Get media for a vehicle' })
   @ApiQuery({ name: 'type', required: false })
-  getMediaForVehicle(
-    @Param('vehicleId') vehicleId: string,
-    @Query('type') type?: string,
-  ) {
+  getMediaForVehicle(@Param('vehicleId') vehicleId: string, @Query('type') type?: string) {
     return this.vehiclesService.getMediaForVehicle(vehicleId, type);
   }
 
@@ -273,10 +270,7 @@ export class VehiclesController {
   @ApiOperation({ summary: 'Get pricing configurations' })
   @ApiQuery({ name: 'vehicleId', required: false })
   @ApiQuery({ name: 'branchId', required: false })
-  getPricing(
-    @Query('vehicleId') vehicleId?: string,
-    @Query('branchId') branchId?: string,
-  ) {
+  getPricing(@Query('vehicleId') vehicleId?: string, @Query('branchId') branchId?: string) {
     return this.vehiclesService.getPricing(vehicleId, branchId);
   }
 
@@ -288,10 +282,7 @@ export class VehiclesController {
 
   @Put('pricing/:id')
   @ApiOperation({ summary: 'Update pricing configuration' })
-  updatePricing(
-    @Param('id') id: string,
-    @Body() updatePricingDto: UpdateVehiclePricingDto,
-  ) {
+  updatePricing(@Param('id') id: string, @Body() updatePricingDto: UpdateVehiclePricingDto) {
     return this.vehiclesService.updatePricing(id, updatePricingDto);
   }
 
@@ -309,10 +300,6 @@ export class VehiclesController {
     @Body('branchId') branchId: string,
     @Body('actualWaitTimeMinutes') actualWaitTimeMinutes: number,
   ) {
-    return this.vehiclesService.calculateWaitTimeCharge(
-      vehicleId,
-      branchId,
-      actualWaitTimeMinutes,
-    );
+    return this.vehiclesService.calculateWaitTimeCharge(vehicleId, branchId, actualWaitTimeMinutes);
   }
 }

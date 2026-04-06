@@ -34,8 +34,12 @@ export class CreateProductDetailTables1700002300000 implements MigrationInterfac
           REFERENCES "products"("id") ON DELETE CASCADE
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_product_media_product_id" ON "product_media" ("product_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_product_media_type"       ON "product_media" ("type")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_product_media_product_id" ON "product_media" ("product_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_product_media_type"       ON "product_media" ("type")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_product_media_updated_at
         BEFORE UPDATE ON "product_media"
@@ -63,8 +67,12 @@ export class CreateProductDetailTables1700002300000 implements MigrationInterfac
           REFERENCES "branches"("id") ON DELETE CASCADE
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_delivery_zones_branch_id" ON "delivery_zones" ("branch_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_delivery_zones_active"    ON "delivery_zones" ("active")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_delivery_zones_branch_id" ON "delivery_zones" ("branch_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_delivery_zones_active"    ON "delivery_zones" ("active")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_delivery_zones_updated_at
         BEFORE UPDATE ON "delivery_zones"
@@ -98,10 +106,18 @@ export class CreateProductDetailTables1700002300000 implements MigrationInterfac
           REFERENCES "branches"("id") ON DELETE CASCADE
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_discount_tiers_product_id"  ON "discount_tiers" ("product_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_discount_tiers_branch_id"   ON "discount_tiers" ("branch_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_discount_tiers_is_active"   ON "discount_tiers" ("is_active")`);
-    await queryRunner.query(`CREATE INDEX "idx_discount_tiers_valid_range" ON "discount_tiers" ("valid_from","valid_to")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_discount_tiers_product_id"  ON "discount_tiers" ("product_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_discount_tiers_branch_id"   ON "discount_tiers" ("branch_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_discount_tiers_is_active"   ON "discount_tiers" ("is_active")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_discount_tiers_valid_range" ON "discount_tiers" ("valid_from","valid_to")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_discount_tiers_updated_at
         BEFORE UPDATE ON "discount_tiers"
@@ -128,10 +144,18 @@ export class CreateProductDetailTables1700002300000 implements MigrationInterfac
         CONSTRAINT "pk_sos_alerts" PRIMARY KEY ("id")
       )
     `);
-    await queryRunner.query(`CREATE INDEX "idx_sos_alerts_user_id"      ON "sos_alerts" ("user_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_sos_alerts_recipient_id" ON "sos_alerts" ("recipient_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_sos_alerts_status"       ON "sos_alerts" ("status")`);
-    await queryRunner.query(`CREATE INDEX "idx_sos_alerts_ride_id"      ON "sos_alerts" ("ride_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "idx_sos_alerts_user_id"      ON "sos_alerts" ("user_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_sos_alerts_recipient_id" ON "sos_alerts" ("recipient_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_sos_alerts_status"       ON "sos_alerts" ("status")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_sos_alerts_ride_id"      ON "sos_alerts" ("ride_id")`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER trg_sos_alerts_updated_at
         BEFORE UPDATE ON "sos_alerts"

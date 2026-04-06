@@ -10,9 +10,7 @@ import { MarketNotification, RecipientType } from './entities/market-notificatio
 @ApiTags('Market Profiles')
 @Controller('market-profiles')
 export class MarketProfilesController {
-  constructor(
-    private readonly marketProfilesService: MarketProfilesService,
-  ) {}
+  constructor(private readonly marketProfilesService: MarketProfilesService) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new market profile' })
@@ -26,11 +24,7 @@ export class MarketProfilesController {
     const creatorType = user?.role === 'EntityAdmin' ? CreatedByType.ENTITY : CreatedByType.BRANCH;
     const creatorId = user?.id || 'system';
 
-    return await this.marketProfilesService.createMarketProfile(
-      createDto,
-      creatorType,
-      creatorId,
-    );
+    return await this.marketProfilesService.createMarketProfile(createDto, creatorType, creatorId);
   }
 
   @Get()
@@ -86,7 +80,8 @@ export class MarketProfilesController {
   @ApiResponse({ status: 404, description: 'Market profile not found' })
   async applyAiSegmentation(
     @Param('id') id: string,
-    @Body() analytics: {
+    @Body()
+    analytics: {
       clickRate: number;
       impressions: number;
       conversions: number;
@@ -102,14 +97,19 @@ export class MarketProfilesController {
   async getNotifications(@Req() req: Request): Promise<MarketNotification[]> {
     const user = (req as any).user;
     const recipientId = user?.id || 'system';
-    const recipientType = user?.role === 'EntityAdmin' ? RecipientType.ENTITY : RecipientType.BRANCH;
+    const recipientType =
+      user?.role === 'EntityAdmin' ? RecipientType.ENTITY : RecipientType.BRANCH;
 
     return await this.marketProfilesService.getNotifications(recipientId, recipientType);
   }
 
   @Put('notifications/:id/read')
   @ApiOperation({ summary: 'Mark notification as read' })
-  @ApiResponse({ status: 200, description: 'Notification marked as read', type: MarketNotification })
+  @ApiResponse({
+    status: 200,
+    description: 'Notification marked as read',
+    type: MarketNotification,
+  })
   @ApiResponse({ status: 404, description: 'Notification not found' })
   async markNotificationRead(@Param('id') id: string): Promise<MarketNotification> {
     return await this.marketProfilesService.markNotificationRead(id);

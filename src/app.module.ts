@@ -66,12 +66,12 @@ import { QPointsMarketModule } from './modules/qpoints/market/qpoints-market.mod
     // Rate Limiting (defense-in-depth alongside nginx)
     ThrottlerModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ([
+      useFactory: (configService: ConfigService) => [
         {
           ttl: configService.get<number>('throttle.ttl') ?? 60,
           limit: configService.get<number>('throttle.limit') ?? 100,
         },
-      ]),
+      ],
     }),
 
     // Queue

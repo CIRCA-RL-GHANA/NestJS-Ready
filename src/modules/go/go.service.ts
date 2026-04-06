@@ -1,11 +1,11 @@
-import {
-  Injectable,
-  NotFoundException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { GoTransaction, GoTransactionCategory, GoTransactionType } from './entities/go-transaction.entity';
+import {
+  GoTransaction,
+  GoTransactionCategory,
+  GoTransactionType,
+} from './entities/go-transaction.entity';
 import { WalletsService } from '../wallets/wallets.service';
 import { AIInsightsService } from '../ai/services/ai-insights.service';
 
@@ -135,24 +135,23 @@ export class GoService {
     }
 
     const income = txns
-      .filter(t => t.type === GoTransactionType.CREDIT)
-      .map(t => ({ amount: Number(t.amount), category: t.category, date: t.createdAt.toISOString() }));
+      .filter((t) => t.type === GoTransactionType.CREDIT)
+      .map((t) => ({ amount: Number(t.amount), category: String(t.category), date: t.createdAt }));
 
     const expenses = txns
-      .filter(t => t.type === GoTransactionType.DEBIT)
-      .map(t => ({ amount: Number(t.amount), category: t.category, date: t.createdAt.toISOString() }));
+      .filter((t) => t.type === GoTransactionType.DEBIT)
+      .map((t) => ({ amount: Number(t.amount), category: String(t.category), date: t.createdAt }));
 
-    const allForSpending = txns.map(t => ({
-      amount:   Number(t.amount),
-      category: t.category ?? 'other',
-      date:     t.createdAt.toISOString(),
-      type:     t.type === GoTransactionType.CREDIT ? 'credit' as const : 'debit' as const,
+    const allForSpending = txns.map((t) => ({
+      amount: Number(t.amount),
+      category: String(t.category ?? 'other'),
+      date: t.createdAt,
     }));
 
     const dailySales = txns
-      .filter(t => t.type === GoTransactionType.CREDIT)
+      .filter((t) => t.type === GoTransactionType.CREDIT)
       .slice(0, 30)
-      .map(t => Number(t.amount));
+      .map((t) => ({ date: t.createdAt, revenue: Number(t.amount) }));
 
     const [insights, spendingPattern, forecast] = await Promise.all([
       this.aiInsights.analyseFinancials(income, expenses),
@@ -160,7 +159,9 @@ export class GoService {
       dailySales.length >= 3 ? this.aiInsights.forecastRevenue(dailySales) : Promise.resolve(null),
     ]);
 
-    this.logger.debug(`AI spending insights generated for user ${userId}: ${insights.length} insights`);
+    this.logger.debug(
+      `AI spending insights generated for user ${userId}: ${insights.length} insights`,
+    );
     return { insights, spendingPattern, forecast };
   }
 }

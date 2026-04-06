@@ -15,7 +15,7 @@ export enum TransactionCategory {
   INVESTMENT = 'investment',
   GIFT = 'gift',
   OTHER_INCOME = 'other_income',
-  
+
   // Expense categories
   FOOD = 'food',
   TRANSPORTATION = 'transportation',
@@ -50,7 +50,7 @@ export class PlannerTransaction extends BaseEntity {
 
   @ApiProperty({
     description: 'Transaction amount',
-    example: 150.50,
+    example: 150.5,
   })
   @Column({ type: 'decimal', precision: 15, scale: 2 })
   amount: number;

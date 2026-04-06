@@ -30,7 +30,25 @@ import { AITensorflowService } from './services/ai-tensorflow.service';
     HttpModule,
   ],
   controllers: [AIController],
-  providers: [AIService, AINlpService, AIPricingService, AIFraudService, AIInsightsService, AISearchService, AIRecommendationsService, AITensorflowService],
-  exports:   [AIService, AINlpService, AIPricingService, AIFraudService, AIInsightsService, AISearchService, AIRecommendationsService, AITensorflowService],
+  providers: [
+    AIService,
+    AINlpService,
+    AIPricingService,
+    AIFraudService,
+    AIInsightsService,
+    AISearchService,
+    AIRecommendationsService,
+    AITensorflowService,
+  ],
+  exports: [
+    AIService,
+    AINlpService,
+    AIPricingService,
+    AIFraudService,
+    AIInsightsService,
+    AISearchService,
+    AIRecommendationsService,
+    AITensorflowService,
+  ],
 })
 export class AIModule {}

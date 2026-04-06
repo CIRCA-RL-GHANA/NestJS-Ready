@@ -1,4 +1,16 @@
-import { IsString, IsUUID, IsEnum, IsNumber, IsOptional, IsInt, IsBoolean, IsArray, IsObject, Length, Min } from 'class-validator';
+import {
+  IsString,
+  IsUUID,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsInt,
+  IsBoolean,
+  IsArray,
+  IsObject,
+  Length,
+  Min,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { ProductCategory, ProductStatus } from '../entities/product.entity';
 

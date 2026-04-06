@@ -23,9 +23,7 @@ export class MarketNotificationService {
   ) {}
 
   /** Called by QPointsMarketGateway to wire up real-time delivery */
-  setWsServer(server: {
-    emitToUser(userId: string, event: string, payload: unknown): void;
-  }): void {
+  setWsServer(server: { emitToUser(userId: string, event: string, payload: unknown): void }): void {
     this.wsServer = server;
   }
 
@@ -61,11 +59,7 @@ export class MarketNotificationService {
     await this.repo.update({ userId, read: false }, { read: true });
   }
 
-  async getUserNotifications(
-    userId: string,
-    limit = 20,
-    offset = 0,
-  ): Promise<NotificationPage> {
+  async getUserNotifications(userId: string, limit = 20, offset = 0): Promise<NotificationPage> {
     const [notifications, total] = await this.repo.findAndCount({
       where: { userId },
       order: { createdAt: 'DESC' },

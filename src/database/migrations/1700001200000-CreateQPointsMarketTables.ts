@@ -108,10 +108,7 @@ export class CreateQPointsMarketTables1700001200000 implements MigrationInterfac
           { name: 'seller_id', type: 'uuid', isNullable: false },
           { name: 'created_at', type: 'timestamp with time zone', default: 'now()' },
         ],
-        checks: [
-          { expression: 'price > 0' },
-          { expression: 'quantity > 0' },
-        ],
+        checks: [{ expression: 'price > 0' }, { expression: 'quantity > 0' }],
       }),
       true,
     );

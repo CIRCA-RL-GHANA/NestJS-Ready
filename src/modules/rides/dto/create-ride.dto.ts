@@ -8,7 +8,7 @@ class LocationDto {
   @IsNumber()
   lat: number;
 
-  @ApiProperty({ example: -74.0060 })
+  @ApiProperty({ example: -74.006 })
   @IsNumber()
   lng: number;
 

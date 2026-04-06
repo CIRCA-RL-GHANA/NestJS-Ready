@@ -51,7 +51,7 @@ export class QPointTransaction extends BaseEntity {
 
   @ApiProperty({
     description: 'Transaction amount',
-    example: 100.00,
+    example: 100.0,
   })
   @Column({ type: 'decimal', precision: 12, scale: 2 })
   amount: number;
@@ -101,21 +101,21 @@ export class QPointTransaction extends BaseEntity {
 
   @ApiProperty({
     description: 'Balance before transaction',
-    example: 1000.00,
+    example: 1000.0,
   })
   @Column({ type: 'decimal', precision: 12, scale: 2 })
   balanceBefore: number;
 
   @ApiProperty({
     description: 'Balance after transaction',
-    example: 1100.00,
+    example: 1100.0,
   })
   @Column({ type: 'decimal', precision: 12, scale: 2 })
   balanceAfter: number;
 
   @ApiProperty({
     description: 'Transaction fee (if applicable)',
-    example: 1.50,
+    example: 1.5,
   })
   @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
   fee: number;

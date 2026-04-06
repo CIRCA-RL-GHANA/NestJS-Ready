@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FavoriteDriver, FavoriteDriverVisibility } from './entities/favorite-driver.entity';
@@ -172,11 +177,7 @@ export class FavoriteDriversService {
       const favorites = await this.getFavoriteDrivers(entityId);
       const corpus = favorites.map((f) => ({
         id: f.driverId,
-        text: [
-          (f as any).nickname ?? '',
-          (f as any).notes ?? '',
-          String(f.personalRating ?? ''),
-        ]
+        tags: [(f as any).nickname ?? '', (f as any).notes ?? '', String(f.personalRating ?? '')]
           .filter(Boolean)
           .join(' '),
       }));

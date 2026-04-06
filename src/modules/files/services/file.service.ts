@@ -1,6 +1,11 @@
 import { Injectable, BadRequestException, Logger } from '@nestjs/common';
 import { AINlpService } from '../../ai/services/ai-nlp.service';
-import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectCommand,
+  GetObjectCommand,
+} from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -129,16 +134,12 @@ export class FileService {
 
     const allowed = allowedTypes[folder] || [];
     if (!this.isAllowedType(file.mimetype, allowed)) {
-      throw new BadRequestException(
-        `File type ${file.mimetype} not allowed for ${folder}`,
-      );
+      throw new BadRequestException(`File type ${file.mimetype} not allowed for ${folder}`);
     }
 
     const maxSize = maxSizes[folder] || 50 * 1024 * 1024;
     if (file.size > maxSize) {
-      throw new BadRequestException(
-        `File size exceeds ${maxSize / 1024 / 1024}MB limit`,
-      );
+      throw new BadRequestException(`File size exceeds ${maxSize / 1024 / 1024}MB limit`);
     }
   }
 
@@ -149,6 +150,17 @@ export class FileService {
       }
       return mimeType === type;
     });
+  }
+
+  /**
+   * Get file metadata (minimal stub — returns key and a placeholder userId for ownership check).
+   * Extend this when a FileMetadata entity is added to the DB.
+   */
+  async getFileMetadata(fileKey: string): Promise<{ userId: string; key: string }> {
+    // The fileKey format is `{folder}/{userId}/{timestamp}-{uuid}`
+    // Extract userId from the second path segment
+    const parts = fileKey.split('/');
+    return { userId: parts[1] ?? '', key: fileKey };
   }
 
   /**
@@ -163,7 +175,7 @@ export class FileService {
       if (/avatar|profile|photo|picture/.test(lower)) folder = 'avatars';
       else if (/receipt|invoice|payment|bill/.test(lower)) folder = 'receipts';
       else if (/doc|contract|agreement|report|pdf/.test(lower)) folder = 'documents';
-      return { folder, keywords: kw.keywords };
+      return { folder, keywords: kw };
     } catch {
       return { folder: 'attachments', keywords: [] };
     }

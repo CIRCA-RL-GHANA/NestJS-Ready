@@ -23,7 +23,7 @@ export class DeliveryZone extends BaseEntity {
   @ApiProperty({
     description: 'Zone center coordinates',
     type: 'object',
-    example: { latitude: 40.7128, longitude: -74.0060 },
+    example: { latitude: 40.7128, longitude: -74.006 },
   })
   @Column({ type: 'jsonb' })
   location: { latitude: number; longitude: number };
@@ -37,14 +37,14 @@ export class DeliveryZone extends BaseEntity {
 
   @ApiProperty({
     description: 'Delivery fee in cedis',
-    example: 5.00,
+    example: 5.0,
   })
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   feeCedis: number;
 
   @ApiProperty({
     description: 'Minimum order amount',
-    example: 20.00,
+    example: 20.0,
   })
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   minOrderAmount: number;

@@ -2,7 +2,10 @@ import { Injectable, NotFoundException, BadRequestException, Logger } from '@nes
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource, LessThan } from 'typeorm';
 import { SubscriptionPlan, SubscriptionTier } from './entities/subscription-plan.entity';
-import { SubscriptionAssignment, SubscriptionTargetType } from './entities/subscription-assignment.entity';
+import {
+  SubscriptionAssignment,
+  SubscriptionTargetType,
+} from './entities/subscription-assignment.entity';
 import { QPointAccount } from '@modules/qpoints/entities/qpoint-account.entity';
 import { BoosterPointsAccount } from '@modules/qpoints/entities/booster-points-account.entity';
 import { EntityProfile } from '@modules/entities/entities/entity.entity';
@@ -32,7 +35,7 @@ export class SubscriptionsService {
     @InjectRepository(AuditLog)
     private readonly auditLogRepository: Repository<AuditLog>,
     private readonly dataSource: DataSource,
-    private readonly aiPricing:         AIPricingService,
+    private readonly aiPricing: AIPricingService,
     private readonly aiRecommendations: AIRecommendationsService,
   ) {}
 
@@ -94,7 +97,7 @@ export class SubscriptionsService {
    */
   async deletePlan(id: string): Promise<void> {
     const plan = await this.getPlanById(id);
-    
+
     // Check if any active subscriptions use this plan
     const activeAssignments = await this.assignmentRepository.count({
       where: { planId: id, activated: true },
@@ -111,7 +114,10 @@ export class SubscriptionsService {
   /**
    * Activate subscription for Entity or Branch
    */
-  async activateSubscription(dto: ActivateSubscriptionDto, userId: string): Promise<SubscriptionAssignment> {
+  async activateSubscription(
+    dto: ActivateSubscriptionDto,
+    userId: string,
+  ): Promise<SubscriptionAssignment> {
     return this.dataSource.transaction(async (manager) => {
       // Get plan details
       const plan = await manager.findOne(SubscriptionPlan, { where: { id: dto.planId } });
@@ -130,23 +136,24 @@ export class SubscriptionsService {
       }
 
       // Get Q-Points account
-      const qpointAccount = await manager.findOne(QPointAccount, { where: { entityId: dto.entityId } });
+      const qpointAccount = await manager.findOne(QPointAccount, {
+        where: { entityId: dto.entityId },
+      });
       if (!qpointAccount) {
         throw new NotFoundException('Q-Points account not found');
       }
 
       // Check if Free plan - skip Q-Points deduction
       const isFree = plan.name === SubscriptionTier.FREE;
-      
+
       if (!isFree) {
         // Check sufficient Q-Points
         if (qpointAccount.balance < plan.monthlyCostQPoints) {
-          await this.logAudit(
-            'Activate Subscription',
-            'ERROR',
-            userId,
-            { reason: 'Insufficient Q-Points', required: plan.monthlyCostQPoints, available: qpointAccount.balance },
-          );
+          await this.logAudit('Activate Subscription', 'ERROR', userId, {
+            reason: 'Insufficient Q-Points',
+            required: plan.monthlyCostQPoints,
+            available: qpointAccount.balance,
+          });
           throw new BadRequestException('Insufficient Q-Points balance');
         }
 
@@ -190,9 +197,10 @@ export class SubscriptionsService {
 
       // Allocate booster points
       const boosterAccount = await manager.findOne(BoosterPointsAccount, {
-        where: dto.targetType === SubscriptionTargetType.ENTITY
-          ? { entityId: dto.targetId }
-          : { branchId: dto.targetId },
+        where:
+          dto.targetType === SubscriptionTargetType.ENTITY
+            ? { entityId: dto.targetId }
+            : { branchId: dto.targetId },
       });
 
       if (boosterAccount && plan.boosterPointsAllocation > 0) {
@@ -224,7 +232,9 @@ export class SubscriptionsService {
         manager,
       );
 
-      this.logger.log(`Subscription activated: ${savedAssignment.id} for ${dto.targetType} ${dto.targetId}`);
+      this.logger.log(
+        `Subscription activated: ${savedAssignment.id} for ${dto.targetType} ${dto.targetId}`,
+      );
       return savedAssignment;
     });
   }
@@ -232,7 +242,10 @@ export class SubscriptionsService {
   /**
    * Get active subscription for target
    */
-  async getActiveSubscription(targetType: SubscriptionTargetType, targetId: string): Promise<SubscriptionAssignment | null> {
+  async getActiveSubscription(
+    targetType: SubscriptionTargetType,
+    targetId: string,
+  ): Promise<SubscriptionAssignment | null> {
     return this.assignmentRepository.findOne({
       where: {
         targetType,
@@ -256,12 +269,12 @@ export class SubscriptionsService {
     assignment.autoRenew = false;
     await this.assignmentRepository.save(assignment);
 
-    await this.logAudit(
-      'Cancel Subscription',
-      'SUCCESS',
-      userId,
-      { assignmentId, targetType: assignment.targetType, targetId: assignment.targetId, ...(reason ? { reason } : {}) },
-    );
+    await this.logAudit('Cancel Subscription', 'SUCCESS', userId, {
+      assignmentId,
+      targetType: assignment.targetType,
+      targetId: assignment.targetId,
+      ...(reason ? { reason } : {}),
+    });
 
     this.logger.log(`Subscription cancelled: ${assignmentId}`);
   }
@@ -271,7 +284,7 @@ export class SubscriptionsService {
    */
   async renewSubscriptions(): Promise<void> {
     const now = new Date();
-    
+
     const expiredSubscriptions = await this.assignmentRepository.find({
       where: {
         activated: true,
@@ -298,7 +311,7 @@ export class SubscriptionsService {
   private async renewSubscription(assignment: SubscriptionAssignment): Promise<void> {
     return this.dataSource.transaction(async (manager) => {
       const plan = assignment.plan;
-      
+
       // Find entity for Q-Points deduction
       let entityId: string;
       if (assignment.targetType === SubscriptionTargetType.ENTITY) {
@@ -319,7 +332,7 @@ export class SubscriptionsService {
 
       // Check if Free plan - skip Q-Points deduction
       const isFree = plan.name === SubscriptionTier.FREE;
-      
+
       if (!isFree) {
         if (qpointAccount.balance < plan.monthlyCostQPoints) {
           // Insufficient funds - deactivate subscription
@@ -331,8 +344,8 @@ export class SubscriptionsService {
             'Auto-Renew Subscription',
             'ERROR',
             'system',
-            { 
-              reason: 'Insufficient Q-Points', 
+            {
+              reason: 'Insufficient Q-Points',
               assignmentId: assignment.id,
               required: plan.monthlyCostQPoints,
               available: qpointAccount.balance,
@@ -352,16 +365,17 @@ export class SubscriptionsService {
       // Extend expiry by 30 days
       const newExpiryDate = new Date(assignment.expiresAt);
       newExpiryDate.setDate(newExpiryDate.getDate() + 30);
-      
+
       assignment.expiresAt = newExpiryDate;
       assignment.lastRenewalAt = new Date();
       await manager.save(SubscriptionAssignment, assignment);
 
       // Allocate booster points
       const boosterAccount = await manager.findOne(BoosterPointsAccount, {
-        where: assignment.targetType === SubscriptionTargetType.ENTITY
-          ? { entityId: assignment.targetId }
-          : { branchId: assignment.targetId },
+        where:
+          assignment.targetType === SubscriptionTargetType.ENTITY
+            ? { entityId: assignment.targetId }
+            : { branchId: assignment.targetId },
       });
 
       if (boosterAccount && plan.boosterPointsAllocation > 0) {
@@ -424,8 +438,8 @@ export class SubscriptionsService {
    */
   async getAIRetentionOffer(
     assignmentId: string,
-    monthsSubscribed:  number,
-    loginDaysAgo:      number,
+    monthsSubscribed: number,
+    loginDaysAgo: number,
     featureUsageScore: number,
   ) {
     const assignment = await this.assignmentRepository.findOne({
@@ -451,19 +465,15 @@ export class SubscriptionsService {
   /**
    * Recommend the best plan for an entity based on their usage behaviour.
    */
-  async getAIPlanRecommendation(
-    currentTier:       string,
-    monthlyUsageScore: number,
-  ) {
+  async getAIPlanRecommendation(currentTier: string, monthlyUsageScore: number) {
     const plans = await this.planRepository.find({ where: { isActive: true } });
 
-    const planVectors = plans.map(p => ({
-      id:           p.id,
-      name:         p.name,
-      tier:         p.tier ?? p.name,
-      featureScore: p.activeListingsLimit > 0
-        ? Math.min(1, p.activeListingsLimit / 500)
-        : 0.1,
+    const planVectors = plans.map((p) => ({
+      id: p.id,
+      name: p.name,
+      tier: p.name,
+      featureScore:
+        p.maxBranches != null && p.maxBranches > 0 ? Math.min(1, p.maxBranches / 10) : 0.1,
       price: Number(p.monthlyCostQPoints),
     }));
 

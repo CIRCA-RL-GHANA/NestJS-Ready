@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource, EntityManager } from 'typeorm';
 import { Wallet } from './entities/wallet.entity';
@@ -24,7 +19,12 @@ export class WalletsService {
     let wallet = await this.walletRepository.findOne({ where: { userId } });
 
     if (!wallet) {
-      wallet = this.walletRepository.create({ userId, balance: 0, currency: 'NGN', isActive: true });
+      wallet = this.walletRepository.create({
+        userId,
+        balance: 0,
+        currency: 'NGN',
+        isActive: true,
+      });
       wallet = await this.walletRepository.save(wallet);
       this.logger.log(`Wallet created for user ${userId}`);
     }
@@ -76,14 +76,21 @@ export class WalletsService {
         const fraudCheck = this.aiFraud.scoreTransaction({
           userId,
           amount,
+          currency: 'NGN',
           paymentMethod: 'wallet',
         });
         if (fraudCheck.blocked) {
-          this.logger.warn(`Wallet deduction BLOCKED by AI fraud check for user ${userId}: score=${fraudCheck.riskScore}`);
-          throw new BadRequestException('Transaction blocked by fraud detection. Please contact support.');
+          this.logger.warn(
+            `Wallet deduction BLOCKED by AI fraud check for user ${userId}: score=${fraudCheck.riskScore}`,
+          );
+          throw new BadRequestException(
+            'Transaction blocked by fraud detection. Please contact support.',
+          );
         }
         if (fraudCheck.reviewFlag) {
-          this.logger.warn(`Wallet deduction flagged for review: user=${userId}, amount=${amount}, score=${fraudCheck.riskScore}`);
+          this.logger.warn(
+            `Wallet deduction flagged for review: user=${userId}, amount=${amount}, score=${fraudCheck.riskScore}`,
+          );
         }
       } catch (e) {
         if (e instanceof BadRequestException) throw e;

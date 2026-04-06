@@ -12,13 +12,17 @@ export class TransferQPointsDto {
   @IsUUID()
   destinationAccountId: string;
 
-  @ApiProperty({ description: 'Amount to transfer', example: 50.00 })
+  @ApiProperty({ description: 'Amount to transfer', example: 50.0 })
   @IsNotEmpty()
   @IsNumber()
   @Min(0.01)
   amount: number;
 
-  @ApiProperty({ description: 'Transfer description', required: false, example: 'Payment for services' })
+  @ApiProperty({
+    description: 'Transfer description',
+    required: false,
+    example: 'Payment for services',
+  })
   @IsOptional()
   @IsString()
   description?: string;

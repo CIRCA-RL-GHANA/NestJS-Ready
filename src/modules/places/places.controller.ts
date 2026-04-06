@@ -9,18 +9,13 @@ import { Place, PlaceVisibility } from './entities/place.entity';
 @ApiTags('Places')
 @Controller('places')
 export class PlacesController {
-  constructor(
-    private readonly placesService: PlacesService,
-  ) {}
+  constructor(private readonly placesService: PlacesService) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new place' })
   @ApiResponse({ status: 201, description: 'Place created', type: Place })
   @ApiResponse({ status: 409, description: 'Place with this ID already exists' })
-  async createPlace(
-    @Body() createDto: CreatePlaceDto,
-    @Req() req: Request,
-  ): Promise<Place> {
+  async createPlace(@Body() createDto: CreatePlaceDto, @Req() req: Request): Promise<Place> {
     const ownerId = (req as any).user?.id || 'system';
     return await this.placesService.createPlace(createDto, ownerId);
   }
@@ -68,7 +63,12 @@ export class PlacesController {
   @ApiOperation({ summary: 'Get places by proximity' })
   @ApiQuery({ name: 'latitude', required: true, type: 'number' })
   @ApiQuery({ name: 'longitude', required: true, type: 'number' })
-  @ApiQuery({ name: 'radius', required: false, type: 'number', description: 'Radius in kilometers (default: 10)' })
+  @ApiQuery({
+    name: 'radius',
+    required: false,
+    type: 'number',
+    description: 'Radius in kilometers (default: 10)',
+  })
   @ApiResponse({ status: 200, description: 'Nearby places retrieved', type: [Place] })
   async getPlacesByProximity(
     @Query('latitude') latitude: string,
@@ -117,10 +117,7 @@ export class PlacesController {
   @ApiResponse({ status: 200, description: 'Place deleted' })
   @ApiResponse({ status: 403, description: 'Forbidden - not the owner' })
   @ApiResponse({ status: 404, description: 'Place not found' })
-  async deletePlace(
-    @Param('id') id: string,
-    @Req() req: Request,
-  ): Promise<{ message: string }> {
+  async deletePlace(@Param('id') id: string, @Req() req: Request): Promise<{ message: string }> {
     const userId = (req as any).user?.id || 'system';
     await this.placesService.deletePlace(id, userId);
     return { message: 'Place deleted successfully' };
@@ -146,10 +143,7 @@ export class PlacesController {
   @ApiOperation({ summary: 'Add a rating to a place' })
   @ApiResponse({ status: 200, description: 'Rating added', type: Place })
   @ApiResponse({ status: 404, description: 'Place not found' })
-  async ratePlace(
-    @Param('id') id: string,
-    @Body('rating') rating: number,
-  ): Promise<Place> {
+  async ratePlace(@Param('id') id: string, @Body('rating') rating: number): Promise<Place> {
     return await this.placesService.updatePlaceRating(id, rating);
   }
 

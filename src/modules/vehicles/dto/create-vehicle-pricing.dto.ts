@@ -26,7 +26,7 @@ export class CreateVehiclePricingDto {
 
   @ApiProperty({
     description: 'Price per minute after allowable wait time',
-    example: 2.50,
+    example: 2.5,
   })
   @IsNumber()
   @Min(0)
