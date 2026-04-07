@@ -92,14 +92,10 @@ wait_for_healthy() {
 
 # ── Deploy ────────────────────────────────────────────────────────────────────
 deploy() {
-  # Safety net: build the app image if it does not already exist locally.
-  # Normally build_image() is called by full_deploy() before this function,
-  # but guarding here makes 'deploy' safe to call standalone (e.g. after a
-  # manual rollback or a container restart without a full redeploy).
-  if ! docker image inspect nestjs-ready-app:latest &>/dev/null; then
-    warn "App image not found locally — building now (run 'deploy.sh deploy' for the full pipeline)"
-    build_image
-  fi
+  # Always build the app image first so docker compose up never has to rely on
+  # pull_policy to trigger a build.  This makes 'deploy' safe to call both
+  # standalone (e.g. after a manual rollback) and from full_deploy().
+  build_image
 
   log "Pulling third-party images (postgres / redis / nginx / certbot)..."
   $COMPOSE pull --ignore-pull-failures postgres redis nginx certbot
@@ -216,7 +212,7 @@ full_deploy() {
     log "Saved nestjs-ready-app:previous (rollback available if this deploy fails)"
   fi
 
-  build_image
+  # build_image() is called inside deploy() — no separate call needed here.
   deploy
   healthcheck
   ok "Deployment complete! ✓"

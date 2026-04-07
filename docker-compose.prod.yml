@@ -117,8 +117,9 @@ services:
       target: production
     image: nestjs-ready-app:latest
     # Never pull from a registry — the image name is local-only.
-    # Docker Compose will always build from the Dockerfile above.
-    pull_policy: build
+    # The deploy script (scripts/deploy.sh) always builds this image
+    # explicitly before calling `docker compose up`.
+    pull_policy: never
     container_name: promptgenie-app
     restart: unless-stopped
     expose:
