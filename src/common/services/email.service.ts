@@ -80,7 +80,9 @@ export class EmailService {
    */
   async sendTemplateEmail(options: EmailOptions & { templateId: string }): Promise<void> {
     if (!this.configured) {
-      this.logger.warn(`Template email skipped (SendGrid not configured): template "${options.templateId}"`);
+      this.logger.warn(
+        `Template email skipped (SendGrid not configured): template "${options.templateId}"`,
+      );
       return;
     }
     try {
