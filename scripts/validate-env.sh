@@ -1,425 +1,210 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# ============================================================
+# PROMPT Genie — Environment Validation Script
+#
+# Validates that every variable consumed by configuration.ts
+# and docker-compose.prod.yml is present, non-empty, and not
+# a placeholder value.
+#
+# Usage: bash scripts/validate-env.sh [--strict]
+#   --strict  treat warnings as errors (use in CI)
+#
+# Exit 0 = passed (or warnings-only in non-strict mode)
+# Exit 1 = errors (or warnings in --strict mode)
+# ============================================================
+set -euo pipefail
 
-# ════════════════════════════════════════════════════════════════════════════════
-# Environment Configuration Validation Script
-# ════════════════════════════════════════════════════════════════════════════════
-# Purpose: Validate that all required .env variables are set and properly configured
-# Usage: ./scripts/validate-env.sh [--strict] [--help]
-# ════════════════════════════════════════════════════════════════════════════════
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+ENV_FILE="$ROOT_DIR/.env"
+STRICT=false
 
-set -e
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'; NC='\033[0m'
+ERRORS=0; WARNINGS=0; PASSES=0
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+_err()  { echo -e "${RED}[✗]${NC} $*"; (( ERRORS++  )) || true; }
+_warn() { echo -e "${YELLOW}[!]${NC} $*"; (( WARNINGS++ )) || true; }
+_ok()   { echo -e "${GREEN}[✓]${NC} $*"; (( PASSES++  )) || true; }
+_hdr()  { echo ""; echo -e "${BLUE}── $* ${NC}"; }
 
-# Counters
-ERRORS=0
-WARNINGS=0
-SUCCESS=0
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --strict) STRICT=true; shift ;;
+    --help)   echo "Usage: $0 [--strict]"; exit 0 ;;
+    *) echo "Unknown option: $1"; exit 1 ;;
+  esac
+done
 
-# Configuration
-STRICT_MODE=false
-WORKSPACE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# ── .env must exist ───────────────────────────────────────────────────────────
+_hdr "Checking .env file"
+if [ ! -f "$ENV_FILE" ]; then
+  _err ".env not found at $ENV_FILE"
+  _err "Run:  cp $ROOT_DIR/.env.example $ROOT_DIR/.env  then fill in all values"
+  exit 1
+fi
+_ok ".env exists"
 
-# ────────────────────────────────────────────────────────────────────────────────
-# Helper Functions
-# ────────────────────────────────────────────────────────────────────────────────
+# ── Helper functions ──────────────────────────────────────────────────────────
+_val() { grep -E "^${1}=" "$ENV_FILE" 2>/dev/null | cut -d= -f2- || echo ""; }
 
-print_header() {
-    echo ""
-    echo -e "${BLUE}═══════════════════════════════════════════════════════════════${NC}"
-    echo -e "${BLUE}$1${NC}"
-    echo -e "${BLUE}═══════════════════════════════════════════════════════════════${NC}"
+_check_required() {
+  local var="$1"
+  local v; v=$(_val "$var")
+  if [[ -z "$v" ]]; then
+    _err "$var is not set"
+  elif [[ "$v" == *CHANGE_ME* || "$v" == *change_me* || "$v" == *your-* \
+       || "$v" == *replace* || "$v" == *TODO* ]]; then
+    _err "$var is still a placeholder: ${v:0:40}..."
+  else
+    _ok "$var ✓"
+  fi
 }
 
-print_success() {
-    echo -e "${GREEN}✓${NC} $1"
-    ((SUCCESS++))
+_check_recommended() {
+  local var="$1"
+  local desc="$2"
+  local v; v=$(_val "$var")
+  if [[ -z "$v" || "$v" == *CHANGE_ME* || "$v" == *your-* ]]; then
+    _warn "$var not set — $desc"
+  else
+    _ok "$var ✓"
+  fi
 }
 
-print_warning() {
-    echo -e "${YELLOW}⚠${NC} $1"
-    ((WARNINGS++))
+_check_optional() {
+  local var="$1"
+  local v; v=$(_val "$var")
+  [[ -n "$v" ]] && _ok "$var ✓ (optional)" || _warn "$var not set (optional)"
 }
 
-print_error() {
-    echo -e "${RED}✗${NC} $1"
-    ((ERRORS++))
-}
+# ── Required — application ────────────────────────────────────────────────────
+_hdr "Application"
+for v in NODE_ENV PORT API_PREFIX API_VERSION APP_NAME; do
+  _check_required "$v"
+done
 
-# Check if a variable is set in .env file
-check_env_var() {
-    local env_file=$1
-    local var_name=$2
-    local required=${3:-true}
-    
-    if grep -q "^${var_name}=" "$env_file" 2>/dev/null; then
-        return 0
-    else
-        return 1
-    fi
-}
+# ── Required — database ───────────────────────────────────────────────────────
+_hdr "Database (PostgreSQL)"
+for v in DB_HOST DB_PORT DB_USERNAME DB_PASSWORD DB_NAME DB_SYNCHRONIZE DB_LOGGING DB_SSL; do
+  _check_required "$v"
+done
 
-# Get value of env variable
-get_env_value() {
-    local env_file=$1
-    local var_name=$2
-    
-    grep "^${var_name}=" "$env_file" 2>/dev/null | cut -d'=' -f2 | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'
-}
+# ── Required — redis ──────────────────────────────────────────────────────────
+_hdr "Redis"
+for v in REDIS_HOST REDIS_PORT REDIS_PASSWORD REDIS_DB; do
+  _check_required "$v"
+done
 
-# Validate env file exists
-validate_file_exists() {
-    local env_file=$1
-    local name=$2
-    
-    if [ ! -f "$env_file" ]; then
-        print_error "$name not found: $env_file"
-        return 1
-    else
-        print_success "$name exists: $env_file"
-        return 0
-    fi
-}
+# ── Required — JWT / security ─────────────────────────────────────────────────
+_hdr "JWT & Security"
+for v in JWT_SECRET JWT_EXPIRES_IN JWT_REFRESH_SECRET JWT_REFRESH_EXPIRES_IN \
+         BCRYPT_ROUNDS PIN_ENCRYPTION_KEY; do
+  _check_required "$v"
+done
 
-# ────────────────────────────────────────────────────────────────────────────────
-# Root .env Validation
-# ────────────────────────────────────────────────────────────────────────────────
+# ── Required — CORS & domains ─────────────────────────────────────────────────
+_hdr "CORS & Domains"
+for v in CORS_ORIGIN CORS_CREDENTIALS API_DOMAIN FRONTEND_DOMAIN; do
+  _check_required "$v"
+done
 
-validate_root_env() {
-    print_header "Validating Root Environment (.env)"
-    
-    local env_file="$WORKSPACE_ROOT/.env"
-    
-    if ! validate_file_exists "$env_file" "Root .env"; then
-        print_error "Copy .env.example to .env: cp $WORKSPACE_ROOT/.env.example $WORKSPACE_ROOT/.env"
-        return 1
-    fi
-    
-    # Required variables
-    local required_vars=(
-        "NODE_ENV"
-        "APP_VERSION"
-        "BACKEND_PORT"
-        "FRONTEND_PORT"
-        "DB_HOST"
-        "DB_PORT"
-        "DB_USERNAME"
-        "DB_PASSWORD"
-        "DB_NAME"
-        "REDIS_HOST"
-        "REDIS_PORT"
-        "JWT_SECRET"
-        "JWT_REFRESH_SECRET"
-    )
-    
-    # Check required variables
-    for var in "${required_vars[@]}"; do
-        if check_env_var "$env_file" "$var"; then
-            local value=$(get_env_value "$env_file" "$var")
-            
-            # Check for placeholder values
-            if [[ "$value" == "your-"* ]] || [[ "$value" == *"-here"* ]]; then
-                print_warning "$var is set but appears to be a placeholder"
-            else
-                print_success "$var is configured"
-            fi
-        else
-            print_error "$var is missing from .env"
-        fi
-    done
-    
-    # Optional but recommended variables
-    local optional_vars=(
-        "CORS_ORIGIN"
-        "SENDGRID_API_KEY"
-        "TWILIO_ACCOUNT_SID"
-        "AWS_ACCESS_KEY_ID"
-        "SENTRY_DSN"
-    )
-    
-    for var in "${optional_vars[@]}"; do
-        if check_env_var "$env_file" "$var"; then
-            local value=$(get_env_value "$env_file" "$var")
-            if [[ "$value" != "your-"* ]] && [[ "$value" != *"-here"* ]]; then
-                print_success "$var is configured (optional)"
-            fi
-        fi
-    done
-}
+# ── Required — payment ────────────────────────────────────────────────────────
+_hdr "Payment Facilitator"
+for v in PAYMENT_FACILITATOR_PROVIDER PAYMENT_FACILITATOR_SECRET_KEY \
+         PAYMENT_FACILITATOR_WEBHOOK_SECRET PAYMENT_FACILITATOR_CURRENCY; do
+  _check_required "$v"
+done
 
-# ────────────────────────────────────────────────────────────────────────────────
-# Backend .env Validation
-# ────────────────────────────────────────────────────────────────────────────────
+# ── Recommended — third-party services ───────────────────────────────────────
+_hdr "Third-Party Services (required for full functionality)"
+_check_recommended "SENDGRID_API_KEY"       "email delivery will not work"
+_check_recommended "EMAIL_FROM"             "outbound email sender address"
+_check_recommended "TWILIO_ACCOUNT_SID"     "SMS delivery will not work"
+_check_recommended "TWILIO_AUTH_TOKEN"      "SMS delivery will not work"
+_check_recommended "TWILIO_PHONE_NUMBER"    "SMS delivery will not work"
 
-validate_backend_env() {
-    print_header "Validating Backend Environment"
-    
-    local env_file="$WORKSPACE_ROOT/orionstack-backend--main/.env"
-    
-    if [ ! -f "$env_file" ]; then
-        print_warning "Backend .env not found, copying from .env.example"
-        cp "$WORKSPACE_ROOT/orionstack-backend--main/.env.example" "$env_file"
-    fi
-    
-    if ! validate_file_exists "$env_file" "Backend .env"; then
-        return 1
-    fi
-    
-    # Required variables
-    local required_vars=(
-        "NODE_ENV"
-        "PORT"
-        "DB_HOST"
-        "DB_PORT"
-        "DB_USERNAME"
-        "DB_PASSWORD"
-        "DB_NAME"
-        "REDIS_HOST"
-        "REDIS_PORT"
-        "JWT_SECRET"
-        "JWT_REFRESH_SECRET"
-        "BCRYPT_ROUNDS"
-        "OTP_LENGTH"
-    )
-    
-    for var in "${required_vars[@]}"; do
-        if check_env_var "$env_file" "$var"; then
-            local value=$(get_env_value "$env_file" "$var")
-            
-            if [[ "$value" == "your-"* ]]; then
-                print_warning "$var is set but appears to be a placeholder"
-            else
-                print_success "$var is configured"
-            fi
-        else
-            print_error "$var is missing from backend .env"
-        fi
-    done
-}
+# ── Optional ──────────────────────────────────────────────────────────────────
+_hdr "Optional"
+_check_optional "AI_API_KEY"
+_check_optional "GOOGLE_MAPS_API_KEY"
+_check_optional "AWS_ACCESS_KEY_ID"
 
-# ────────────────────────────────────────────────────────────────────────────────
-# Flutter .env Validation
-# ────────────────────────────────────────────────────────────────────────────────
+# ── Security checks ───────────────────────────────────────────────────────────
+_hdr "Security Quality Checks"
 
-validate_flutter_env() {
-    print_header "Validating Flutter Configuration"
-    
-    local env_file="$WORKSPACE_ROOT/thepg/.env"
-    local env_example="$WORKSPACE_ROOT/thepg/.env.example"
-    
-    if [ ! -f "$env_file" ]; then
-        if [ -f "$env_example" ]; then
-            print_warning "Flutter .env not found, creating from .env.example"
-            cp "$env_example" "$env_file"
-        else
-            print_warning "Flutter .env.example not found"
-            return 0
-        fi
-    fi
-    
-    if ! validate_file_exists "$env_file" "Flutter .env"; then
-        return 1
-    fi
-    
-    # Check for key Flutter configuration
-    local flutter_vars=(
-        "APP_ENV"
-        "API_BASE_URL"
-        "API_TIMEOUT"
-        "FEATURE_BIOMETRIC_AUTH"
-        "THEME_MODE"
-    )
-    
-    for var in "${flutter_vars[@]}"; do
-        if check_env_var "$env_file" "$var"; then
-            print_success "Flutter $var is configured"
-        else
-            print_warning "Flutter $var is not set (optional)"
-        fi
-    done
-}
+jwt=$(_val JWT_SECRET)
+jwt_r=$(_val JWT_REFRESH_SECRET)
 
-# ────────────────────────────────────────────────────────────────────────────────
-# Service Connectivity Checks
-# ────────────────────────────────────────────────────────────────────────────────
+if [[ ${#jwt} -lt 32 ]]; then
+  _err "JWT_SECRET is too short (${#jwt} chars — need ≥ 32). Generate: openssl rand -base64 64"
+else
+  _ok "JWT_SECRET length OK (${#jwt} chars)"
+fi
 
-validate_services() {
-    print_header "Validating Service Connectivity"
-    
-    # Only perform connectivity checks if .env exists
-    if [ ! -f "$WORKSPACE_ROOT/.env" ]; then
-        print_warning "Skipping connectivity checks (no .env file)"
-        return 0
-    fi
-    
-    # Load .env variables
-    set -a
-    source "$WORKSPACE_ROOT/.env" 2>/dev/null || true
-    set +a
-    
-    # Check Docker
-    if command -v docker &> /dev/null; then
-        if docker ps &>/dev/null; then
-            print_success "Docker is running"
-        else
-            print_error "Docker daemon is not running"
-        fi
-    else
-        print_warning "Docker is not installed"
-    fi
-    
-    # Check Node.js
-    if command -v node &> /dev/null; then
-        local node_version=$(node --version)
-        print_success "Node.js is installed: $node_version"
-    else
-        print_error "Node.js is not installed"
-    fi
-    
-    # Check Flutter
-    if command -v flutter &> /dev/null; then
-        local flutter_version=$(flutter --version | head -n1)
-        print_success "Flutter is installed: $flutter_version"
-    else
-        print_warning "Flutter is not installed (required for mobile development)"
-    fi
-    
-    # Check PostgreSQL connectivity (if running)
-    if [ ! -z "$DB_HOST" ] && [ ! -z "$DB_PORT" ]; then
-        print_warning "Database connectivity check requires psql, skipping"
-    fi
-}
+if [[ ${#jwt_r} -lt 32 ]]; then
+  _err "JWT_REFRESH_SECRET is too short (${#jwt_r} chars — need ≥ 32)"
+else
+  _ok "JWT_REFRESH_SECRET length OK (${#jwt_r} chars)"
+fi
 
-# ────────────────────────────────────────────────────────────────────────────────
-# Generate Secrets Section
-# ────────────────────────────────────────────────────────────────────────────────
+if [[ "$jwt" == "$jwt_r" ]]; then
+  _err "JWT_SECRET and JWT_REFRESH_SECRET must be different values"
+else
+  _ok "JWT_SECRET ≠ JWT_REFRESH_SECRET"
+fi
 
-generate_secrets() {
-    print_header "Generating Required Secrets"
-    
-    echo -e "${YELLOW}Run these commands to generate secure values:${NC}\n"
-    
-    echo "JWT_SECRET:"
-    echo "  openssl rand -base64 64"
-    echo ""
-    
-    echo "JWT_REFRESH_SECRET:"
-    echo "  openssl rand -base64 64"
-    echo ""
-    
-    echo "PIN_ENCRYPTION_KEY:"
-    echo "  openssl rand -base64 32"
-    echo ""
-    
-    echo "HIVE_ENCRYPTION_KEY (Flutter):"
-    echo "  openssl rand -base64 32"
-}
+pin=$(_val PIN_ENCRYPTION_KEY)
+if [[ ${#pin} -lt 32 ]]; then
+  _err "PIN_ENCRYPTION_KEY is too short (${#pin} chars — need ≥ 32). Generate: openssl rand -hex 32"
+else
+  _ok "PIN_ENCRYPTION_KEY length OK"
+fi
 
-# ────────────────────────────────────────────────────────────────────────────────
-# Help Text
-# ────────────────────────────────────────────────────────────────────────────────
+redis_pw=$(_val REDIS_PASSWORD)
+if [[ ${#redis_pw} -lt 16 ]]; then
+  _warn "REDIS_PASSWORD is short (${#redis_pw} chars — recommend ≥ 16)"
+else
+  _ok "REDIS_PASSWORD length OK"
+fi
 
-show_help() {
-    cat << EOF
-${BLUE}Environment Configuration Validation Script${NC}
+# Production-specific safety checks
+node_env=$(_val NODE_ENV)
+if [[ "$node_env" == "production" ]]; then
+  _hdr "Production Safety Checks"
 
-${YELLOW}Usage:${NC}
-  ./scripts/validate-env.sh [OPTIONS]
+  sync=$(_val DB_SYNCHRONIZE)
+  [[ "$sync" == "true" ]] \
+    && _err  "DB_SYNCHRONIZE=true in production — TypeORM can DROP columns on schema changes!" \
+    || _ok   "DB_SYNCHRONIZE=false ✓"
 
-${YELLOW}Options:${NC}
-  --strict        Exit with error if any issues found
-  --generate      Show secret generation commands
-  --help          Show this help message
+  logging=$(_val DB_LOGGING)
+  [[ "$logging" == "true" ]] \
+    && _warn "DB_LOGGING=true in production — expect high log volume" \
+    || _ok   "DB_LOGGING=false ✓"
 
-${YELLOW}Description:${NC}
-  This script validates that all required environment variables are:
-  1. Present in .env files
-  2. Not set to placeholder values
-  3. Properly configured for your environment
+  swagger=$(_val ENABLE_SWAGGER)
+  [[ "$swagger" == "true" ]] \
+    && _warn "ENABLE_SWAGGER=true in production — API schema is publicly visible" \
+    || _ok   "ENABLE_SWAGGER=false (or unset) ✓"
+fi
 
-${YELLOW}Files Checked:${NC}
-  - .env (root workspace)
-  - orionstack-backend--main/.env (NestJS backend)
-  - thepg/.env (Flutter app)
+# ── Summary ───────────────────────────────────────────────────────────────────
+echo ""
+echo -e "${BLUE}────────────────────────────────────${NC}"
+echo -e "  ${GREEN}Passed:   $PASSES${NC}"
+echo -e "  ${YELLOW}Warnings: $WARNINGS${NC}"
+echo -e "  ${RED}Errors:   $ERRORS${NC}"
+echo -e "${BLUE}────────────────────────────────────${NC}"
 
-${YELLOW}Examples:${NC}
-  ./scripts/validate-env.sh              # Standard validation
-  ./scripts/validate-env.sh --strict     # Fail on warnings
-  ./scripts/validate-env.sh --generate   # Show secret generation
+if [ "$ERRORS" -gt 0 ]; then
+  echo -e "${RED}✗ Validation FAILED — fix errors before deploying${NC}"
+  exit 1
+fi
 
-${YELLOW}For more information:${NC}
-  - See ENVIRONMENT_CONFIGURATION_GUIDE.md
-  - See thepg/CONFIGURATION_GUIDE.md
-  - See README.md
-EOF
-}
+if [ "$WARNINGS" -gt 0 ] && [ "$STRICT" = "true" ]; then
+  echo -e "${YELLOW}✗ Strict mode — $WARNINGS warning(s) treated as errors${NC}"
+  exit 1
+fi
 
-# ────────────────────────────────────────────────────────────────────────────────
-# Main Execution
-# ────────────────────────────────────────────────────────────────────────────────
-
-main() {
-    # Parse command line arguments
-    while [[ $# -gt 0 ]]; do
-        case $1 in
-            --help)
-                show_help
-                exit 0
-                ;;
-            --strict)
-                STRICT_MODE=true
-                shift
-                ;;
-            --generate)
-                generate_secrets
-                exit 0
-                ;;
-            *)
-                echo "Unknown option: $1"
-                show_help
-                exit 1
-                ;;
-        esac
-    done
-    
-    # Run validations
-    validate_root_env
-    validate_backend_env
-    validate_flutter_env
-    validate_services
-    
-    # Summary
-    print_header "Validation Summary"
-    
-    echo ""
-    echo -e "${GREEN}Success:${NC} $SUCCESS"
-    echo -e "${YELLOW}Warnings:${NC} $WARNINGS"
-    echo -e "${RED}Errors:${NC} $ERRORS"
-    echo ""
-    
-    if [ $ERRORS -eq 0 ]; then
-        echo -e "${GREEN}✓ Environment validation passed!${NC}"
-        
-        if [ $WARNINGS -gt 0 ]; then
-            echo -e "${YELLOW}⚠ There are $WARNINGS warnings to review${NC}"
-            
-            if [ "$STRICT_MODE" = true ]; then
-                exit 1
-            fi
-        fi
-        
-        exit 0
-    else
-        echo -e "${RED}✗ Environment validation failed!${NC}"
-        echo -e "${RED}Please fix the errors above and try again.${NC}"
-        exit 1
-    fi
-}
-
-# Run main function
-main "$@"
+echo -e "${GREEN}✓ Validation passed${NC}"
+exit 0

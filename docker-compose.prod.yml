@@ -1,7 +1,10 @@
 # ============================================
-# Production Docker Compose - PROMPT Genie Backend
-# NestJS app context is '.' (repo root)
+# Production Docker Compose — PROMPT Genie Backend
+# Project name is pinned so container/volume/network names
+# are stable regardless of the directory this file lives in.
 # ============================================
+
+name: promptgenie
 
 services:
   # ---- Nginx Reverse Proxy ----
@@ -91,6 +94,7 @@ services:
     networks:
       - promptgenie-network
     healthcheck:
+      # compose substitutes ${REDIS_PASSWORD} from .env at parse-time (list form)
       test: ['CMD', 'redis-cli', '-a', '${REDIS_PASSWORD}', 'ping']
       interval: 10s
       timeout: 5s
@@ -149,15 +153,21 @@ services:
         window: 120s
 
 volumes:
+  # Explicit names make volumes independent of the working directory path.
   postgres_data:
     driver: local
+    name: promptgenie_postgres_data
   redis_data:
     driver: local
+    name: promptgenie_redis_data
   app_logs:
     driver: local
+    name: promptgenie_app_logs
   app_uploads:
     driver: local
+    name: promptgenie_app_uploads
 
 networks:
   promptgenie-network:
     driver: bridge
+    name: promptgenie-network

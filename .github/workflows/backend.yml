@@ -144,39 +144,19 @@ jobs:
           script: |
             set -euo pipefail
             cd /opt/promptgenie
-
-            echo "=== [1/4] Building new app image ==="
-            docker compose -f docker-compose.prod.yml build --no-cache app
-
-            echo "=== [2/4] Ensuring DB + Redis are healthy ==="
-            docker compose -f docker-compose.prod.yml up -d postgres redis
-            sleep 5
-
-            echo "=== [3/4] Running migrations ==="
-            docker compose -f docker-compose.prod.yml run --rm \
-              -e NODE_ENV=production --entrypoint "" \
-              app sh -c "npm run migration:run:prod"
-
-            echo "=== [4/4] Rolling restart ==="
-            docker compose -f docker-compose.prod.yml up -d --remove-orphans
-            docker image prune -f --filter "until=24h"
-
-            echo "=== Health check (max 120s) ==="
-            for i in $(seq 1 24); do
-              if docker exec promptgenie-app wget -qO- http://localhost:3000/api/v1/health/live 2>/dev/null | grep -q '"status":"ok"'; then
-                echo "✓ Healthy after $((i*5))s"; break
-              fi
-              [ $i -lt 24 ] && sleep 5 || { docker compose -f docker-compose.prod.yml logs --tail=60 app; exit 1; }
-            done
-            echo "✓ Deployment complete"
+            # scripts/deploy.sh is the single source of truth for deploy logic.
+            # It handles: preflight → tag :previous → build → wait-healthy →
+            # migrate → up --remove-orphans → health check.
+            bash scripts/deploy.sh deploy
 
       - name: API smoke test
         run: |
-          sleep 5
+          # Give nginx a moment to register the healthy upstream before probing externally
+          sleep 10
           STATUS=$(curl -sk -o /dev/null -w '%{http_code}' \
             "https://api.genieinprompt.app/api/v1/health/live")
           echo "Health: HTTP $STATUS"
-          [ "$STATUS" -eq 200 ] || { echo "::error::Health check failed (HTTP $STATUS)"; exit 1; }
+          [ "$STATUS" -eq 200 ] || { echo "::error::Smoke test failed (HTTP $STATUS)"; exit 1; }
 
       - name: Cleanup SSH key
         if: always()

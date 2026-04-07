@@ -1,217 +1,237 @@
-#!/bin/bash
-# ============================================
-# PROMPT Genie Production Deployment Script
-# ============================================
+#!/usr/bin/env bash
+# ============================================================
+# PROMPT Genie — Production Deployment Script
+#
+# MASTER STANDARD (applied to every script in this repo):
+#   1. set -euo pipefail — fail fast, no silent errors
+#   2. All paths derived from SCRIPT_DIR — never assume cwd
+#   3. All critical env vars validated before any destructive action
+#   4. Health checks poll until healthy — never rely on sleep
+#   5. Image tagged :previous before each build — rollback always possible
+#   6. Explicit project name (name: promptgenie in compose) — stable everywhere
+#   7. All compose commands use -f $COMPOSE_FILE — never the default file
+#   8. Container names are explicit in compose — referenced by name here
+#
+# Usage: bash scripts/deploy.sh {deploy|build|healthcheck|status|rollback|logs [svc]|preflight}
+# ============================================================
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 COMPOSE_FILE="$ROOT_DIR/docker-compose.prod.yml"
+COMPOSE="docker compose -f $COMPOSE_FILE"
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'; NC='\033[0m'
+log()  { echo -e "${BLUE}[INFO]${NC}  $*"; }
+ok()   { echo -e "${GREEN}[OK]${NC}    $*"; }
+warn() { echo -e "${YELLOW}[WARN]${NC}  $*"; }
+die()  { echo -e "${RED}[ERROR]${NC} $*" >&2; exit 1; }
 
-log_info()  { echo -e "${BLUE}[INFO]${NC} $*"; }
-log_ok()    { echo -e "${GREEN}[OK]${NC} $*"; }
-log_warn()  { echo -e "${YELLOW}[WARN]${NC} $*"; }
-log_error() { echo -e "${RED}[ERROR]${NC} $*"; }
-
-# ---- Pre-flight checks ----
+# ── Preflight ────────────────────────────────────────────────────────────────
 preflight() {
-  log_info "Running pre-flight checks..."
+  log "Running pre-flight checks..."
 
-  # Check Docker
-  if ! command -v docker &>/dev/null; then
-    log_error "Docker is not installed"
-    exit 1
-  fi
-  log_ok "Docker: $(docker --version)"
+  command -v docker &>/dev/null       || die "Docker is not installed"
+  docker compose version &>/dev/null  || die "Docker Compose v2 is not installed"
+  ok "Docker: $(docker --version | head -1)"
+  ok "Docker Compose: $(docker compose version --short)"
 
-  # Check Docker Compose
-  if ! docker compose version &>/dev/null; then
-    log_error "Docker Compose V2 is not installed"
-    exit 1
-  fi
-  log_ok "Docker Compose: $(docker compose version --short)"
+  [ -f "$COMPOSE_FILE" ] || die "Compose file not found: $COMPOSE_FILE"
+  ok "Compose file: $COMPOSE_FILE"
 
-  # Check .env file
-  if [ ! -f "$ROOT_DIR/.env" ]; then
-    log_error ".env file not found at $ROOT_DIR/.env"
-    log_info "Copy .env.example to .env and fill in production values"
-    exit 1
-  fi
-  log_ok ".env file exists"
+  [ -f "$ROOT_DIR/.env" ] || die ".env not found — cp .env.example .env and fill in values"
+  ok ".env file exists"
 
-  # Validate critical env vars
-  source "$ROOT_DIR/.env"
-  local missing=0
-  for var in DB_PASSWORD JWT_SECRET JWT_REFRESH_SECRET PIN_ENCRYPTION_KEY; do
-    val="${!var:-}"
-    if [ -z "$val" ] || [[ "$val" == *"CHANGE_ME"* ]]; then
-      log_error "Environment variable $var is not set or has default value"
-      missing=1
-    fi
-  done
-  if [ $missing -eq 1 ]; then
-    exit 1
-  fi
-  log_ok "Critical environment variables are set"
-
-  # Check Nginx config
-  if [ ! -f "$ROOT_DIR/nginx/nginx.conf" ]; then
-    log_error "Nginx configuration not found"
-    exit 1
-  fi
-  log_ok "Nginx configuration exists"
-
-  log_ok "All pre-flight checks passed!"
-  echo ""
-}
-
-# ---- Deploy ----
-deploy() {
-  log_info "Starting deployment..."
-
-  cd "$ROOT_DIR"
-
-  # Pull latest images
-  log_info "Pulling latest images..."
-  docker compose -f "$COMPOSE_FILE" pull
-
-  # Build application
-  log_info "Building application..."
-  docker compose -f "$COMPOSE_FILE" build --no-cache app
-
-  # Stop old containers and start new ones
-  log_info "Deploying services..."
-  docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
-
-  # Wait for health checks
-  log_info "Waiting for services to be healthy (max 120s)..."
-  local retries=0
-  local max_retries=24
-  while [ $retries -lt $max_retries ]; do
-    sleep 5
-    retries=$((retries + 1))
-    # Check if any container is still starting or unhealthy
-    if ! docker compose -f "$COMPOSE_FILE" ps | grep -qE '(starting|unhealthy)'; then
-      break
-    fi
-  done
-
-  if docker compose -f "$COMPOSE_FILE" ps | grep -q 'unhealthy'; then
-    log_error "Services did not become healthy within timeout"
-    docker compose -f "$COMPOSE_FILE" logs --tail=50 app
-    exit 1
-  fi
-
-  log_ok "All services are running and healthy!"
-}
-
-# ---- Health check ----
-healthcheck() {
-  log_info "Running health checks..."
-
-  # Load env so $DB_USERNAME is available
+  # Validate critical secrets — must be non-empty and not a placeholder
   # shellcheck source=/dev/null
-  [[ -f "$ROOT_DIR/.env" ]] && source "$ROOT_DIR/.env" || true
-  local db_user="${DB_USERNAME:-postgres}"
+  set -a; source "$ROOT_DIR/.env"; set +a
+  local failed=0
+  for var in DB_PASSWORD REDIS_PASSWORD JWT_SECRET JWT_REFRESH_SECRET \
+             PIN_ENCRYPTION_KEY API_DOMAIN FRONTEND_DOMAIN; do
+    local val="${!var:-}"
+    if [[ -z "$val" || "$val" == *CHANGE_ME* || "$val" == *change_me* \
+       || "$val" == *your-* || "$val" == *replace* ]]; then
+      echo -e "${RED}[ERROR]${NC} $var is not set or is still a placeholder" >&2
+      failed=1
+    fi
+  done
+  [ $failed -eq 0 ] || die "Fix the missing/placeholder env vars above, then retry"
+  ok "All critical env vars are set"
 
-  local app_health
-  app_health=$(docker exec promptgenie-app wget -qO- http://localhost:3000/api/v1/health 2>/dev/null || echo "FAIL")
+  # Nginx template files (rendered at runtime by docker-entrypoint.sh via envsubst)
+  [ -f "$ROOT_DIR/nginx/nginx.conf.template" ]      || die "nginx/nginx.conf.template not found"
+  [ -f "$ROOT_DIR/nginx/nginx-http.conf.template" ] || die "nginx/nginx-http.conf.template not found"
+  [ -f "$ROOT_DIR/nginx/docker-entrypoint.sh" ]     || die "nginx/docker-entrypoint.sh not found"
+  ok "Nginx templates present"
 
-  if echo "$app_health" | grep -q '"status":"ok"'; then
-    log_ok "Backend health check: PASSED"
-  else
-    log_error "Backend health check: FAILED"
-    echo "$app_health"
-    return 1
-  fi
-
-  # Check database connectivity
-  local db_check
-  db_check=$(docker exec promptgenie-postgres pg_isready -U "${db_user}" 2>/dev/null || echo "FAIL")
-  if echo "$db_check" | grep -q "accepting connections"; then
-    log_ok "Database health check: PASSED"
-  else
-    log_error "Database health check: FAILED"
-    return 1
-  fi
-
-  # Check Redis
-  local redis_check
-  redis_check=$(docker exec promptgenie-redis redis-cli ${REDIS_PASSWORD:+-a "$REDIS_PASSWORD"} ping 2>/dev/null || echo "FAIL")
-  if [ "$redis_check" = "PONG" ]; then
-    log_ok "Redis health check: PASSED"
-  else
-    log_error "Redis health check: FAILED"
-    return 1
-  fi
-
-  log_ok "All health checks passed!"
+  ok "Pre-flight complete ✓"
 }
 
-# ---- Status ----
+# ── Build ─────────────────────────────────────────────────────────────────────
+build_image() {
+  log "Building application image (nestjs-ready-app:latest)..."
+  $COMPOSE build --no-cache app
+  ok "Image built successfully"
+}
+
+# ── Poll until a service's Docker healthcheck reports healthy ─────────────────
+wait_for_healthy() {
+  local service="$1"
+  local timeout="${2:-60}"
+  log "Waiting for $service to be healthy (up to ${timeout}s)..."
+  local deadline=$(( $(date +%s) + timeout ))
+  until $COMPOSE ps "$service" 2>/dev/null | grep -q "(healthy)"; do
+    if [ "$(date +%s)" -ge "$deadline" ]; then
+      $COMPOSE logs --tail=40 "$service"
+      die "$service did not become healthy within ${timeout}s"
+    fi
+    sleep 3
+  done
+  ok "$service is healthy"
+}
+
+# ── Deploy ────────────────────────────────────────────────────────────────────
+deploy() {
+  log "Pulling third-party images (postgres / redis / nginx / certbot)..."
+  $COMPOSE pull --ignore-pull-failures postgres redis nginx certbot
+
+  log "Starting postgres and redis..."
+  $COMPOSE up -d postgres redis
+  wait_for_healthy postgres 60
+  wait_for_healthy redis    30
+
+  log "Running database migrations..."
+  $COMPOSE run --rm \
+    --no-deps \
+    --entrypoint "" \
+    app sh -c "npm run migration:run:prod"
+  ok "Migrations applied"
+
+  log "Starting all services..."
+  $COMPOSE up -d --remove-orphans
+
+  wait_for_app_healthy
+}
+
+# ── Poll the app's HTTP health endpoint ───────────────────────────────────────
+wait_for_app_healthy() {
+  log "Waiting for app health endpoint (up to 120s)..."
+  local deadline=$(( $(date +%s) + 120 ))
+  until docker exec promptgenie-app \
+      wget -qO- http://localhost:3000/api/v1/health/live 2>/dev/null \
+      | grep -q '"status":"ok"'; do
+    if [ "$(date +%s)" -ge "$deadline" ]; then
+      $COMPOSE logs --tail=60 app
+      die "App did not pass health check within 120s"
+    fi
+    sleep 5
+  done
+  ok "App is healthy ✓"
+}
+
+# ── Health check ──────────────────────────────────────────────────────────────
+healthcheck() {
+  log "Running health checks..."
+  # shellcheck source=/dev/null
+  [[ -f "$ROOT_DIR/.env" ]] && { set -a; source "$ROOT_DIR/.env"; set +a; } || true
+
+  local fail_count=0
+
+  # App
+  local app_resp
+  app_resp=$(docker exec promptgenie-app \
+    wget -qO- http://localhost:3000/api/v1/health/live 2>/dev/null || echo "UNREACHABLE")
+  if echo "$app_resp" | grep -q '"status":"ok"'; then
+    ok "App: healthy"
+  else
+    echo -e "${RED}[FAIL]${NC} App: $app_resp"; (( fail_count++ )) || true
+  fi
+
+  # PostgreSQL
+  local db_user="${DB_USERNAME:-postgres}"
+  if docker exec promptgenie-postgres pg_isready -U "$db_user" 2>/dev/null \
+      | grep -q "accepting"; then
+    ok "PostgreSQL: accepting connections"
+  else
+    echo -e "${RED}[FAIL]${NC} PostgreSQL: not ready"; (( fail_count++ )) || true
+  fi
+
+  # Redis
+  local redis_resp
+  redis_resp=$(docker exec promptgenie-redis \
+    redis-cli ${REDIS_PASSWORD:+-a "$REDIS_PASSWORD"} ping 2>/dev/null || echo "FAIL")
+  if [ "$redis_resp" = "PONG" ]; then
+    ok "Redis: PONG"
+  else
+    echo -e "${RED}[FAIL]${NC} Redis: $redis_resp"; (( fail_count++ )) || true
+  fi
+
+  [ $fail_count -eq 0 ] || die "$fail_count health check(s) failed"
+  ok "All health checks passed ✓"
+}
+
+# ── Status ────────────────────────────────────────────────────────────────────
 status() {
-  log_info "Service status:"
-  docker compose -f "$COMPOSE_FILE" ps
+  $COMPOSE ps
   echo ""
-  log_info "Resource usage:"
-  docker stats --no-stream --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}" \
+  docker stats --no-stream --format \
+    "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}" \
     promptgenie-app promptgenie-postgres promptgenie-redis promptgenie-nginx 2>/dev/null || true
 }
 
-# ---- Rollback ----
+# ── Rollback ──────────────────────────────────────────────────────────────────
 rollback() {
-  log_warn "Rolling back to previous version..."
-  cd "$ROOT_DIR"
-  docker compose -f "$COMPOSE_FILE" down app
-  docker compose -f "$COMPOSE_FILE" up -d app
-  log_info "Rollback complete. Running health check..."
-  sleep 10
-  healthcheck
+  warn "Rolling back app to nestjs-ready-app:previous..."
+  docker image inspect nestjs-ready-app:previous &>/dev/null \
+    || die "No previous image found (nestjs-ready-app:previous). Cannot roll back."
+
+  docker tag nestjs-ready-app:latest   nestjs-ready-app:failed   2>/dev/null || true
+  docker tag nestjs-ready-app:previous nestjs-ready-app:latest
+  $COMPOSE up -d app
+  wait_for_app_healthy
+  ok "Rollback complete ✓"
 }
 
-# ---- Logs ----
+# ── Logs ──────────────────────────────────────────────────────────────────────
 logs() {
-  local service="${1:-app}"
-  docker compose -f "$COMPOSE_FILE" logs -f --tail=100 "$service"
+  $COMPOSE logs -f --tail=100 "${1:-app}"
 }
 
-# ---- Main ----
+# ── Full deploy pipeline ──────────────────────────────────────────────────────
+full_deploy() {
+  preflight
+
+  # Tag current image as :previous before building so rollback is always available
+  if docker image inspect nestjs-ready-app:latest &>/dev/null; then
+    docker tag nestjs-ready-app:latest nestjs-ready-app:previous
+    log "Saved nestjs-ready-app:previous (rollback available if this deploy fails)"
+  fi
+
+  build_image
+  deploy
+  healthcheck
+  ok "Deployment complete! ✓"
+}
+
+# ── Entry point ───────────────────────────────────────────────────────────────
 case "${1:-help}" in
-  deploy)
-    preflight
-    deploy
-    healthcheck
-    ;;
-  healthcheck)
-    healthcheck
-    ;;
-  status)
-    status
-    ;;
-  rollback)
-    rollback
-    ;;
-  logs)
-    logs "${2:-app}"
-    ;;
-  preflight)
-    preflight
-    ;;
+  deploy)      full_deploy ;;
+  build)       build_image ;;
+  healthcheck) healthcheck ;;
+  status)      status ;;
+  rollback)    rollback ;;
+  logs)        logs "${2:-app}" ;;
+  preflight)   preflight ;;
   *)
-    echo "Usage: $0 {deploy|healthcheck|status|rollback|logs [service]|preflight}"
+    echo "Usage: $0 {deploy|build|healthcheck|status|rollback|logs [svc]|preflight}"
     echo ""
     echo "Commands:"
-    echo "  deploy      - Full deployment (preflight + build + deploy + healthcheck)"
-    echo "  healthcheck - Run health checks on all services"
-    echo "  status      - Show service status and resource usage"
-    echo "  rollback    - Rollback to previous deployment"
-    echo "  logs        - Tail logs (default: app)"
-    echo "  preflight   - Run pre-flight checks only"
+    echo "  deploy       Full pipeline: preflight → build → deploy → healthcheck"
+    echo "  build        Build app image only (nestjs-ready-app:latest)"
+    echo "  healthcheck  Check app, postgres, and redis are responding"
+    echo "  status       Show container status and resource usage"
+    echo "  rollback     Restore nestjs-ready-app:previous and restart app"
+    echo "  logs [svc]   Tail logs (default: app)"
+    echo "  preflight    Validate env and required files without deploying"
     ;;
 esac
