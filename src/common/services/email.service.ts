@@ -24,14 +24,17 @@ export class EmailService {
   private readonly logger = new Logger(EmailService.name);
   private readonly fromEmail: string;
   private readonly fromName: string;
+  private readonly configured: boolean;
 
   constructor(private readonly configService: ConfigService) {
     const apiKey = this.configService.get<string>('email.sendgridApiKey');
 
     if (!apiKey) {
       this.logger.warn('SendGrid API key not configured. Email sending will be disabled.');
+      this.configured = false;
     } else {
       sgMail.setApiKey(apiKey);
+      this.configured = true;
       this.logger.log('SendGrid email service initialized');
     }
 
@@ -43,6 +46,10 @@ export class EmailService {
    * Send a simple email
    */
   async sendEmail(options: EmailOptions): Promise<void> {
+    if (!this.configured) {
+      this.logger.warn(`Email skipped (SendGrid not configured): "${options.subject}"`);
+      return;
+    }
     try {
       const msg = {
         to: options.to,
@@ -72,6 +79,10 @@ export class EmailService {
    * Send email using SendGrid template
    */
   async sendTemplateEmail(options: EmailOptions & { templateId: string }): Promise<void> {
+    if (!this.configured) {
+      this.logger.warn(`Template email skipped (SendGrid not configured): template "${options.templateId}"`);
+      return;
+    }
     try {
       const msg = {
         to: options.to,

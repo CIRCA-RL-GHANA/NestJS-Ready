@@ -9,9 +9,9 @@ services:
     image: nginx:1.25-alpine
     container_name: promptgenie-nginx
     restart: unless-stopped
-    # Render nginx.conf.template → nginx.conf via envsubst, then start nginx
-    command: |
-      /bin/sh -c "envsubst '$$API_DOMAIN $$FRONTEND_DOMAIN' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && exec nginx -g 'daemon off;'"
+    # Our entrypoint script checks whether the SSL cert exists and selects
+    # the correct nginx config (HTTPS or HTTP-only bootstrap) before starting nginx.
+    entrypoint: ["/bin/sh", "/etc/nginx/docker-entrypoint.sh"]
     environment:
       API_DOMAIN: ${API_DOMAIN}
       FRONTEND_DOMAIN: ${FRONTEND_DOMAIN}
@@ -19,7 +19,9 @@ services:
       - '80:80'
       - '443:443'
     volumes:
+      - ./nginx/docker-entrypoint.sh:/etc/nginx/docker-entrypoint.sh:ro
       - ./nginx/nginx.conf.template:/etc/nginx/nginx.conf.template:ro
+      - ./nginx/nginx-http.conf.template:/etc/nginx/nginx-http.conf.template:ro
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - /opt/promptgenie/certbot/conf:/etc/letsencrypt:ro
       - /opt/promptgenie/certbot/www:/var/www/certbot:ro

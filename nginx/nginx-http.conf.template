@@ -1,0 +1,69 @@
+# ============================================
+# Nginx HTTP-only Bootstrap Configuration
+# Used when the Let's Encrypt certificate does not yet exist.
+# This config allows certbot to perform the ACME HTTP-01 challenge
+# so that vps-init.sh can issue the SSL certificate.
+#
+# After the cert is issued, restart the nginx container; the
+# docker-entrypoint.sh wrapper will automatically switch to the
+# full HTTPS config (nginx.conf.template).
+# ============================================
+
+worker_processes auto;
+error_log /var/log/nginx/error.log warn;
+pid /var/run/nginx.pid;
+
+events {
+    worker_connections 1024;
+    use epoll;
+}
+
+http {
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+
+    sendfile on;
+    keepalive_timeout 65;
+    client_max_body_size 20M;
+
+    # Upstream: NestJS Backend
+    upstream nestjs_backend {
+        server app:3000 max_fails=3 fail_timeout=30s;
+    }
+
+    server {
+        listen 80;
+        server_name ${API_DOMAIN};
+
+        # ACME challenge for Let's Encrypt cert issuance
+        location /.well-known/acme-challenge/ {
+            root /var/www/certbot;
+        }
+
+        # Health check (used by Docker + load balancers)
+        location /health {
+            access_log off;
+            return 200 'OK';
+            add_header Content-Type text/plain;
+        }
+
+        # Proxy API on plain HTTP while HTTPS is being bootstrapped
+        location /api/ {
+            proxy_pass http://nestjs_backend;
+            proxy_http_version 1.1;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_read_timeout 90s;
+            proxy_send_timeout 90s;
+            proxy_connect_timeout 30s;
+        }
+
+        # Block all other paths until HTTPS is ready
+        location / {
+            return 503 'SSL certificate not yet provisioned. Please run vps-init.sh.';
+            add_header Content-Type text/plain;
+        }
+    }
+}
