@@ -115,6 +115,11 @@ deploy() {
 healthcheck() {
   log_info "Running health checks..."
 
+  # Load env so $DB_USERNAME is available
+  # shellcheck source=/dev/null
+  [[ -f "$ROOT_DIR/.env" ]] && source "$ROOT_DIR/.env" || true
+  local db_user="${DB_USERNAME:-postgres}"
+
   local app_health
   app_health=$(docker exec promptgenie-app wget -qO- http://localhost:3000/api/v1/health 2>/dev/null || echo "FAIL")
 
@@ -128,7 +133,7 @@ healthcheck() {
 
   # Check database connectivity
   local db_check
-  db_check=$(docker exec promptgenie-postgres pg_isready -U postgres 2>/dev/null || echo "FAIL")
+  db_check=$(docker exec promptgenie-postgres pg_isready -U "${db_user}" 2>/dev/null || echo "FAIL")
   if echo "$db_check" | grep -q "accepting connections"; then
     log_ok "Database health check: PASSED"
   else
