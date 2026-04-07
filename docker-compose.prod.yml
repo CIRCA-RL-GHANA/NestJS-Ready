@@ -116,10 +116,12 @@ services:
       dockerfile: Dockerfile
       target: production
     image: nestjs-ready-app:latest
-    # Never pull from a registry — the image name is local-only.
-    # The deploy script (scripts/deploy.sh) always builds this image
-    # explicitly before calling `docker compose up`.
-    pull_policy: never
+    # Always build locally — the image name is local-only, never pulled from
+    # a registry.  pull_policy: build tells compose to run `docker build`
+    # automatically, so this works correctly whether the service is started by
+    # Coolify (which calls `docker compose up` directly) or by
+    # scripts/deploy.sh (which called `docker compose build app` explicitly).
+    pull_policy: build
     container_name: promptgenie-app
     restart: unless-stopped
     expose:
