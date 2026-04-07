@@ -107,6 +107,7 @@ services:
       context: .
       dockerfile: Dockerfile
       target: production
+    image: nestjs-ready-app:latest
     container_name: promptgenie-app
     restart: unless-stopped
     expose:
