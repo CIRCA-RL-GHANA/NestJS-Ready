@@ -14,6 +14,13 @@
 # ===========================================================
 set -e
 
+# Guard: API_DOMAIN must be set — an empty server_name causes nginx to reject the config.
+if [ -z "${API_DOMAIN}" ]; then
+  echo "[nginx] ERROR: API_DOMAIN environment variable is not set."
+  echo "[nginx] Set API_DOMAIN in .env (e.g. API_DOMAIN=api.example.com) and restart."
+  exit 1
+fi
+
 CERT_PATH="/etc/letsencrypt/live/${API_DOMAIN}/fullchain.pem"
 
 if [ -f "${CERT_PATH}" ]; then

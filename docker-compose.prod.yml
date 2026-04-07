@@ -26,7 +26,8 @@ services:
       - /opt/promptgenie/certbot/conf:/etc/letsencrypt:ro
       - /opt/promptgenie/certbot/www:/var/www/certbot:ro
     depends_on:
-      - app
+      app:
+        condition: service_healthy
     networks:
       - promptgenie-network
     healthcheck:

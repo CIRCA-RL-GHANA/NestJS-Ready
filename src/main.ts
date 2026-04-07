@@ -38,7 +38,7 @@ async function bootstrap() {
     .map((o: string) => o.trim());
   app.enableCors({
     origin: corsOrigins?.length ? corsOrigins : '*',
-    credentials: configService.get('CORS_CREDENTIALS') === 'true',
+    credentials: configService.get<boolean>('cors.credentials') ?? true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
     maxAge: 86400,
