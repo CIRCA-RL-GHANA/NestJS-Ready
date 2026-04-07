@@ -21,6 +21,15 @@ if [ -z "${API_DOMAIN}" ]; then
   exit 1
 fi
 
+# Guard: domain must look like a valid hostname (letters, digits, hyphens, dots only).
+# This prevents broken nginx configs if the value contains spaces or shell metacharacters.
+case "${API_DOMAIN}" in
+  *[\ \	\;\|\&\<\>\'\"\\]*)
+    echo "[nginx] ERROR: API_DOMAIN '${API_DOMAIN}' contains invalid characters."
+    exit 1
+    ;;
+esac
+
 CERT_PATH="/etc/letsencrypt/live/${API_DOMAIN}/fullchain.pem"
 
 if [ -f "${CERT_PATH}" ]; then
