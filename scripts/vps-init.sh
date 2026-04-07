@@ -178,14 +178,39 @@ else
   ok "SSL certificate already exists for $DOMAIN"
 fi
 
-# ── Update nginx cert paths ───────────────────────────────────────────────────
-log "Patching nginx.conf SSL domain..."
-if [[ -f "$APP_DIR/nginx/nginx.conf" ]]; then
-  sed -i "s|/etc/letsencrypt/live/[^/]*/fullchain.pem|/etc/letsencrypt/live/$DOMAIN/fullchain.pem|g" \
-    "$APP_DIR/nginx/nginx.conf"
-  sed -i "s|/etc/letsencrypt/live/[^/]*/privkey.pem|/etc/letsencrypt/live/$DOMAIN/privkey.pem|g" \
-    "$APP_DIR/nginx/nginx.conf"
-  ok "nginx.conf SSL paths updated"
+# ── Inject API_DOMAIN / FRONTEND_DOMAIN into .env ────────────────────────────
+# nginx.conf.template uses these variables (rendered via envsubst at container
+# start).  Derive FRONTEND_DOMAIN by stripping the leading "api." subdomain
+# (e.g. api.example.com → example.com).  If the domain does not start with
+# "api." the user must set FRONTEND_DOMAIN manually in .env.
+if [[ "$DOMAIN" == api.* ]]; then
+  FRONTEND_DOMAIN="${DOMAIN#api.}"
+else
+  # Non-standard API domain: derive frontend domain as the same host.
+  # The user should override FRONTEND_DOMAIN in .env after this script runs.
+  FRONTEND_DOMAIN="$DOMAIN"
+  warn "API domain '$DOMAIN' does not start with 'api.' — FRONTEND_DOMAIN defaulted to '$DOMAIN'."
+  warn "If your frontend is on a different domain, update FRONTEND_DOMAIN in $APP_DIR/.env"
+fi
+ENV_FILE="$APP_DIR/.env"
+if [[ -f "$ENV_FILE" ]]; then
+  # Update or add API_DOMAIN
+  if grep -q '^API_DOMAIN=' "$ENV_FILE"; then
+    sed -i "s|^API_DOMAIN=.*|API_DOMAIN=$DOMAIN|" "$ENV_FILE"
+  else
+    echo "API_DOMAIN=$DOMAIN" >> "$ENV_FILE"
+  fi
+  # Update or add FRONTEND_DOMAIN
+  if grep -q '^FRONTEND_DOMAIN=' "$ENV_FILE"; then
+    sed -i "s|^FRONTEND_DOMAIN=.*|FRONTEND_DOMAIN=$FRONTEND_DOMAIN|" "$ENV_FILE"
+  else
+    echo "FRONTEND_DOMAIN=$FRONTEND_DOMAIN" >> "$ENV_FILE"
+  fi
+  ok ".env API_DOMAIN=$DOMAIN  FRONTEND_DOMAIN=$FRONTEND_DOMAIN"
+else
+  warn ".env not found at $ENV_FILE — remember to add:"
+  warn "  API_DOMAIN=$DOMAIN"
+  warn "  FRONTEND_DOMAIN=$FRONTEND_DOMAIN"
 fi
 
 # ── Auto-renew SSL via cron ───────────────────────────────────────────────────
@@ -225,7 +250,8 @@ echo ""
 echo "  Next steps:"
 echo "  1.  Add GitHub Actions SSH public key to:"
 echo "      $SSH_DIR/authorized_keys"
-echo "  2.  Copy .env.production → $APP_DIR/.env  (never commit this!)"
+echo "  2.  Copy .env.example → $APP_DIR/.env and fill in all production values."
+echo "      API_DOMAIN and FRONTEND_DOMAIN are auto-patched above by vps-init.sh."
 echo "  3.  Set GitHub secrets (name them EXACTLY as shown — the CI workflows expect these names):"
 echo "      DEPLOY_HOST=$(hostname -I | awk '{print $1}')"
 echo "      DEPLOY_USER=$DEPLOY_USER"

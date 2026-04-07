@@ -35,14 +35,18 @@ export const validationSchema = Joi.object({
   REDIS_DB: Joi.number().default(0),
 
   // Email - SendGrid
-  SENDGRID_API_KEY: Joi.string().required(),
-  EMAIL_FROM: Joi.string().email().required(),
+  // Allow empty so the app can start without SendGrid configured.
+  // Email sending will be skipped/warned when the key is absent.
+  SENDGRID_API_KEY: Joi.string().allow('').default(''),
+  EMAIL_FROM: Joi.string().email().default('noreply@genieinprompt.app'),
   EMAIL_FROM_NAME: Joi.string().default('PROMPT Genie'),
 
   // SMS
-  TWILIO_ACCOUNT_SID: Joi.string().required(),
-  TWILIO_AUTH_TOKEN: Joi.string().required(),
-  TWILIO_PHONE_NUMBER: Joi.string().required(),
+  // Allow empty so the app can start without Twilio configured.
+  // SMS sending will be skipped/warned when credentials are absent.
+  TWILIO_ACCOUNT_SID: Joi.string().allow('').default(''),
+  TWILIO_AUTH_TOKEN: Joi.string().allow('').default(''),
+  TWILIO_PHONE_NUMBER: Joi.string().allow('').default(''),
 
   // File Upload
   MAX_FILE_SIZE: Joi.number().default(10485760),

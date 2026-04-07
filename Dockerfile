@@ -36,6 +36,10 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
+# Copy runtime path-alias registration helper (needed because tsc does not
+# resolve TypeScript path aliases in compiled output)
+COPY register-paths.js ./
+
 # Copy pre-compiled production node_modules from the builder stage.
 # Native modules (bcrypt, @tensorflow/tfjs-node) are already compiled there;
 # re-running npm ci here would fail because this stage lacks python3/make/g++.
@@ -60,5 +64,5 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/api/v1/health/live', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
-# Start application
-CMD ["node", "dist/main"]
+# Start application (register-paths.js resolves TypeScript path aliases at runtime)
+CMD ["node", "-r", "./register-paths.js", "dist/main"]
