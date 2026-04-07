@@ -103,7 +103,6 @@ services:
   # ---- NestJS Backend Application ----
   # context: '.' because this repo IS the NestJS application
   app:
-    pull_policy: never
     build:
       context: .
       dockerfile: Dockerfile
