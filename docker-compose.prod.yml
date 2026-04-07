@@ -7,6 +7,7 @@ services:
   # ---- Nginx Reverse Proxy ----
   nginx:
     # Build a custom image so nginx.conf is baked in (avoids bind-mount file-vs-directory issues on the VPS)
+    image: nestjs-ready-nginx:latest
     build:
       context: ./nginx
       dockerfile: Dockerfile
