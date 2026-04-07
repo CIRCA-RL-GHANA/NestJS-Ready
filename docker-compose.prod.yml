@@ -10,12 +10,8 @@ services:
     container_name: promptgenie-nginx
     restart: unless-stopped
     # Render nginx.conf.template → nginx.conf via envsubst, then start nginx
-    command: >
-      /bin/sh -c
-      "envsubst '$$API_DOMAIN $$FRONTEND_DOMAIN'
-        < /etc/nginx/nginx.conf.template
-        > /etc/nginx/nginx.conf
-      && exec nginx -g 'daemon off;'"
+    command: |
+      /bin/sh -c "envsubst '$$API_DOMAIN $$FRONTEND_DOMAIN' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && exec nginx -g 'daemon off;'"
     environment:
       API_DOMAIN: ${API_DOMAIN}
       FRONTEND_DOMAIN: ${FRONTEND_DOMAIN}
