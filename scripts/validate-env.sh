@@ -107,6 +107,7 @@ _hdr "CORS & Domains"
 for v in CORS_ORIGIN CORS_CREDENTIALS API_DOMAIN FRONTEND_DOMAIN; do
   _check_required "$v"
 done
+_check_recommended "CERTBOT_EMAIL" "required by deploy.sh to issue the initial Let's Encrypt SSL certificate"
 
 # ── Required — payment ────────────────────────────────────────────────────────
 _hdr "Payment Facilitator"

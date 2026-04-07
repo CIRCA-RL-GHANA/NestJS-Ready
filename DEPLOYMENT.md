@@ -50,6 +50,28 @@ chmod +x /opt/promptgenie/scripts/*.sh
 
 ---
 
+## Cold-start bootstrap (first deployment without vps-init.sh)
+
+`scripts/deploy.sh deploy` is fully self-bootstrapping:
+
+1. **SSL certificate**: if `/opt/promptgenie/certbot/conf/live/<API_DOMAIN>/fullchain.pem`
+   does not exist, `deploy.sh` calls `scripts/setup-ssl.sh` automatically to issue the
+   initial Let's Encrypt certificate via certbot standalone mode.
+   `CERTBOT_EMAIL` must be set in `.env` for this to work.
+
+2. **App image**: `pull_policy: build` in `docker-compose.prod.yml` tells Docker Compose
+   to build the image from the local `Dockerfile` whenever it is not already present.
+   `deploy.sh` also runs `docker compose build --no-cache app` explicitly before
+   `docker compose up`, so the image is always fresh.
+
+3. **Nginx startup order**: nginx uses `depends_on: app: condition: service_started`
+   (not `service_healthy`).  This means nginx starts in HTTP-only bootstrap mode as
+   soon as the app container exists, without waiting up to 130 s for the app health
+   check to pass.  Nginx's own `/health` endpoint returns 200 directly and is
+   independent of the app.
+
+---
+
 ## Step 1 — Provision your Hostinger VPS
 
 1. In the Hostinger panel create a **VPS** running **Ubuntu 22.04 LTS**.
@@ -344,10 +366,11 @@ docker compose -f docker-compose.prod.yml run --rm \
 
 ### Nginx fails to start (SSL cert missing)
 
-The certificate is created by `vps-init.sh`. If it is missing, re-run:
+`deploy.sh` now calls `setup-ssl.sh` automatically when the certificate is absent.
+If you need to re-run it manually:
 
 ```bash
-bash scripts/vps-init.sh --domain api.genieinprompt.app --email admin@genieinprompt.app
+bash scripts/setup-ssl.sh api.genieinprompt.app admin@genieinprompt.app
 ```
 
 Or use the standalone Certbot container directly:

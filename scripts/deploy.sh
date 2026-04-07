@@ -64,7 +64,52 @@ preflight() {
   [ -f "$ROOT_DIR/nginx/docker-entrypoint.sh" ]     || die "nginx/docker-entrypoint.sh not found"
   ok "Nginx templates present"
 
+  # CERTBOT_EMAIL is required for initial SSL certificate issuance.
+  # Warn here so operators know before hitting an error inside deploy().
+  local certbot_email="${CERTBOT_EMAIL:-}"
+  if [[ -z "$certbot_email" ]]; then
+    warn "CERTBOT_EMAIL is not set — required if the SSL certificate has not yet been issued"
+    warn "  Add to .env: CERTBOT_EMAIL=admin@yourdomain.com"
+  else
+    ok "CERTBOT_EMAIL is set"
+  fi
+
   ok "Pre-flight complete ✓"
+}
+
+# ── SSL Certificate Bootstrap ─────────────────────────────────────────────────
+# Issues the initial Let's Encrypt certificate if one does not yet exist.
+# Uses certbot standalone mode (binds port 80 directly) so nginx does not need
+# to be running beforehand.  On re-deployments the cert already exists and this
+# function returns immediately without touching port 80.
+ensure_ssl_cert() {
+  # .env may already be sourced by preflight(); source again as a safety net
+  # for callers that invoke deploy() outside of full_deploy().
+  [[ -f "$ROOT_DIR/.env" ]] && { set -a; source "$ROOT_DIR/.env"; set +a; } || true
+
+  local domain="${API_DOMAIN:-}"
+  local email="${CERTBOT_EMAIL:-}"
+  local cert_base="/opt/promptgenie/certbot"
+  local cert_path="$cert_base/conf/live/${domain}/fullchain.pem"
+
+  if [[ -z "$domain" ]]; then
+    warn "API_DOMAIN not set — skipping SSL certificate check"
+    return 0
+  fi
+
+  if [ -f "$cert_path" ]; then
+    ok "SSL certificate already exists for ${domain} ✓"
+    return 0
+  fi
+
+  log "No SSL certificate found for ${domain}."
+  [[ -z "$email" ]] && die "CERTBOT_EMAIL must be set in .env to issue the initial SSL certificate. Add: CERTBOT_EMAIL=admin@${domain}"
+
+  # setup-ssl.sh creates cert dirs, stops nginx if running, runs certbot
+  # standalone, and re-registers the auto-renewal cron.
+  log "Issuing initial SSL certificate via scripts/setup-ssl.sh..."
+  bash "$SCRIPT_DIR/setup-ssl.sh" "${domain}" "${email}"
+  ok "SSL certificate issued for ${domain} ✓"
 }
 
 # ── Build ─────────────────────────────────────────────────────────────────────
@@ -92,6 +137,11 @@ wait_for_healthy() {
 
 # ── Deploy ────────────────────────────────────────────────────────────────────
 deploy() {
+  # Ensure the SSL certificate exists before starting the stack.
+  # On first deployment this issues the cert; on re-deployments it exits
+  # immediately because the cert already exists.
+  ensure_ssl_cert
+
   # Always build the app image first so docker compose up never has to rely on
   # pull_policy to trigger a build.  This makes 'deploy' safe to call both
   # standalone (e.g. after a manual rollback) and from full_deploy().

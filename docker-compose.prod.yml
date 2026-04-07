@@ -30,7 +30,11 @@ services:
       - /opt/promptgenie/certbot/www:/var/www/certbot:ro
     depends_on:
       app:
-        condition: service_healthy
+        # service_started (not service_healthy) so nginx can come up in HTTP-only
+        # bootstrap mode even while the app container is still initialising.
+        # Nginx's own /health endpoint returns 200 directly — it does not proxy to
+        # the app — so nginx reaches healthy state independently of the app.
+        condition: service_started
     networks:
       - promptgenie-network
     healthcheck:
