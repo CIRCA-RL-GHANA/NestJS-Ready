@@ -180,8 +180,18 @@ fi
 
 # ── Inject API_DOMAIN / FRONTEND_DOMAIN into .env ────────────────────────────
 # nginx.conf.template uses these variables (rendered via envsubst at container
-# start).  Derive FRONTEND_DOMAIN by stripping the leading "api." subdomain.
-FRONTEND_DOMAIN="${DOMAIN#api.}"
+# start).  Derive FRONTEND_DOMAIN by stripping the leading "api." subdomain
+# (e.g. api.example.com → example.com).  If the domain does not start with
+# "api." the user must set FRONTEND_DOMAIN manually in .env.
+if [[ "$DOMAIN" == api.* ]]; then
+  FRONTEND_DOMAIN="${DOMAIN#api.}"
+else
+  # Non-standard API domain: derive frontend domain as the same host.
+  # The user should override FRONTEND_DOMAIN in .env after this script runs.
+  FRONTEND_DOMAIN="$DOMAIN"
+  warn "API domain '$DOMAIN' does not start with 'api.' — FRONTEND_DOMAIN defaulted to '$DOMAIN'."
+  warn "If your frontend is on a different domain, update FRONTEND_DOMAIN in $APP_DIR/.env"
+fi
 ENV_FILE="$APP_DIR/.env"
 if [[ -f "$ENV_FILE" ]]; then
   # Update or add API_DOMAIN

@@ -30,6 +30,6 @@ else
         > /etc/nginx/nginx.conf
 fi
 
-# Delegate to the official nginx entrypoint so that
-# /docker-entrypoint.d/ scripts (ipv6, worker-process tuning, etc.) still run.
-exec /docker-entrypoint.sh nginx -g 'daemon off;'
+# Start nginx directly (we skip /docker-entrypoint.d/ helper scripts because
+# they only modify the default conf.d/default.conf which we replace entirely).
+exec nginx -g 'daemon off;'

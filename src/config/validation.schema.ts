@@ -38,7 +38,7 @@ export const validationSchema = Joi.object({
   // Allow empty so the app can start without SendGrid configured.
   // Email sending will be skipped/warned when the key is absent.
   SENDGRID_API_KEY: Joi.string().allow('').default(''),
-  EMAIL_FROM: Joi.string().email().default('noreply@example.com'),
+  EMAIL_FROM: Joi.string().email().default('noreply@genieinprompt.app'),
   EMAIL_FROM_NAME: Joi.string().default('PROMPT Genie'),
 
   // SMS

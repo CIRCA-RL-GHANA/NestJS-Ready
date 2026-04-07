@@ -1,7 +1,26 @@
 'use strict';
-// Registers TypeScript path aliases at runtime for the compiled dist/ output.
-// tsc does not transform path aliases in compiled JS, so Node needs help
-// resolving imports like require('@/common/...') to the correct dist/ paths.
+/**
+ * register-paths.js — Runtime TypeScript path-alias resolver
+ *
+ * Background
+ * ----------
+ * `tsc` (the TypeScript compiler used by `nest build`) compiles source files
+ * but does NOT transform TypeScript path aliases into relative `require()`
+ * calls.  The compiled `dist/` files therefore still contain statements such
+ * as `require('@/common/entities/base.entity')`, which Node.js cannot resolve
+ * because it looks for a package named `@` in `node_modules/`.
+ *
+ * Solution
+ * --------
+ * `tsconfig-paths` patches Node's module resolver to translate the aliases to
+ * their real paths at runtime.  This file is loaded before `dist/main` via
+ * the `-r` flag:
+ *
+ *   node -r ./register-paths.js dist/main
+ *
+ * The `baseUrl` is set to `dist/` so paths map correctly in production.
+ * This file itself lives in the project root (same directory as `dist/`).
+ */
 const path = require('path');
 const { register } = require('tsconfig-paths');
 
