@@ -10,7 +10,6 @@ services:
     build:
       context: ./nginx
       dockerfile: Dockerfile
-    image: promptgenie-nginx:latest
     container_name: promptgenie-nginx
     restart: unless-stopped
     ports:
